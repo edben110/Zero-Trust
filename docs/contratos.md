@@ -5,9 +5,9 @@
 > **Propuesto por Sebas, pendiente de validar con el equipo:** fila y jar de auth_server, convención de finalName, "Variables de entorno de auth_server", aud por cliente en "Token JWT", "RabbitMQ OAuth2", "Tráfico hacia vm-auth:443" y el refresco de token de los clientes Kafka.
 
 ## Decisiones
-- Estados del bot_detector: (NORMAL | CONFIABLE) / SOSPECHOSA / BLOQUEADA → pendiente
-- Un voto por votante: el agregado de vote_processor ignora voterId repetido + UNIQUE(voter_id) en BD → pendiente
-- Réplicas: analytics_archiver, user_validation_service, dashboard workers. vote_processor y regional_rollup_service con instancia única → pendiente
+- Estados del bot_detector: **NORMAL / SOSPECHOSA / BLOQUEADA** (propuesto Daniel: se usa NORMAL como estado inicial, alineado con el enunciado)
+- Un voto por votante: el agregado de vote_processor ignora voterId repetido + UNIQUE(voter_id) en BD → pendiente validar con equipo
+- Réplicas: analytics_archiver ×2, user_validation_service ×2, global_dashboard_worker ×2, regional_dashboard_worker ×2. vote_processor y regional_rollup_service instancia única (stateful)
 
 ## Servicios
 | Servicio | VM | Puerto | Jar (finalName) | client_id |
@@ -52,18 +52,26 @@ AUTH_TOKEN_URL, AUTH_JWKS_URL, CLIENT_ID, CLIENT_SECRET, KAFKA_BOOTSTRAP, RABBIT
 ## Kafka
 | Topic | Productor | Consumidor | Key | Payload (JSON) |
 |---|---|---|---|---|
-| eligible_voters (compactado) | voter_registration_service | user_validation_service | | |
-| raw_votes | voting_api | vote_processor, regional_rollup_service, bot_detector_service, analytics_archiver | | |
-| security_alerts | bot_detector_service | | | |
+| eligible_voters (compactado) | voter_registration_service | user_validation_service | voterId | `{"voterId":"<uuid>","fullName":"<string>","region":"<string>","registeredAt":"<ISO-8601>"}` |
+| raw_votes | voting_api | vote_processor, regional_rollup_service, bot_detector_service, analytics_archiver | voteId | `{"voteId":"<uuid>","voterId":"<uuid>","candidateId":"<uuid>","region":"<string>","sourceIp":"<string>","timestamp":"<ISO-8601>"}` |
+| security_alerts | bot_detector_service | — | ip | `{"ip":"<string>","riskLevel":"NORMAL\|SOSPECHOSA\|BLOQUEADA","voteCount":<int>,"windowSeconds":<int>,"detectedAt":"<ISO-8601>"}` |
 
-- (Propuesto) Con TTL de 300 s, los clientes Kafka deben usar sasl.login.refresh.buffer.seconds menor que el TTL (propuesto: 30).
+- Con TTL de 300 s, los clientes Kafka deben usar `sasl.login.refresh.buffer.seconds=30` (propuesto Sebas).
 
 ## RabbitMQ
 | Nombre | Tipo | Productor | Consumidor | Payload |
 |---|---|---|---|---|
-| user_validation_queue | cola RPC (reply-to + correlationId) | voting_api | user_validation_service | |
-| live_results_global | fanout | vote_processor | global_dashboard_worker | |
-| live_results_regional | topic | regional_rollup_service | regional_dashboard_worker | |
+| user_validation_queue | cola RPC (reply-to + correlationId) | voting_api | user_validation_service | request: `{"voterId":"<uuid>"}` / response: `{"valid":true\|false}` |
+| live_results_global | fanout exchange | vote_processor | global_dashboard_worker | `{"timestamp":"<ISO-8601>","results":[{"candidateId":"<uuid>","candidateName":"<string>","voteCount":<long>}]}` |
+| live_results_regional | topic exchange, routing key = `results.<region>` | regional_rollup_service | regional_dashboard_worker | `{"region":"<string>","timestamp":"<ISO-8601>","results":[{"candidateId":"<uuid>","candidateName":"<string>","voteCount":<long>}]}` |
 
 ## API pública
-POST /vote → payload pendiente (debe incluir lo necesario para la región; la IP la toma voting_api de la petición)
+POST /vote payload:
+```json
+{
+  "voterId": "<uuid>",
+  "candidateId": "<uuid>",
+  "region": "<string>"
+}
+```
+La IP la extrae voting_api del request (X-Forwarded-For o RemoteAddr).
