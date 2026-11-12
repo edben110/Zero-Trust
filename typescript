@@ -105,4 +105,89 @@ EXIT: 0
 [1m[7m%[27m[1m[0m                                                                                                                         [0m[27m[24m[Jdanielguevararodriguez@MacBook-Pro-de-Daniel-2 Zero-Trust % [K[?2004hcchmod +x /tmp/move_services.sh && /tmp/move_services.sh[?2004l
 Movido. Estructura:
 App		services
+[1m[7m%[27m[1m[0m                                                                                                                         [0m[27m[24m[Jdanielguevararodriguez@MacBook-Pro-de-Daniel-2 Zero-Trust % [K[?2004hcchmod +x /tmp/git_move.sh && /tmp/git_move.sh[?2004l
+[feature/daniel 6ce9674] refactor: mover services/ dentro de Back/
+ 73 files changed, 108 insertions(+)
+ rename {services => Back/services}/bot_detector_service/Dockerfile (100%)
+ rename {services => Back/services}/bot_detector_service/pom.xml (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/BotDetectorApplication.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/kafka/RawVoteKafkaConsumer.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/kafka/SecurityAlertKafkaPublisher.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/persistence/FraudIncidentEntity.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/persistence/FraudIncidentJpaRepository.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/persistence/JpaFraudIncidentRepository.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/model/IpTrafficContext.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/model/SecurityAlert.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/port/FraudIncidentRepository.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/port/SecurityAlertPublisher.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/BlockedState.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/IpRiskState.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/NormalState.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/SuspiciousState.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/service/BotDetectorService.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/resources/application.properties (100%)
+ rename {services => Back/services}/bot_detector_service/src/test/java/com/zerotrust/botdetector/domain/IpTrafficContextTest.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/test/java/com/zerotrust/botdetector/service/BotDetectorServiceTest.java (100%)
+ rename {services => Back/services}/global_dashboard_worker/Dockerfile (100%)
+ rename {services => Back/services}/global_dashboard_worker/pom.xml (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/GlobalDashboardWorkerApplication.java (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/adapter/rabbit/GlobalResultsRabbitConsumer.java (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/config/RabbitConfig.java (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/config/WebSocketConfig.java (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/main/resources/application.properties (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/test/java/com/zerotrust/globaldashboardworker/adapter/GlobalResultsRabbitConsumerTest.java (100%)
+ rename {services => Back/services}/regional_dashboard_worker/Dockerfile (100%)
+ rename {services => Back/services}/regional_dashboard_worker/pom.xml (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/RegionalDashboardWorkerApplication.java (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/adapter/rabbit/RegionalResultsRabbitConsumer.java (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/config/RabbitConfig.java (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/config/WebSocketConfig.java (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/main/resources/application.properties (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/test/java/com/zerotrust/regionaldashboardworker/adapter/RegionalResultsRabbitConsumerTest.java (100%)
+ rename {services => Back/services}/regional_rollup_service/Dockerfile (100%)
+ rename {services => Back/services}/regional_rollup_service/pom.xml (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/RegionalRollupApplication.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/adapter/kafka/RawVoteKafkaConsumer.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/adapter/rabbit/RegionalResultRabbitPublisher.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/config/AppConfig.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RawVoteEvent.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RegionalCandidateResult.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RegionalResultSnapshot.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RegionalVoteAccumulator.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/port/RegionalResultPublisher.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/strategy/RegionalConsolidationStrategy.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/strategy/SimpleCountStrategy.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/service/RegionalRollupService.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/resources/application.properties (100%)
+ rename {services => Back/services}/regional_rollup_service/src/test/java/com/zerotrust/regionalrollup/domain/RegionalVoteAccumulatorTest.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/test/java/com/zerotrust/regionalrollup/service/RegionalRollupServiceTest.java (100%)
+ rename {services => Back/services}/vote_processor/Dockerfile (100%)
+ rename {services => Back/services}/vote_processor/pom.xml (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/VoteProcessorApplication.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/adapter/kafka/RawVoteKafkaConsumer.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/adapter/rabbit/GlobalResultRabbitPublisher.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/config/AppConfig.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/config/RabbitConfig.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/CandidateId.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/CandidateResult.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/GlobalResultSnapshot.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/RawVoteEvent.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/VoteAggregate.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/VoteId.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/VoterId.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/port/GlobalResultPublisher.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/service/VoteProcessorService.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/resources/application.properties (100%)
+ rename {services => Back/services}/vote_processor/src/test/java/com/zerotrust/voteprocessor/domain/VoteAggregateTest.java (100%)
+ rename {services => Back/services}/vote_processor/src/test/java/com/zerotrust/voteprocessor/service/VoteProcessorServiceTest.java (100%)
+ create mode 100644 typescript
+Enumerating objects: 6, done.
+Counting objects:  16% (1/6)Counting objects:  33% (2/6)Counting objects:  50% (3/6)Counting objects:  66% (4/6)Counting objects:  83% (5/6)Counting objects: 100% (6/6)Counting objects: 100% (6/6), done.
+Delta compression using up to 15 threads
+Compressing objects:  25% (1/4)Compressing objects:  50% (2/4)Compressing objects:  75% (3/4)Compressing objects: 100% (4/4)Compressing objects: 100% (4/4), done.
+Writing objects:  25% (1/4)Writing objects:  50% (2/4)Writing objects:  75% (3/4)Writing objects: 100% (4/4)Writing objects: 100% (4/4), 3.76 KiB | 3.76 MiB/s, done.
+Total 4 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+To https://github.com/edben110/Zero-Trust.git
+   6965461..6ce9674  feature/daniel -> feature/daniel
+EXIT: 0
 [1m[7m%[27m[1m[0m                                                                                                                         [0m[27m[24m[Jdanielguevararodriguez@MacBook-Pro-de-Daniel-2 Zero-Trust % [K[?2004h
