@@ -1,0 +1,193 @@
+Script started on Wed Nov 11 20:39:50 2026
+[1m[7m%[27m[1m[0m                                                                                                                         [0m[27m[24m[Jdanielguevararodriguez@MacBook-Pro-de-Daniel-2 Zero-Trust % [K[?2004hcchmod +x /tmp/git_daniel.sh && /tmp/git_daniel.sh[?2004l
+Branch actual: feature/daniel
+Archivos staged:       74
+[feature/daniel 6965461] feat: daniel services
+ 73 files changed, 2687 insertions(+), 11 deletions(-)
+ create mode 100644 services/bot_detector_service/Dockerfile
+ create mode 100644 services/bot_detector_service/pom.xml
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/BotDetectorApplication.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/kafka/RawVoteKafkaConsumer.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/kafka/SecurityAlertKafkaPublisher.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/persistence/FraudIncidentEntity.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/persistence/FraudIncidentJpaRepository.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/persistence/JpaFraudIncidentRepository.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/model/IpTrafficContext.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/model/SecurityAlert.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/port/FraudIncidentRepository.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/port/SecurityAlertPublisher.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/BlockedState.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/IpRiskState.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/NormalState.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/SuspiciousState.java
+ create mode 100644 services/bot_detector_service/src/main/java/com/zerotrust/botdetector/service/BotDetectorService.java
+ create mode 100644 services/bot_detector_service/src/main/resources/application.properties
+ create mode 100644 services/bot_detector_service/src/test/java/com/zerotrust/botdetector/domain/IpTrafficContextTest.java
+ create mode 100644 services/bot_detector_service/src/test/java/com/zerotrust/botdetector/service/BotDetectorServiceTest.java
+ create mode 100644 services/global_dashboard_worker/Dockerfile
+ create mode 100644 services/global_dashboard_worker/pom.xml
+ create mode 100644 services/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/GlobalDashboardWorkerApplication.java
+ create mode 100644 services/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/adapter/rabbit/GlobalResultsRabbitConsumer.java
+ create mode 100644 services/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/config/RabbitConfig.java
+ create mode 100644 services/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/config/WebSocketConfig.java
+ create mode 100644 services/global_dashboard_worker/src/main/resources/application.properties
+ create mode 100644 services/global_dashboard_worker/src/test/java/com/zerotrust/globaldashboardworker/adapter/GlobalResultsRabbitConsumerTest.java
+ create mode 100644 services/regional_dashboard_worker/Dockerfile
+ create mode 100644 services/regional_dashboard_worker/pom.xml
+ create mode 100644 services/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/RegionalDashboardWorkerApplication.java
+ create mode 100644 services/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/adapter/rabbit/RegionalResultsRabbitConsumer.java
+ create mode 100644 services/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/config/RabbitConfig.java
+ create mode 100644 services/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/config/WebSocketConfig.java
+ create mode 100644 services/regional_dashboard_worker/src/main/resources/application.properties
+ create mode 100644 services/regional_dashboard_worker/src/test/java/com/zerotrust/regionaldashboardworker/adapter/RegionalResultsRabbitConsumerTest.java
+ create mode 100644 services/regional_rollup_service/Dockerfile
+ create mode 100644 services/regional_rollup_service/pom.xml
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/RegionalRollupApplication.java
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/adapter/kafka/RawVoteKafkaConsumer.java
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/adapter/rabbit/RegionalResultRabbitPublisher.java
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/config/AppConfig.java
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RawVoteEvent.java
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RegionalCandidateResult.java
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RegionalResultSnapshot.java
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RegionalVoteAccumulator.java
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/port/RegionalResultPublisher.java
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/strategy/RegionalConsolidationStrategy.java
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/strategy/SimpleCountStrategy.java
+ create mode 100644 services/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/service/RegionalRollupService.java
+ create mode 100644 services/regional_rollup_service/src/main/resources/application.properties
+ create mode 100644 services/regional_rollup_service/src/test/java/com/zerotrust/regionalrollup/domain/RegionalVoteAccumulatorTest.java
+ create mode 100644 services/regional_rollup_service/src/test/java/com/zerotrust/regionalrollup/service/RegionalRollupServiceTest.java
+ create mode 100644 services/vote_processor/Dockerfile
+ create mode 100644 services/vote_processor/pom.xml
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/VoteProcessorApplication.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/adapter/kafka/RawVoteKafkaConsumer.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/adapter/rabbit/GlobalResultRabbitPublisher.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/config/AppConfig.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/config/RabbitConfig.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/CandidateId.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/CandidateResult.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/GlobalResultSnapshot.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/RawVoteEvent.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/VoteAggregate.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/VoteId.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/VoterId.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/port/GlobalResultPublisher.java
+ create mode 100644 services/vote_processor/src/main/java/com/zerotrust/voteprocessor/service/VoteProcessorService.java
+ create mode 100644 services/vote_processor/src/main/resources/application.properties
+ create mode 100644 services/vote_processor/src/test/java/com/zerotrust/voteprocessor/domain/VoteAggregateTest.java
+ create mode 100644 services/vote_processor/src/test/java/com/zerotrust/voteprocessor/service/VoteProcessorServiceTest.java
+Enumerating objects: 184, done.
+Counting objects:   0% (1/184)Counting objects:   1% (2/184)Counting objects:   2% (4/184)Counting objects:   3% (6/184)Counting objects:   4% (8/184)Counting objects:   5% (10/184)Counting objects:   6% (12/184)Counting objects:   7% (13/184)Counting objects:   8% (15/184)Counting objects:   9% (17/184)Counting objects:  10% (19/184)Counting objects:  11% (21/184)Counting objects:  12% (23/184)Counting objects:  13% (24/184)Counting objects:  14% (26/184)Counting objects:  15% (28/184)Counting objects:  16% (30/184)Counting objects:  17% (32/184)Counting objects:  18% (34/184)Counting objects:  19% (35/184)Counting objects:  20% (37/184)Counting objects:  21% (39/184)Counting objects:  22% (41/184)Counting objects:  23% (43/184)Counting objects:  24% (45/184)Counting objects:  25% (46/184)Counting objects:  26% (48/184)Counting objects:  27% (50/184)Counting objects:  28% (52/184)Counting objects:  29% (54/184)Counting objects:  30% (56/184)Counting objects:  31% (58/184)Counting objects:  32% (59/184)Counting objects:  33% (61/184)Counting objects:  34% (63/184)Counting objects:  35% (65/184)Counting objects:  36% (67/184)Counting objects:  37% (69/184)Counting objects:  38% (70/184)Counting objects:  39% (72/184)Counting objects:  40% (74/184)Counting objects:  41% (76/184)Counting objects:  42% (78/184)Counting objects:  43% (80/184)Counting objects:  44% (81/184)Counting objects:  45% (83/184)Counting objects:  46% (85/184)Counting objects:  47% (87/184)Counting objects:  48% (89/184)Counting objects:  49% (91/184)Counting objects:  50% (92/184)Counting objects:  51% (94/184)Counting objects:  52% (96/184)Counting objects:  53% (98/184)Counting objects:  54% (100/184)Counting objects:  55% (102/184)Counting objects:  56% (104/184)Counting objects:  57% (105/184)Counting objects:  58% (107/184)Counting objects:  59% (109/184)Counting objects:  60% (111/184)Counting objects:  61% (113/184)Counting objects:  62% (115/184)Counting objects:  63% (116/184)Counting objects:  64% (118/184)Counting objects:  65% (120/184)Counting objects:  66% (122/184)Counting objects:  67% (124/184)Counting objects:  68% (126/184)Counting objects:  69% (127/184)Counting objects:  70% (129/184)Counting objects:  71% (131/184)Counting objects:  72% (133/184)Counting objects:  73% (135/184)Counting objects:  74% (137/184)Counting objects:  75% (138/184)Counting objects:  76% (140/184)Counting objects:  77% (142/184)Counting objects:  78% (144/184)Counting objects:  79% (146/184)Counting objects:  80% (148/184)Counting objects:  81% (150/184)Counting objects:  82% (151/184)Counting objects:  83% (153/184)Counting objects:  84% (155/184)Counting objects:  85% (157/184)Counting objects:  86% (159/184)Counting objects:  87% (161/184)Counting objects:  88% (162/184)Counting objects:  89% (164/184)Counting objects:  90% (166/184)Counting objects:  91% (168/184)Counting objects:  92% (170/184)Counting objects:  93% (172/184)Counting objects:  94% (173/184)Counting objects:  95% (175/184)Counting objects:  96% (177/184)Counting objects:  97% (179/184)Counting objects:  98% (181/184)Counting objects:  99% (183/184)Counting objects: 100% (184/184)Counting objects: 100% (184/184), done.
+Delta compression using up to 15 threads
+Compressing objects:   0% (1/142)Compressing objects:   1% (2/142)Compressing objects:   2% (3/142)Compressing objects:   3% (5/142)Compressing objects:   4% (6/142)Compressing objects:   5% (8/142)Compressing objects:   6% (9/142)Compressing objects:   7% (10/142)Compressing objects:   8% (12/142)Compressing objects:   9% (13/142)Compressing objects:  10% (15/142)Compressing objects:  11% (16/142)Compressing objects:  12% (18/142)Compressing objects:  13% (19/142)Compressing objects:  14% (20/142)Compressing objects:  15% (22/142)Compressing objects:  16% (23/142)Compressing objects:  17% (25/142)Compressing objects:  18% (26/142)Compressing objects:  19% (27/142)Compressing objects:  20% (29/142)Compressing objects:  21% (30/142)Compressing objects:  22% (32/142)Compressing objects:  23% (33/142)Compressing objects:  24% (35/142)Compressing objects:  25% (36/142)Compressing objects:  26% (37/142)Compressing objects:  27% (39/142)Compressing objects:  28% (40/142)Compressing objects:  29% (42/142)Compressing objects:  30% (43/142)Compressing objects:  31% (45/142)Compressing objects:  32% (46/142)Compressing objects:  33% (47/142)Compressing objects:  34% (49/142)Compressing objects:  35% (50/142)Compressing objects:  36% (52/142)Compressing objects:  37% (53/142)Compressing objects:  38% (54/142)Compressing objects:  39% (56/142)Compressing objects:  40% (57/142)Compressing objects:  41% (59/142)Compressing objects:  42% (60/142)Compressing objects:  43% (62/142)Compressing objects:  44% (63/142)Compressing objects:  45% (64/142)Compressing objects:  46% (66/142)Compressing objects:  47% (67/142)Compressing objects:  48% (69/142)Compressing objects:  49% (70/142)Compressing objects:  50% (71/142)Compressing objects:  51% (73/142)Compressing objects:  52% (74/142)Compressing objects:  53% (76/142)Compressing objects:  54% (77/142)Compressing objects:  55% (79/142)Compressing objects:  56% (80/142)Compressing objects:  57% (81/142)Compressing objects:  58% (83/142)Compressing objects:  59% (84/142)Compressing objects:  60% (86/142)Compressing objects:  61% (87/142)Compressing objects:  62% (89/142)Compressing objects:  63% (90/142)Compressing objects:  64% (91/142)Compressing objects:  65% (93/142)Compressing objects:  66% (94/142)Compressing objects:  67% (96/142)Compressing objects:  68% (97/142)Compressing objects:  69% (98/142)Compressing objects:  70% (100/142)Compressing objects:  71% (101/142)Compressing objects:  72% (103/142)Compressing objects:  73% (104/142)Compressing objects:  74% (106/142)Compressing objects:  75% (107/142)Compressing objects:  76% (108/142)Compressing objects:  77% (110/142)Compressing objects:  78% (111/142)Compressing objects:  79% (113/142)Compressing objects:  80% (114/142)Compressing objects:  81% (116/142)Compressing objects:  82% (117/142)Compressing objects:  83% (118/142)Compressing objects:  84% (120/142)Compressing objects:  85% (121/142)Compressing objects:  86% (123/142)Compressing objects:  87% (124/142)Compressing objects:  88% (125/142)Compressing objects:  89% (127/142)Compressing objects:  90% (128/142)Compressing objects:  91% (130/142)Compressing objects:  92% (131/142)Compressing objects:  93% (133/142)Compressing objects:  94% (134/142)Compressing objects:  95% (135/142)Compressing objects:  96% (137/142)Compressing objects:  97% (138/142)Compressing objects:  98% (140/142)Compressing objects:  99% (141/142)Compressing objects: 100% (142/142)Compressing objects: 100% (142/142), done.
+Writing objects:   0% (1/181)Writing objects:   1% (2/181)Writing objects:   2% (4/181)Writing objects:   3% (6/181)Writing objects:   4% (9/181)Writing objects:   6% (11/181)Writing objects:   7% (13/181)Writing objects:   8% (15/181)Writing objects:   9% (17/181)Writing objects:  10% (19/181)Writing objects:  11% (20/181)Writing objects:  12% (23/181)Writing objects:  13% (24/181)Writing objects:  14% (26/181)Writing objects:  15% (28/181)Writing objects:  16% (29/181)Writing objects:  17% (31/181)Writing objects:  18% (33/181)Writing objects:  19% (35/181)Writing objects:  20% (37/181)Writing objects:  22% (40/181)Writing objects:  23% (42/181)Writing objects:  24% (44/181)Writing objects:  25% (46/181)Writing objects:  26% (48/181)Writing objects:  27% (49/181)Writing objects:  28% (51/181)Writing objects:  29% (53/181)Writing objects:  30% (55/181)Writing objects:  31% (57/181)Writing objects:  32% (58/181)Writing objects:  33% (60/181)Writing objects:  34% (62/181)Writing objects:  35% (64/181)Writing objects:  36% (66/181)Writing objects:  37% (68/181)Writing objects:  38% (69/181)Writing objects:  39% (71/181)Writing objects:  40% (73/181)Writing objects:  42% (77/181)Writing objects:  43% (78/181)Writing objects:  44% (80/181)Writing objects:  45% (82/181)Writing objects:  46% (85/181)Writing objects:  47% (86/181)Writing objects:  48% (87/181)Writing objects:  49% (89/181)Writing objects:  50% (91/181)Writing objects:  51% (93/181)Writing objects:  52% (95/181)Writing objects:  53% (96/181)Writing objects:  54% (98/181)Writing objects:  55% (100/181)Writing objects:  56% (102/181)Writing objects:  57% (104/181)Writing objects:  58% (105/181)Writing objects:  59% (107/181)Writing objects:  60% (109/181)Writing objects:  61% (111/181)Writing objects:  62% (113/181)Writing objects:  63% (115/181)Writing objects:  64% (116/181)Writing objects:  65% (118/181)Writing objects:  66% (120/181)Writing objects:  67% (122/181)Writing objects:  68% (124/181)Writing objects:  69% (125/181)Writing objects:  70% (127/181)Writing objects:  71% (129/181)Writing objects:  72% (131/181)Writing objects:  73% (133/181)Writing objects:  74% (134/181)Writing objects:  75% (136/181)Writing objects:  76% (138/181)Writing objects:  77% (140/181)Writing objects:  78% (142/181)Writing objects:  79% (144/181)Writing objects:  80% (145/181)Writing objects:  81% (147/181)Writing objects:  82% (149/181)Writing objects:  83% (151/181)Writing objects:  84% (153/181)Writing objects:  85% (154/181)Writing objects:  86% (156/181)Writing objects:  87% (158/181)Writing objects:  88% (160/181)Writing objects:  90% (163/181)Writing objects:  91% (165/181)Writing objects:  92% (167/181)Writing objects:  93% (169/181)Writing objects:  94% (171/181)Writing objects:  95% (172/181)Writing objects:  96% (174/181)Writing objects:  97% (176/181)Writing objects:  98% (178/181)Writing objects:  99% (180/181)Writing objects: 100% (181/181)Writing objects: 100% (181/181), 34.99 KiB | 7.00 MiB/s, done.
+Total 181 (delta 33), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas:   0% (0/33)[Kremote: Resolving deltas:   3% (1/33)[Kremote: Resolving deltas:   6% (2/33)[Kremote: Resolving deltas:   9% (3/33)[Kremote: Resolving deltas:  12% (4/33)[Kremote: Resolving deltas:  15% (5/33)[Kremote: Resolving deltas:  18% (6/33)[Kremote: Resolving deltas:  21% (7/33)[Kremote: Resolving deltas:  24% (8/33)[Kremote: Resolving deltas:  27% (9/33)[Kremote: Resolving deltas:  30% (10/33)[Kremote: Resolving deltas:  33% (11/33)[Kremote: Resolving deltas:  36% (12/33)[Kremote: Resolving deltas:  39% (13/33)[Kremote: Resolving deltas:  42% (14/33)[Kremote: Resolving deltas:  45% (15/33)[Kremote: Resolving deltas:  48% (16/33)[Kremote: Resolving deltas:  51% (17/33)[Kremote: Resolving deltas:  54% (18/33)[Kremote: Resolving deltas:  57% (19/33)[Kremote: Resolving deltas:  60% (20/33)[Kremote: Resolving deltas:  63% (21/33)[Kremote: Resolving deltas:  66% (22/33)[Kremote: Resolving deltas:  69% (23/33)[Kremote: Resolving deltas:  72% (24/33)[Kremote: Resolving deltas:  75% (25/33)[Kremote: Resolving deltas:  78% (26/33)[Kremote: Resolving deltas:  81% (27/33)[Kremote: Resolving deltas:  84% (28/33)[Kremote: Resolving deltas:  87% (29/33)[Kremote: Resolving deltas:  90% (30/33)[Kremote: Resolving deltas:  93% (31/33)[Kremote: Resolving deltas:  96% (32/33)[Kremote: Resolving deltas: 100% (33/33)[Kremote: Resolving deltas: 100% (33/33), completed with 2 local objects.[K
+remote: 
+remote: Create a pull request for 'feature/daniel' on GitHub by visiting:[K
+remote:      https://github.com/edben110/Zero-Trust/pull/new/feature/daniel[K
+remote: 
+To https://github.com/edben110/Zero-Trust.git
+ * [new branch]      feature/daniel -> feature/daniel
+branch 'feature/daniel' set up to track 'origin/feature/daniel'.
+DONE
+[1m[7m%[27m[1m[0m                                                                                                                         [0m[27m[24m[Jdanielguevararodriguez@MacBook-Pro-de-Daniel-2 Zero-Trust % [K[?2004hccat > /tmp/git_push2.sh << 'EOF'[?2004l
+[0m[27m[24m[Jheredoc> [K[?2004h##!/bin/sh[?2004l
+[0m[27m[24m[Jheredoc> [K[?2004hRREPO="/Users/danielguevararodriguez/Documents/Sexto Semestre /Proyecto Final Zero-Trust/Zero-Trust"[?2004l
+[0m[27m[24m[Jheredoc> [K[?2004hccd "$REPO"[?2004l
+[0m[27m[24m[Jheredoc> [K[?2004hggit push -u origin feature/daniel[?2004l
+[0m[27m[24m[Jheredoc> [K[?2004heecho "EXIT: $?"[?2004l
+[0m[27m[24m[Jheredoc> [K[?2004hEEOF[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                         [0m[27m[24m[Jdanielguevararodriguez@MacBook-Pro-de-Daniel-2 Zero-Trust % [K[?2004hcchmod +x /tmp/git_push2.sh && /tmp/git_push2.sh[?2004l
+branch 'feature/daniel' set up to track 'origin/feature/daniel'.
+Everything up-to-date
+EXIT: 0
+[1m[7m%[27m[1m[0m                                                                                                                         [0m[27m[24m[Jdanielguevararodriguez@MacBook-Pro-de-Daniel-2 Zero-Trust % [K[?2004hcchmod +x /tmp/move_services.sh && /tmp/move_services.sh[?2004l
+Movido. Estructura:
+App		services
+[1m[7m%[27m[1m[0m                                                                                                                         [0m[27m[24m[Jdanielguevararodriguez@MacBook-Pro-de-Daniel-2 Zero-Trust % [K[?2004hcchmod +x /tmp/git_move.sh && /tmp/git_move.sh[?2004l
+[feature/daniel 6ce9674] refactor: mover services/ dentro de Back/
+ 73 files changed, 108 insertions(+)
+ rename {services => Back/services}/bot_detector_service/Dockerfile (100%)
+ rename {services => Back/services}/bot_detector_service/pom.xml (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/BotDetectorApplication.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/kafka/RawVoteKafkaConsumer.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/kafka/SecurityAlertKafkaPublisher.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/persistence/FraudIncidentEntity.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/persistence/FraudIncidentJpaRepository.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/adapter/persistence/JpaFraudIncidentRepository.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/model/IpTrafficContext.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/model/SecurityAlert.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/port/FraudIncidentRepository.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/port/SecurityAlertPublisher.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/BlockedState.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/IpRiskState.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/NormalState.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/domain/state/SuspiciousState.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/java/com/zerotrust/botdetector/service/BotDetectorService.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/main/resources/application.properties (100%)
+ rename {services => Back/services}/bot_detector_service/src/test/java/com/zerotrust/botdetector/domain/IpTrafficContextTest.java (100%)
+ rename {services => Back/services}/bot_detector_service/src/test/java/com/zerotrust/botdetector/service/BotDetectorServiceTest.java (100%)
+ rename {services => Back/services}/global_dashboard_worker/Dockerfile (100%)
+ rename {services => Back/services}/global_dashboard_worker/pom.xml (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/GlobalDashboardWorkerApplication.java (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/adapter/rabbit/GlobalResultsRabbitConsumer.java (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/config/RabbitConfig.java (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/main/java/com/zerotrust/globaldashboardworker/config/WebSocketConfig.java (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/main/resources/application.properties (100%)
+ rename {services => Back/services}/global_dashboard_worker/src/test/java/com/zerotrust/globaldashboardworker/adapter/GlobalResultsRabbitConsumerTest.java (100%)
+ rename {services => Back/services}/regional_dashboard_worker/Dockerfile (100%)
+ rename {services => Back/services}/regional_dashboard_worker/pom.xml (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/RegionalDashboardWorkerApplication.java (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/adapter/rabbit/RegionalResultsRabbitConsumer.java (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/config/RabbitConfig.java (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/main/java/com/zerotrust/regionaldashboardworker/config/WebSocketConfig.java (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/main/resources/application.properties (100%)
+ rename {services => Back/services}/regional_dashboard_worker/src/test/java/com/zerotrust/regionaldashboardworker/adapter/RegionalResultsRabbitConsumerTest.java (100%)
+ rename {services => Back/services}/regional_rollup_service/Dockerfile (100%)
+ rename {services => Back/services}/regional_rollup_service/pom.xml (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/RegionalRollupApplication.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/adapter/kafka/RawVoteKafkaConsumer.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/adapter/rabbit/RegionalResultRabbitPublisher.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/config/AppConfig.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RawVoteEvent.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RegionalCandidateResult.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RegionalResultSnapshot.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/model/RegionalVoteAccumulator.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/port/RegionalResultPublisher.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/strategy/RegionalConsolidationStrategy.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/domain/strategy/SimpleCountStrategy.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/java/com/zerotrust/regionalrollup/service/RegionalRollupService.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/main/resources/application.properties (100%)
+ rename {services => Back/services}/regional_rollup_service/src/test/java/com/zerotrust/regionalrollup/domain/RegionalVoteAccumulatorTest.java (100%)
+ rename {services => Back/services}/regional_rollup_service/src/test/java/com/zerotrust/regionalrollup/service/RegionalRollupServiceTest.java (100%)
+ rename {services => Back/services}/vote_processor/Dockerfile (100%)
+ rename {services => Back/services}/vote_processor/pom.xml (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/VoteProcessorApplication.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/adapter/kafka/RawVoteKafkaConsumer.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/adapter/rabbit/GlobalResultRabbitPublisher.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/config/AppConfig.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/config/RabbitConfig.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/CandidateId.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/CandidateResult.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/GlobalResultSnapshot.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/RawVoteEvent.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/VoteAggregate.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/VoteId.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/model/VoterId.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/domain/port/GlobalResultPublisher.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/java/com/zerotrust/voteprocessor/service/VoteProcessorService.java (100%)
+ rename {services => Back/services}/vote_processor/src/main/resources/application.properties (100%)
+ rename {services => Back/services}/vote_processor/src/test/java/com/zerotrust/voteprocessor/domain/VoteAggregateTest.java (100%)
+ rename {services => Back/services}/vote_processor/src/test/java/com/zerotrust/voteprocessor/service/VoteProcessorServiceTest.java (100%)
+ create mode 100644 typescript
+Enumerating objects: 6, done.
+Counting objects:  16% (1/6)Counting objects:  33% (2/6)Counting objects:  50% (3/6)Counting objects:  66% (4/6)Counting objects:  83% (5/6)Counting objects: 100% (6/6)Counting objects: 100% (6/6), done.
+Delta compression using up to 15 threads
+Compressing objects:  25% (1/4)Compressing objects:  50% (2/4)Compressing objects:  75% (3/4)Compressing objects: 100% (4/4)Compressing objects: 100% (4/4), done.
+Writing objects:  25% (1/4)Writing objects:  50% (2/4)Writing objects:  75% (3/4)Writing objects: 100% (4/4)Writing objects: 100% (4/4), 3.76 KiB | 3.76 MiB/s, done.
+Total 4 (delta 0), reused 0 (delta 0), pack-reused 0 (from 0)
+To https://github.com/edben110/Zero-Trust.git
+   6965461..6ce9674  feature/daniel -> feature/daniel
+EXIT: 0
+[1m[7m%[27m[1m[0m                                                                                                                         [0m[27m[24m[Jdanielguevararodriguez@MacBook-Pro-de-Daniel-2 Zero-Trust % [K[?2004h
