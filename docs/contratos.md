@@ -100,12 +100,17 @@ spring.kafka.ssl.trust-store-type=PKCS12
 - La clase del handler es `org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginCallbackHandler`. La del paquete `...oauthbearer.secured` está obsoleta desde Kafka 3.4.
 - Las opciones `ssl.*` dentro del JAAS son las del HTTPS hacia `AUTH_TOKEN_URL`; las de `spring.kafka.ssl.*` son las del TLS hacia el broker.
 - Kafka 3.6 envía `clientId:clientSecret` por Basic **sin** codificarlos. Por eso los `client_secret` solo usan los caracteres `A-Z a-z 0-9 . _ ~ -`, que no cambian al decodificar form-urlencoded en auth_server.
-- En los servicios de Sebas, el JAAS lo construye y valida una clase de `config/` (con las comillas escapadas), y no una línea de propiedades.
+- En los servicios de Sebas, el JAAS lo construye y valida una clase de `config/` (con las comillas escapadas), y no una línea de propiedades:
+  - `VariablesClienteToken` lee y valida las variables al arrancar; `KAFKA_SECURITY_PROTOCOL` solo admite `SASL_SSL` o `SASL_PLAINTEXT`.
+  - `PropiedadesKafkaOAuth` construye las propiedades de arriba.
+  - `ConfiguracionKafkaOAuth` las aplica a las fábricas de productores y consumidores (`DefaultKafkaProducerFactoryCustomizer` y `DefaultKafkaConsumerFactoryCustomizer` de Spring Boot 3.2.5).
+- Un consumidor de Kafka pide el token a auth_server al crearse, durante el arranque. Si auth_server no responde, el servicio no arranca: en el despliegue conviene una política de reinicio (`restart: on-failure` o equivalente). Un productor pide el token en el primer envío.
 
 **RabbitMQ** (clase de `config/` sobre el `ConnectionFactory` de Spring AMQP):
 - `OAuth2ClientCredentialsGrantCredentialsProvider` (amqp-client) con `tokenEndpointUri=${AUTH_TOKEN_URL}`, `clientId=${CLIENT_ID}`, `clientSecret=${CLIENT_SECRET}`, `grantType=client_credentials` y un `SSLContext` creado con el truststore (`TRUSTSTORE_FILE`/`TRUSTSTORE_PASSWORD`).
 - `DefaultCredentialsRefreshService` en el `ConnectionFactory`: renueva el token antes de que caduque (al 80 % de su vida por defecto).
 - Sin usuario ni contraseña fijos. amqp-client codifica las credenciales en Basic como pide RFC 6749.
+- En los servicios de Sebas lo hace `ConfiguracionRabbitOAuth` con un `ConnectionFactoryCustomizer` de Spring Boot 3.2.5, que se aplica después de que Boot configure la conexión.
 
 **PostgreSQL**: `DB_URL`, `DB_USER`, `DB_PASSWORD`, sin valores por defecto; `spring.jpa.hibernate.ddl-auto=validate` contra `docs/schema.sql`.
 
