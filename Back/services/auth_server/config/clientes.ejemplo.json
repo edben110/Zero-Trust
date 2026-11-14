@@ -1,0 +1,103 @@
+{
+  "clients": [
+    {
+      "client_id": "voter_registration_service",
+      "secret_hash": "$2a$12$ucEH1CxpjGRKy3uPd1faf./0KkhxFYb/kRMGrHWvdQNRJ.jjTrjVm",
+      "scopes": [],
+      "audiences": [
+        "kafka"
+      ]
+    },
+    {
+      "client_id": "user_validation_service",
+      "secret_hash": "$2a$12$Ig8iJiEZuYLskC8ZYFQs4u28A0xiJHmIIbL4SXEpu2hp.7bk3x136",
+      "scopes": [
+        "rabbitmq.read:votacion/user_validation_queue",
+        "rabbitmq.write:votacion/amq.default"
+      ],
+      "audiences": [
+        "kafka",
+        "rabbitmq"
+      ]
+    },
+    {
+      "client_id": "voting_api",
+      "secret_hash": "$2a$12$zczVdC1g7cYX1x43uz1JQ.PEPcI7jO9lUgV1oxVYXf52yO8pPJL3.",
+      "scopes": [
+        "rabbitmq.write:votacion/amq.default",
+        "rabbitmq.configure:votacion/amq.gen-*",
+        "rabbitmq.read:votacion/amq.gen-*"
+      ],
+      "audiences": [
+        "kafka",
+        "rabbitmq"
+      ]
+    },
+    {
+      "client_id": "vote_processor",
+      "secret_hash": "$2a$12$BzNgNL5mb7rO/COcFpnHzOjcW6ljvca/uHx0e7GnwqOhvEhspXfgu",
+      "scopes": [
+        "rabbitmq.configure:votacion/live_results_global",
+        "rabbitmq.write:votacion/live_results_global"
+      ],
+      "audiences": [
+        "kafka",
+        "rabbitmq"
+      ]
+    },
+    {
+      "client_id": "regional_rollup_service",
+      "secret_hash": "$2a$12$B2PLCFC30oZZhV9emVK9bu.JBuB64.C2celWpSnla.76XDd6YxzcK",
+      "scopes": [
+        "rabbitmq.configure:votacion/live_results_regional",
+        "rabbitmq.write:votacion/live_results_regional"
+      ],
+      "audiences": [
+        "kafka",
+        "rabbitmq"
+      ]
+    },
+    {
+      "client_id": "bot_detector_service",
+      "secret_hash": "$2a$12$4OnZbomBy2WPokUDPAyPJOIfeX9emIo9A1YB3sdrZwaIj0IpPmgpO",
+      "scopes": [],
+      "audiences": [
+        "kafka"
+      ]
+    },
+    {
+      "client_id": "analytics_archiver",
+      "secret_hash": "$2a$12$ZgqFkF1M8QsiNLAz9iC.y.KvnwFXQquCM.COz6zKKNbjLYLHvF4Vy",
+      "scopes": [],
+      "audiences": [
+        "kafka"
+      ]
+    },
+    {
+      "client_id": "global_dashboard_worker",
+      "secret_hash": "$2a$12$c621ly6vrIv5fldkj8bEQ.m5Z4txglC0XXgcU1zz8yy.xFbLnA2tS",
+      "scopes": [
+        "rabbitmq.configure:votacion/amq.gen-*",
+        "rabbitmq.read:votacion/live_results_global",
+        "rabbitmq.read:votacion/amq.gen-*",
+        "rabbitmq.write:votacion/amq.gen-*"
+      ],
+      "audiences": [
+        "rabbitmq"
+      ]
+    },
+    {
+      "client_id": "regional_dashboard_worker",
+      "secret_hash": "$2a$12$0S5kanbidvYznhFOtRp9FullZTOWqHIF5P/wj/ZP0IdSUFa/z2z5i",
+      "scopes": [
+        "rabbitmq.configure:votacion/amq.gen-*",
+        "rabbitmq.read:votacion/live_results_regional",
+        "rabbitmq.read:votacion/amq.gen-*",
+        "rabbitmq.write:votacion/amq.gen-*"
+      ],
+      "audiences": [
+        "rabbitmq"
+      ]
+    }
+  ]
+}
