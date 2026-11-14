@@ -1,0 +1,47 @@
+// Tipos de docs/contratos.md: GET /catalog, POST /vote y los mensajes de los dashboard workers.
+
+export type Candidato = {
+  candidateId: string;
+  name: string;
+  list: string;
+};
+
+export type Catalogo = {
+  candidates: Candidato[];
+  regions: string[];
+};
+
+export type SolicitudVoto = {
+  voterId: string;
+  candidateId: string;
+  region: string;
+};
+
+export type Comprobante = {
+  voteId: string;
+  receivedAt: string;
+};
+
+export type ResultadoCandidato = {
+  candidateId: string;
+  candidateName: string;
+  voteCount: number;
+};
+
+export type ResultadosGlobales = {
+  timestamp: string;
+  results: ResultadoCandidato[];
+};
+
+export type ResultadosRegionales = ResultadosGlobales & {
+  region: string;
+};
+
+export type ResultadoVoto =
+  | { tipo: "aceptado"; comprobante: Comprobante }
+  | { tipo: "invalido"; campos: string[] }
+  | { tipo: "no-habilitado" }
+  | { tipo: "no-disponible" }
+  | { tipo: "error" };
+
+export type EstadoConexion = "conectando" | "en-vivo" | "reconectando" | "sin-conexion";
