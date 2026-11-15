@@ -68,6 +68,17 @@ function Formulario({ catalogo, alAceptar }: { catalogo: Catalogo; alAceptar: (c
   const [rechazo, setRechazo] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
+  function quitarError(campo: keyof Errores) {
+    setErrores((anteriores) => {
+      if (anteriores[campo] === undefined) {
+        return anteriores;
+      }
+      const restantes = { ...anteriores };
+      delete restantes[campo];
+      return restantes;
+    });
+  }
+
   async function depositar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     const nuevos: Errores = {};
@@ -106,7 +117,12 @@ function Formulario({ catalogo, alAceptar }: { catalogo: Catalogo; alAceptar: (c
           id="voterId"
           name="voterId"
           value={voterId}
-          onChange={(evento) => setVoterId(evento.target.value)}
+          onChange={(evento) => {
+            setVoterId(evento.target.value);
+            if (esUuid(evento.target.value)) {
+              quitarError("voterId");
+            }
+          }}
           autoComplete="off"
           spellCheck={false}
           aria-invalid={errores.voterId !== undefined}
@@ -134,7 +150,10 @@ function Formulario({ catalogo, alAceptar }: { catalogo: Catalogo; alAceptar: (c
                 name="region"
                 value={opcion}
                 checked={region === opcion}
-                onChange={() => setRegion(opcion)}
+                onChange={() => {
+                  setRegion(opcion);
+                  quitarError("region");
+                }}
                 className="sr-only"
               />
               {nombreRegion(opcion)}
@@ -164,7 +183,10 @@ function Formulario({ catalogo, alAceptar }: { catalogo: Catalogo; alAceptar: (c
                   name="candidato"
                   value={candidato.candidateId}
                   checked={marcado}
-                  onChange={() => setCandidateId(candidato.candidateId)}
+                  onChange={() => {
+                    setCandidateId(candidato.candidateId);
+                    quitarError("candidateId");
+                  }}
                   className="sr-only"
                 />
                 <span className="relative flex h-14 w-14 shrink-0 items-center justify-center border-2 border-tinta">

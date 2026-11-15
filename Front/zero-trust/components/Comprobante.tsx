@@ -1,7 +1,7 @@
 import type { Comprobante as DatosComprobante } from "@/lib/contrato";
 import { formatearFecha, formatearHora } from "@/lib/formato";
 
-const RECORRIDO = ["Contrato validado", "Votante habilitado", "Voto registrado"] as const;
+const RECORRIDO = ["Datos del voto validados", "Votante habilitado", "Voto registrado"] as const;
 
 type Props = {
   comprobante: DatosComprobante;
@@ -12,7 +12,7 @@ export function Comprobante({ comprobante, alVolver }: Props) {
   return (
     <section aria-labelledby="titulo-comprobante" className="mx-auto max-w-xl">
       <div className="perforado px-6 py-8 sm:px-10">
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-tinta-suave">Comprobante de voto</p>
             <h2 id="titulo-comprobante" className="mt-1 font-serif text-3xl">
@@ -56,7 +56,7 @@ export function Comprobante({ comprobante, alVolver }: Props) {
       </div>
 
       <p className="mt-6 text-sm text-tinta-suave">
-        Guarde el código del voto: identifica su voto en el registro de auditoría sin revelar por quién votó.
+        Guarde el código del voto: con él puede ubicarse su voto en el registro de auditoría.
       </p>
       <button
         type="button"
