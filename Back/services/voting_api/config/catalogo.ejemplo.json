@@ -1,0 +1,31 @@
+{
+  "candidates": [
+    {
+      "candidateId": "0b1c2d3e-4f50-4a61-8b72-93a4b5c6d7e8",
+      "name": "Lucía Marín Ospina",
+      "list": "Movimiento Ceiba"
+    },
+    {
+      "candidateId": "1c2d3e4f-5061-4b72-8c83-a4b5c6d7e8f9",
+      "name": "Andrés Felipe Quintero",
+      "list": "Alianza Río Claro"
+    },
+    {
+      "candidateId": "2d3e4f50-6172-4c83-9d94-b5c6d7e8f90a",
+      "name": "Valentina Rojas Ibarra",
+      "list": "Coalición Guadua"
+    },
+    {
+      "candidateId": "3e4f5061-7283-4d94-8ea5-c6d7e8f90a1b",
+      "name": "Samuel Ortega Lozano",
+      "list": "Partido de los Páramos"
+    }
+  ],
+  "regions": [
+    "norte",
+    "sur",
+    "oriente",
+    "occidente",
+    "centro"
+  ]
+}

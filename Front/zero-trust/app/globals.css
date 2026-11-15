@@ -1,26 +1,125 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-papel: #f4f1ea;
+  --color-papel-hondo: #ebe6da;
+  --color-tinta: #16181d;
+  --color-tinta-suave: #4a4d55;
+  --color-linea: rgb(22 24 29 / 0.15);
+  --color-sello: #c8321e;
+  --color-verificado: #2f6b4f;
+
+  --font-serif: var(--fuente-serif);
+  --font-sans: var(--fuente-sans);
+  --font-mono: var(--fuente-mono);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-papel);
+  color: var(--color-tinta);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--fuente-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-tinta);
+  outline-offset: 3px;
+}
+
+.cifras {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Trazo de bolígrafo de la X del tarjetón */
+.trazo-x path {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+  animation: trazar 280ms ease-out forwards;
+}
+
+.trazo-x path:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+@keyframes trazar {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Borde perforado del comprobante: muescas a los lados y línea de corte punteada */
+.perforado {
+  position: relative;
+  background: var(--color-papel);
+  border: 1px solid var(--color-linea);
+}
+
+.perforado::before,
+.perforado::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-top: -9px;
+  border-radius: 9999px;
+  background: var(--color-papel-hondo);
+  border: 1px solid var(--color-linea);
+}
+
+.perforado::before {
+  left: -10px;
+}
+
+.perforado::after {
+  right: -10px;
+}
+
+.linea-corte {
+  border-top: 1px dashed rgb(22 24 29 / 0.35);
+}
+
+/* Sello RECIBIDO, ligeramente rotado */
+.sello {
+  color: var(--color-sello);
+  border: 3px double var(--color-sello);
+  transform: rotate(-7deg);
+  letter-spacing: 0.22em;
+  opacity: 0.88;
+}
+
+/* Cambio de cifras en el acta */
+.cifra-viva {
+  animation: resaltar 700ms ease-out;
+}
+
+@keyframes resaltar {
+  from {
+    background-color: rgb(22 24 29 / 0.08);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+.barra {
+  transition: width 500ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trazo-x path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .cifra-viva {
+    animation: none;
+  }
+
+  .barra {
+    transition: none;
+  }
 }
