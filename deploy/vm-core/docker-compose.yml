@@ -1,0 +1,141 @@
+# vm-core: procesamiento de negocio. Sin puertos publicados: solo trafico saliente
+# hacia vm-auth:443 y vm-brokers:9092/5672/5432.
+# Uso: cp .env.example .env  (editar)  &&  docker compose up -d --build
+#
+# Las replicas de un servicio comparten imagen, variables y group.id de Kafka, por eso
+# consumen de forma competitiva (analytics_archiver) o cada una lee el topic completo
+# (user_validation_service, ver su application.properties).
+
+x-hosts: &hosts
+  - "vm-auth:${VM_AUTH_IP:?defina VM_AUTH_IP}"
+  - "vm-brokers:${VM_BROKERS_IP:?defina VM_BROKERS_IP}"
+
+x-endurecimiento: &endurecimiento
+  restart: unless-stopped   # los consumidores Kafka no arrancan si auth_server no responde
+  extra_hosts: *hosts
+  read_only: true
+  tmpfs:
+    - /tmp
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+
+# Servicios con cliente de token propio (config/ de cada servicio).
+x-entorno-token: &entorno-token
+  AUTH_TOKEN_URL: https://vm-auth:443/token
+  KAFKA_SECURITY_PROTOCOL: SASL_SSL
+  KAFKA_BOOTSTRAP: vm-brokers:9092
+  RABBIT_HOST: vm-brokers
+  RABBIT_PORT: "5672"
+  SPRING_RABBITMQ_VIRTUAL_HOST: votacion   # los scopes de los tokens apuntan a este vhost
+  TRUSTSTORE_FILE: /certs/truststore.p12
+  TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD:?defina TRUSTSTORE_PASSWORD}
+
+# Servicios que aun no leen CLIENT_ID/CLIENT_SECRET (ver deploy/README.md): reciben las
+# mismas variables y el truststore se aplica a toda la JVM.
+x-entorno-companeros: &entorno-companeros
+  <<: *entorno-token
+  AUTH_JWKS_URL: https://vm-auth:443/.well-known/jwks.json
+  JAVA_OPTS: >-
+    -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError
+    -Djavax.net.ssl.trustStore=/certs/truststore.p12
+    -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD}
+    -Djavax.net.ssl.trustStoreType=PKCS12
+
+x-db: &db
+  DB_URL: jdbc:postgresql://vm-brokers:5432/${POSTGRES_DB:-zerotrust}
+  DB_USER: ${DB_USER:?defina DB_USER}
+  DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD}
+
+x-truststore: &truststore ./secrets/truststore.p12:/certs/truststore.p12:ro
+
+services:
+  user_validation_service:
+    <<: *endurecimiento
+    build:
+      context: ../../Back/services/user_validation_service
+    image: zerotrust/user-validation-service:${IMAGE_TAG:-1.0}
+    environment:
+      <<: *entorno-token
+      CLIENT_ID: user_validation_service
+      CLIENT_SECRET: ${SECRET_USER_VALIDATION_SERVICE:?defina SECRET_USER_VALIDATION_SERVICE}
+    volumes:
+      - *truststore
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  analytics_archiver:
+    <<: *endurecimiento
+    build:
+      context: ../../Back/services/analytics_archiver
+    image: zerotrust/analytics-archiver:${IMAGE_TAG:-1.0}
+    environment:
+      <<: [*entorno-token, *db]
+      CLIENT_ID: analytics_archiver
+      CLIENT_SECRET: ${SECRET_ANALYTICS_ARCHIVER:?defina SECRET_ANALYTICS_ARCHIVER}
+    volumes:
+      - *truststore
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  # Stateful: una sola instancia (docs/contratos.md, Decisiones).
+  vote_processor:
+    <<: *endurecimiento
+    build:
+      context: ../../Back/services/vote_processor
+    image: zerotrust/vote-processor:${IMAGE_TAG:-1.0}
+    environment:
+      <<: *entorno-companeros
+      CLIENT_ID: vote_processor
+      CLIENT_SECRET: ${SECRET_VOTE_PROCESSOR:?defina SECRET_VOTE_PROCESSOR}
+    volumes:
+      - *truststore
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  # Stateful: una sola instancia.
+  regional_rollup_service:
+    <<: *endurecimiento
+    build:
+      context: ../../Back/services/regional_rollup_service
+    image: zerotrust/regional-rollup-service:${IMAGE_TAG:-1.0}
+    environment:
+      <<: *entorno-companeros
+      CLIENT_ID: regional_rollup_service
+      CLIENT_SECRET: ${SECRET_REGIONAL_ROLLUP_SERVICE:?defina SECRET_REGIONAL_ROLLUP_SERVICE}
+    volumes:
+      - *truststore
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  bot_detector_service:
+    <<: *endurecimiento
+    build:
+      context: ../../Back/services/bot_detector_service
+    image: zerotrust/bot-detector-service:${IMAGE_TAG:-1.0}
+    environment:
+      <<: [*entorno-companeros, *db]
+      CLIENT_ID: bot_detector_service
+      CLIENT_SECRET: ${SECRET_BOT_DETECTOR_SERVICE:?defina SECRET_BOT_DETECTOR_SERVICE}
+    volumes:
+      - *truststore
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M

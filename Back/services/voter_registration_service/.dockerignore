@@ -1,0 +1,12 @@
+target/
+.git/
+.mvn/
+mvnw
+mvnw.cmd
+config/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+.env*

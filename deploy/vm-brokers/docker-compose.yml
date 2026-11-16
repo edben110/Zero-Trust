@@ -1,0 +1,135 @@
+# vm-brokers: zona de datos. Kafka (KRaft, un nodo), RabbitMQ y PostgreSQL.
+# Uso: cp .env.example .env  (editar)  &&  docker compose up -d
+#
+# Kafka y RabbitMQ validan el JWT de auth_server (JWKS en vm-auth:443). No hay acceso anonimo
+# por la red. Kafka tiene ademas un listener LOCAL (127.0.0.1:9094, sin publicar) que solo
+# usan el propio broker y el contenedor kafka-init, que comparte su red.
+
+x-hosts: &hosts
+  - "vm-auth:${VM_AUTH_IP:?defina VM_AUTH_IP}"
+
+services:
+  kafka:
+    image: apache/kafka:3.7.1
+    restart: unless-stopped
+    extra_hosts: *hosts
+    ports:
+      - "9092:9092"
+    environment:
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID:?defina KAFKA_CLUSTER_ID}
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@127.0.0.1:9093
+      KAFKA_LISTENERS: CLIENTS://:9092,CONTROLLER://127.0.0.1:9093,LOCAL://127.0.0.1:9094
+      KAFKA_ADVERTISED_LISTENERS: CLIENTS://vm-brokers:9092,LOCAL://127.0.0.1:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENTS:SASL_SSL,CONTROLLER:PLAINTEXT,LOCAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: LOCAL
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      # TLS del listener CLIENTS
+      KAFKA_SSL_KEYSTORE_LOCATION: /certs/kafka.keystore.p12
+      KAFKA_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_SSL_KEYSTORE_PASSWORD: ${KAFKA_KEYSTORE_PASSWORD:?defina KAFKA_KEYSTORE_PASSWORD}
+      KAFKA_SSL_KEY_PASSWORD: ${KAFKA_KEYSTORE_PASSWORD}
+      # SASL/OAUTHBEARER: el broker valida el JWT contra el JWKS de auth_server
+      KAFKA_LISTENER_NAME_CLIENTS_SASL_ENABLED_MECHANISMS: OAUTHBEARER
+      KAFKA_LISTENER_NAME_CLIENTS_OAUTHBEARER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.OAuthBearerValidatorCallbackHandler
+      KAFKA_LISTENER_NAME_CLIENTS_OAUTHBEARER_SASL_JAAS_CONFIG: >-
+        org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required
+        unsecuredLoginStringClaim_sub="broker"
+        ssl.truststore.location="/certs/truststore.p12"
+        ssl.truststore.password="${TRUSTSTORE_PASSWORD:?defina TRUSTSTORE_PASSWORD}"
+        ssl.truststore.type="PKCS12";
+      KAFKA_SASL_OAUTHBEARER_JWKS_ENDPOINT_URL: https://vm-auth:443/.well-known/jwks.json
+      KAFKA_SASL_OAUTHBEARER_EXPECTED_AUDIENCE: kafka
+      KAFKA_SASL_OAUTHBEARER_EXPECTED_ISSUER: ${AUTH_ISSUER:?defina AUTH_ISSUER}
+      KAFKA_OPTS: -Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=https://vm-auth:443/.well-known/jwks.json
+      # Autorizacion por ACL sobre el principal sub = client_id. Sin ACL, se deniega.
+      # El listener LOCAL (principal ANONYMOUS) no es alcanzable desde la red.
+      KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+      KAFKA_SUPER_USERS: User:ANONYMOUS
+      KAFKA_HEAP_OPTS: -Xms384m -Xmx384m
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - ./secrets/kafka.keystore.p12:/certs/kafka.keystore.p12:ro
+      - ./secrets/truststore.p12:/certs/truststore.p12:ro
+    healthcheck:
+      test: ["CMD", "/opt/kafka/bin/kafka-broker-api-versions.sh", "--bootstrap-server", "127.0.0.1:9094"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 768M
+
+  # Crea topics y ACL una vez y termina. Comparte la red de kafka para usar el listener LOCAL.
+  kafka-init:
+    image: apache/kafka:3.7.1
+    network_mode: "service:kafka"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: "no"
+    volumes:
+      - ./kafka/init.sh:/init.sh:ro
+    entrypoint: ["sh", "/init.sh"]
+
+  rabbitmq:
+    image: rabbitmq:3.13-alpine
+    restart: unless-stopped
+    extra_hosts: *hosts
+    ports:
+      - "5672:5672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+      - ./secrets/ca.pem:/etc/rabbitmq/certs/ca.pem:ro
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+
+  postgres-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-zerotrust}
+      POSTGRES_USER: ${DB_USER:?defina DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Se ejecuta solo la primera vez, con el volumen vacio.
+      - ../../docs/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+
+volumes:
+  kafka-data:
+  rabbitmq-data:
+  postgres-data:
