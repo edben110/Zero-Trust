@@ -2,6 +2,7 @@ package com.zerotrust.regionaldashboardworker.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +23,7 @@ public class RabbitConfig {
             @Value("${dashboard.region-binding:#}") String regionPattern) {
         // Cola exclusiva por instancia del worker.
         // Con regionPattern "#" escucha todas las regiones (comportamiento por defecto).
-        return new Queue("", false, true, true);
+        return new AnonymousQueue();
     }
 
     @Bean

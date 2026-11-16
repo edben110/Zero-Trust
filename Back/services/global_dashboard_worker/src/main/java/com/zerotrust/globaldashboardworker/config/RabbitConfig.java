@@ -2,6 +2,7 @@ package com.zerotrust.globaldashboardworker.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.AnonymousQueue;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +20,8 @@ public class RabbitConfig {
 
     @Bean
     public Queue globalDashboardQueue() {
-        // Cola exclusiva por instancia del worker
-        return new Queue("", false, true, true);
+        // Nombre generado antes del listener; Queue("") deja un placeholder.
+        return new AnonymousQueue();
     }
 
     @Bean
