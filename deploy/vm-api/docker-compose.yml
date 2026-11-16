@@ -1,0 +1,43 @@
+# vm-api: DMZ. Solo voting_api, unica zona expuesta a Internet.
+# Uso: cp .env.example .env  (editar)  &&  docker compose up -d --build
+services:
+  voting_api:
+    build:
+      context: ../../Back/services/voting_api
+    image: zerotrust/voting-api:${IMAGE_TAG:-1.0}
+    restart: unless-stopped
+    ports:
+      - "80:8080"
+    extra_hosts:
+      - "vm-auth:${VM_AUTH_IP:?defina VM_AUTH_IP}"
+      - "vm-brokers:${VM_BROKERS_IP:?defina VM_BROKERS_IP}"
+    environment:
+      AUTH_TOKEN_URL: https://vm-auth:443/token
+      CLIENT_ID: voting_api
+      CLIENT_SECRET: ${CLIENT_SECRET:?defina CLIENT_SECRET}
+      KAFKA_SECURITY_PROTOCOL: SASL_SSL
+      KAFKA_BOOTSTRAP: vm-brokers:9092
+      RABBIT_HOST: vm-brokers
+      RABBIT_PORT: "5672"
+      SPRING_RABBITMQ_VIRTUAL_HOST: votacion   # los scopes de los tokens apuntan a este vhost
+      TRUSTSTORE_FILE: /certs/truststore.p12
+      TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD:?defina TRUSTSTORE_PASSWORD}
+      CATALOG_FILE: /config/catalogo.json
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?defina CORS_ALLOWED_ORIGINS}
+      TRUST_FORWARDED_HEADERS: ${TRUST_FORWARDED_HEADERS:-false}
+      RPC_TIMEOUT_MS: ${RPC_TIMEOUT_MS:-3000}
+    volumes:
+      - ./secrets/truststore.p12:/certs/truststore.p12:ro
+      - ./config/catalogo.json:/config/catalogo.json:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M

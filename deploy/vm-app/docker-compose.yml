@@ -1,0 +1,99 @@
+# vm-app: servicios para el usuario final (dashboards por WebSocket y front web).
+# Uso: cp .env.example .env  (editar)  &&  docker compose up -d --build
+# El build del front descarga las fuentes: necesita internet.
+
+x-endurecimiento: &endurecimiento
+  restart: unless-stopped
+  extra_hosts:
+    - "vm-auth:${VM_AUTH_IP:?defina VM_AUTH_IP}"
+    - "vm-brokers:${VM_BROKERS_IP:?defina VM_BROKERS_IP}"
+  read_only: true
+  tmpfs:
+    - /tmp
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+
+x-entorno-worker: &entorno-worker
+  AUTH_TOKEN_URL: https://vm-auth:443/token
+  AUTH_JWKS_URL: https://vm-auth:443/.well-known/jwks.json
+  RABBIT_HOST: vm-brokers
+  RABBIT_PORT: "5672"
+  SPRING_RABBITMQ_VIRTUAL_HOST: votacion   # los scopes de los tokens apuntan a este vhost
+  TRUSTSTORE_FILE: /certs/truststore.p12
+  TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD:?defina TRUSTSTORE_PASSWORD}
+  JAVA_OPTS: >-
+    -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError
+    -Djavax.net.ssl.trustStore=/certs/truststore.p12
+    -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD}
+    -Djavax.net.ssl.trustStoreType=PKCS12
+
+services:
+  global_dashboard_worker:
+    <<: *endurecimiento
+    build:
+      context: ../../Back/services/global_dashboard_worker
+    image: zerotrust/global-dashboard-worker:${IMAGE_TAG:-1.0}
+    environment:
+      <<: *entorno-worker
+      CLIENT_ID: global_dashboard_worker
+      CLIENT_SECRET: ${SECRET_GLOBAL_DASHBOARD_WORKER:?defina SECRET_GLOBAL_DASHBOARD_WORKER}
+      SERVER_PORT: "8080"
+    ports:
+      - "8080-8081:8080"   # un puerto del rango por replica
+    volumes:
+      - ./secrets/truststore.p12:/certs/truststore.p12:ro
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  regional_dashboard_worker:
+    <<: *endurecimiento
+    build:
+      context: ../../Back/services/regional_dashboard_worker
+    image: zerotrust/regional-dashboard-worker:${IMAGE_TAG:-1.0}
+    environment:
+      <<: *entorno-worker
+      CLIENT_ID: regional_dashboard_worker
+      CLIENT_SECRET: ${SECRET_REGIONAL_DASHBOARD_WORKER:?defina SECRET_REGIONAL_DASHBOARD_WORKER}
+      SERVER_PORT: "8081"
+    ports:
+      - "8082-8083:8081"
+    volumes:
+      - ./secrets/truststore.p12:/certs/truststore.p12:ro
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  front:
+    build:
+      context: ../../Front/zero-trust
+      args:
+        # Se incrustan al compilar: deben ser URLs que el NAVEGADOR pueda alcanzar.
+        NEXT_PUBLIC_VOTING_API_URL: ${PUBLIC_VOTING_API_URL:?defina PUBLIC_VOTING_API_URL}
+        NEXT_PUBLIC_WS_GLOBAL_URL: ${PUBLIC_WS_GLOBAL_URL:?defina PUBLIC_WS_GLOBAL_URL}
+        NEXT_PUBLIC_WS_REGIONAL_URL: ${PUBLIC_WS_REGIONAL_URL:?defina PUBLIC_WS_REGIONAL_URL}
+    image: zerotrust/front:${IMAGE_TAG:-1.0}
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.next/cache
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M

@@ -1,0 +1,522 @@
+# Prueba LOCAL: simula en una sola maquina el despliegue de las 6 VMs.
+#
+#   docker compose up -d --build        # arranca todo (la primera vez tarda: compila 11 imagenes)
+#   docker compose down                 # detiene y conserva datos
+#   docker compose down -v              # detiene y borra datos y secretos generados
+#
+# Zonas -> contenedores (cada zona del despliegue real es un grupo de contenedores):
+#   vm-auth     auth_server
+#   vm-brokers  kafka, kafka-init, rabbitmq, postgres-db
+#   vm-api      voting_api
+#   vm-init     voter_registration_service
+#   vm-core     user_validation_service x2, analytics_archiver x2, vote_processor,
+#               regional_rollup_service, bot_detector_service
+#   vm-app      global_dashboard_worker x2, regional_dashboard_worker x2, front
+#
+# Segmentacion con redes Docker (aproxima las reglas nftables, que NO se simulan aqui):
+#   net-auth     auth_server y todo lo que pide o valida tokens
+#   net-brokers  kafka y rabbitmq y todo lo que los usa
+#   net-db       postgres-db y solo los servicios que escriben en ella
+#   net-public   lo que recibe trafico del navegador (voting_api, dashboards, front)
+# vm-core y vm-init no estan en net-public; postgres-db no es alcanzable desde voting_api ni los dashboards.
+#
+# Puertos del host: front 3001 (cambiar con FRONT_PORT), voting_api 8080, auth_server 8443,
+# dashboards global 8090-8091 y regional 8092-8093.
+#
+# Diferencias con el despliegue real: auth_server escucha en 8443 (no 443) y todos los secretos
+# son de DESARROLLO, generados por secrets-init en un volumen. No usar fuera de la prueba local.
+
+name: zerotrust-local
+
+x-seguridad: &seguridad
+  restart: unless-stopped
+  read_only: true
+  tmpfs:
+    - /tmp
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+
+x-entorno-token: &entorno-token
+  AUTH_TOKEN_URL: https://vm-auth:8443/token
+  AUTH_JWKS_URL: https://vm-auth:8443/.well-known/jwks.json
+  KAFKA_SECURITY_PROTOCOL: SASL_SSL
+  KAFKA_BOOTSTRAP: kafka:9092
+  RABBIT_HOST: rabbitmq
+  RABBIT_PORT: "5672"
+  SPRING_RABBITMQ_VIRTUAL_HOST: votacion   # los scopes de los tokens apuntan a este vhost
+  TRUSTSTORE_FILE: /secrets/truststore.p12
+  TRUSTSTORE_PASSWORD: ${STORE_PASSWORD:-dev-store-pass}
+
+# Servicios que todavia no leen CLIENT_ID/CLIENT_SECRET en su codigo (ver deploy/README.md).
+x-java-opts-tls: &java-opts-tls
+  JAVA_OPTS: >-
+    -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+ExitOnOutOfMemoryError
+    -Djavax.net.ssl.trustStore=/secrets/truststore.p12
+    -Djavax.net.ssl.trustStorePassword=${STORE_PASSWORD:-dev-store-pass}
+    -Djavax.net.ssl.trustStoreType=PKCS12
+
+x-db: &db
+  DB_URL: jdbc:postgresql://postgres-db:5432/zerotrust
+  DB_USER: zerotrust
+  DB_PASSWORD: ${DB_PASSWORD:-dev-db-pass}
+
+x-esperar-brokers: &esperar-brokers
+  auth-server:
+    condition: service_healthy
+  kafka-init:
+    condition: service_completed_successfully
+  rabbitmq:
+    condition: service_healthy
+
+x-esperar-db: &esperar-db
+  postgres-db:
+    condition: service_healthy
+
+services:
+  # ------------------------------------------------------------------ vm-auth
+  secrets-init:
+    image: eclipse-temurin:17-jdk-alpine
+    restart: "no"
+    entrypoint: ["sh", "/init.sh"]
+    environment:
+      STORE_PASSWORD: ${STORE_PASSWORD:-dev-store-pass}
+      SECRET_VOTER_REGISTRATION_SERVICE: ${SECRET_VOTER_REGISTRATION_SERVICE:-Dev.VoterRegistration-01}
+      SECRET_USER_VALIDATION_SERVICE: ${SECRET_USER_VALIDATION_SERVICE:-Dev.UserValidation-02}
+      SECRET_VOTING_API: ${SECRET_VOTING_API:-Dev.VotingApi-03}
+      SECRET_VOTE_PROCESSOR: ${SECRET_VOTE_PROCESSOR:-Dev.VoteProcessor-04}
+      SECRET_REGIONAL_ROLLUP_SERVICE: ${SECRET_REGIONAL_ROLLUP_SERVICE:-Dev.RegionalRollup-05}
+      SECRET_BOT_DETECTOR_SERVICE: ${SECRET_BOT_DETECTOR_SERVICE:-Dev.BotDetector-06}
+      SECRET_ANALYTICS_ARCHIVER: ${SECRET_ANALYTICS_ARCHIVER:-Dev.AnalyticsArchiver-07}
+      SECRET_GLOBAL_DASHBOARD_WORKER: ${SECRET_GLOBAL_DASHBOARD_WORKER:-Dev.GlobalDashboard-08}
+      SECRET_REGIONAL_DASHBOARD_WORKER: ${SECRET_REGIONAL_DASHBOARD_WORKER:-Dev.RegionalDashboard-09}
+    volumes:
+      - secrets:/secrets
+      - ./secrets-init.sh:/init.sh:ro
+      - ../../Back/services/auth_server/config/clientes.ejemplo.json:/clientes.ejemplo.json:ro
+
+  auth-server:
+    build:
+      context: ../../Back/services/auth_server
+    image: zerotrust/auth-server:1.0
+    <<: *seguridad
+    depends_on:
+      secrets-init:
+        condition: service_completed_successfully
+    environment:
+      AUTH_ISSUER: https://vm-auth
+      AUTH_CLIENTS_FILE: /secrets/clientes.json
+      AUTH_SIGNING_KEY_FILE: /secrets/firma.pem
+      AUTH_SIGNING_KEY_ID: clave-local-1
+      AUTH_TOKEN_TTL: "300"
+      AUTH_TLS_KEYSTORE: /secrets/tls.p12
+      AUTH_TLS_KEYSTORE_PASSWORD: ${STORE_PASSWORD:-dev-store-pass}
+      SERVER_PORT: "8443"
+    volumes:
+      - secrets:/secrets:ro
+    ports:
+      - "8443:8443"   # solo para probar con curl desde el host
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--no-check-certificate", "-O", "/dev/null", "https://localhost:8443/.well-known/jwks.json"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
+    networks:
+      net-auth:
+        aliases:
+          - vm-auth
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  # --------------------------------------------------------------- vm-brokers
+  kafka:
+    image: apache/kafka:3.7.1
+    restart: unless-stopped
+    depends_on:
+      auth-server:
+        condition: service_healthy
+    environment:
+      CLUSTER_ID: 5L6g3nShT-eMCtK--X86sw
+      KAFKA_NODE_ID: "1"
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@127.0.0.1:9093
+      KAFKA_LISTENERS: CLIENTS://:9092,CONTROLLER://127.0.0.1:9093,LOCAL://127.0.0.1:9094
+      KAFKA_ADVERTISED_LISTENERS: CLIENTS://kafka:9092,LOCAL://127.0.0.1:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CLIENTS:SASL_SSL,CONTROLLER:PLAINTEXT,LOCAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: LOCAL
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_SSL_KEYSTORE_LOCATION: /secrets/kafka.keystore.p12
+      KAFKA_SSL_KEYSTORE_TYPE: PKCS12
+      KAFKA_SSL_KEYSTORE_PASSWORD: ${STORE_PASSWORD:-dev-store-pass}
+      KAFKA_SSL_KEY_PASSWORD: ${STORE_PASSWORD:-dev-store-pass}
+      KAFKA_LISTENER_NAME_CLIENTS_SASL_ENABLED_MECHANISMS: OAUTHBEARER
+      KAFKA_LISTENER_NAME_CLIENTS_OAUTHBEARER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.OAuthBearerValidatorCallbackHandler
+      KAFKA_LISTENER_NAME_CLIENTS_OAUTHBEARER_SASL_JAAS_CONFIG: >-
+        org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required
+        unsecuredLoginStringClaim_sub="broker"
+        ssl.truststore.location="/secrets/truststore.p12"
+        ssl.truststore.password="${STORE_PASSWORD:-dev-store-pass}"
+        ssl.truststore.type="PKCS12";
+      KAFKA_SASL_OAUTHBEARER_JWKS_ENDPOINT_URL: https://vm-auth:8443/.well-known/jwks.json
+      KAFKA_SASL_OAUTHBEARER_EXPECTED_AUDIENCE: kafka
+      KAFKA_SASL_OAUTHBEARER_EXPECTED_ISSUER: https://vm-auth
+      KAFKA_OPTS: -Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=https://vm-auth:8443/.well-known/jwks.json
+      KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
+      KAFKA_SUPER_USERS: User:ANONYMOUS
+      KAFKA_HEAP_OPTS: -Xms384m -Xmx384m
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+      - secrets:/secrets:ro
+    healthcheck:
+      test: ["CMD", "/opt/kafka/bin/kafka-broker-api-versions.sh", "--bootstrap-server", "127.0.0.1:9094"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 40s
+    networks:
+      - net-brokers
+      - net-auth
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 768M
+
+  # Crea topics y ACL una vez y termina. Comparte la red de kafka (listener LOCAL).
+  kafka-init:
+    image: apache/kafka:3.7.1
+    network_mode: "service:kafka"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: "no"
+    volumes:
+      - ../vm-brokers/kafka/init.sh:/init.sh:ro
+    entrypoint: ["sh", "/init.sh"]
+
+  rabbitmq:
+    image: rabbitmq:3.13-alpine
+    restart: unless-stopped
+    depends_on:
+      auth-server:
+        condition: service_healthy
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ../vm-brokers/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+      - secrets:/etc/rabbitmq/certs:ro   # contiene ca.pem
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 8
+      start_period: 40s
+    networks:
+      - net-brokers
+      - net-auth
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+
+  postgres-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: zerotrust
+      POSTGRES_USER: zerotrust
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-dev-db-pass}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ../../docs/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks:
+      - net-db
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+
+  # ------------------------------------------------------------------- vm-init
+  voter_registration_service:
+    build:
+      context: ../../Back/services/voter_registration_service
+    image: zerotrust/voter-registration-service:1.0
+    <<: *seguridad
+    restart: on-failure:20   # tarea unica: termina con codigo 0 y no se reinicia
+    depends_on:
+      <<: [*esperar-brokers, *esperar-db]
+    environment:
+      <<: [*entorno-token, *db]
+      CLIENT_ID: voter_registration_service
+      CLIENT_SECRET: ${SECRET_VOTER_REGISTRATION_SERVICE:-Dev.VoterRegistration-01}
+      VOTERS_FILE: /config/votantes.json
+    volumes:
+      - secrets:/secrets:ro
+      - ../../Back/services/voter_registration_service/config/votantes.ejemplo.json:/config/votantes.json:ro
+    networks:
+      - net-auth
+      - net-brokers
+      - net-db
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  # ------------------------------------------------------------------- vm-core
+  user_validation_service:
+    build:
+      context: ../../Back/services/user_validation_service
+    image: zerotrust/user-validation-service:1.0
+    <<: *seguridad
+    depends_on:
+      <<: *esperar-brokers
+    environment:
+      <<: *entorno-token
+      CLIENT_ID: user_validation_service
+      CLIENT_SECRET: ${SECRET_USER_VALIDATION_SERVICE:-Dev.UserValidation-02}
+    volumes:
+      - secrets:/secrets:ro
+    networks:
+      - net-auth
+      - net-brokers
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  analytics_archiver:
+    build:
+      context: ../../Back/services/analytics_archiver
+    image: zerotrust/analytics-archiver:1.0
+    <<: *seguridad
+    depends_on:
+      <<: [*esperar-brokers, *esperar-db]
+    environment:
+      <<: [*entorno-token, *db]
+      CLIENT_ID: analytics_archiver
+      CLIENT_SECRET: ${SECRET_ANALYTICS_ARCHIVER:-Dev.AnalyticsArchiver-07}
+    volumes:
+      - secrets:/secrets:ro
+    networks:
+      - net-auth
+      - net-brokers
+      - net-db
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  vote_processor:
+    build:
+      context: ../../Back/services/vote_processor
+    image: zerotrust/vote-processor:1.0
+    <<: *seguridad
+    depends_on:
+      <<: *esperar-brokers
+    environment:
+      <<: [*entorno-token, *java-opts-tls]
+      CLIENT_ID: vote_processor
+      CLIENT_SECRET: ${SECRET_VOTE_PROCESSOR:-Dev.VoteProcessor-04}
+    volumes:
+      - secrets:/secrets:ro
+    networks:
+      - net-auth
+      - net-brokers
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  regional_rollup_service:
+    build:
+      context: ../../Back/services/regional_rollup_service
+    image: zerotrust/regional-rollup-service:1.0
+    <<: *seguridad
+    depends_on:
+      <<: *esperar-brokers
+    environment:
+      <<: [*entorno-token, *java-opts-tls]
+      CLIENT_ID: regional_rollup_service
+      CLIENT_SECRET: ${SECRET_REGIONAL_ROLLUP_SERVICE:-Dev.RegionalRollup-05}
+    volumes:
+      - secrets:/secrets:ro
+    networks:
+      - net-auth
+      - net-brokers
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  bot_detector_service:
+    build:
+      context: ../../Back/services/bot_detector_service
+    image: zerotrust/bot-detector-service:1.0
+    <<: *seguridad
+    depends_on:
+      <<: [*esperar-brokers, *esperar-db]
+    environment:
+      <<: [*entorno-token, *java-opts-tls, *db]
+      CLIENT_ID: bot_detector_service
+      CLIENT_SECRET: ${SECRET_BOT_DETECTOR_SERVICE:-Dev.BotDetector-06}
+    volumes:
+      - secrets:/secrets:ro
+    networks:
+      - net-auth
+      - net-brokers
+      - net-db
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  # -------------------------------------------------------------------- vm-api
+  voting_api:
+    build:
+      context: ../../Back/services/voting_api
+    image: zerotrust/voting-api:1.0
+    <<: *seguridad
+    depends_on:
+      <<: *esperar-brokers
+    environment:
+      <<: *entorno-token
+      CLIENT_ID: voting_api
+      CLIENT_SECRET: ${SECRET_VOTING_API:-Dev.VotingApi-03}
+      CATALOG_FILE: /config/catalogo.json
+      CORS_ALLOWED_ORIGINS: http://localhost:${FRONT_PORT:-3001}
+      TRUST_FORWARDED_HEADERS: "false"
+      RPC_TIMEOUT_MS: "3000"
+    volumes:
+      - secrets:/secrets:ro
+      - ../../Back/services/voting_api/config/catalogo.ejemplo.json:/config/catalogo.json:ro
+    ports:
+      - "8080:8080"
+    networks:
+      - net-public
+      - net-auth
+      - net-brokers
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+
+  # -------------------------------------------------------------------- vm-app
+  global_dashboard_worker:
+    build:
+      context: ../../Back/services/global_dashboard_worker
+    image: zerotrust/global-dashboard-worker:1.0
+    <<: *seguridad
+    depends_on:
+      <<: *esperar-brokers
+    environment:
+      <<: [*entorno-token, *java-opts-tls]
+      CLIENT_ID: global_dashboard_worker
+      CLIENT_SECRET: ${SECRET_GLOBAL_DASHBOARD_WORKER:-Dev.GlobalDashboard-08}
+      SERVER_PORT: "8080"
+    volumes:
+      - secrets:/secrets:ro
+    ports:
+      - "8090-8091:8080"   # un puerto del rango por replica
+    networks:
+      - net-public
+      - net-auth
+      - net-brokers
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  regional_dashboard_worker:
+    build:
+      context: ../../Back/services/regional_dashboard_worker
+    image: zerotrust/regional-dashboard-worker:1.0
+    <<: *seguridad
+    depends_on:
+      <<: *esperar-brokers
+    environment:
+      <<: [*entorno-token, *java-opts-tls]
+      CLIENT_ID: regional_dashboard_worker
+      CLIENT_SECRET: ${SECRET_REGIONAL_DASHBOARD_WORKER:-Dev.RegionalDashboard-09}
+      SERVER_PORT: "8081"
+    volumes:
+      - secrets:/secrets:ro
+    ports:
+      - "8092-8093:8081"
+    networks:
+      - net-public
+      - net-auth
+      - net-brokers
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
+
+  front:
+    build:
+      context: ../../Front/zero-trust
+      args:
+        NEXT_PUBLIC_VOTING_API_URL: http://localhost:8080
+        NEXT_PUBLIC_WS_GLOBAL_URL: ws://localhost:8090/ws/results/websocket
+        NEXT_PUBLIC_WS_REGIONAL_URL: ws://localhost:8092/ws/results/websocket
+    image: zerotrust/front:local
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /app/.next/cache
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "${FRONT_PORT:-3001}:3000"
+    networks:
+      - net-public
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+
+networks:
+  net-auth:
+  net-brokers:
+  net-db:
+  net-public:
+
+volumes:
+  secrets:
+  kafka-data:
+  rabbitmq-data:
+  postgres-data:

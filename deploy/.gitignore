@@ -1,0 +1,4 @@
+**/.env
+**/secrets/
+vm-api/config/catalogo.json
+vm-init/config/votantes.json

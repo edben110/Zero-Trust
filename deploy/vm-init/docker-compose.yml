@@ -1,0 +1,41 @@
+# vm-init: zona de arranque. voter_registration_service es una tarea unica:
+# puebla registered_voters (PostgreSQL) y el topic eligible_voters, y termina.
+# Uso: cp .env.example .env  (editar)  &&  docker compose up --build
+services:
+  voter_registration_service:
+    build:
+      context: ../../Back/services/voter_registration_service
+    image: zerotrust/voter-registration-service:${IMAGE_TAG:-1.0}
+    # Falla mientras auth_server o Kafka no respondan: se reintenta.
+    # Al terminar con exito (codigo 0) no se vuelve a ejecutar.
+    restart: on-failure:20
+    extra_hosts:
+      - "vm-auth:${VM_AUTH_IP:?defina VM_AUTH_IP}"
+      - "vm-brokers:${VM_BROKERS_IP:?defina VM_BROKERS_IP}"
+    environment:
+      AUTH_TOKEN_URL: https://vm-auth:443/token
+      CLIENT_ID: voter_registration_service
+      CLIENT_SECRET: ${CLIENT_SECRET:?defina CLIENT_SECRET}
+      KAFKA_SECURITY_PROTOCOL: SASL_SSL
+      KAFKA_BOOTSTRAP: vm-brokers:9092
+      TRUSTSTORE_FILE: /certs/truststore.p12
+      TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD:?defina TRUSTSTORE_PASSWORD}
+      DB_URL: jdbc:postgresql://vm-brokers:5432/${POSTGRES_DB:-zerotrust}
+      DB_USER: ${DB_USER:?defina DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD}
+      VOTERS_FILE: /config/votantes.json
+    volumes:
+      - ./secrets/truststore.p12:/certs/truststore.p12:ro
+      - ./config/votantes.json:/config/votantes.json:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
