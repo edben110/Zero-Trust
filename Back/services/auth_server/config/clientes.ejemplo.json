@@ -50,7 +50,8 @@
       "secret_hash": "$2a$12$B2PLCFC30oZZhV9emVK9bu.JBuB64.C2celWpSnla.76XDd6YxzcK",
       "scopes": [
         "rabbitmq.configure:votacion/live_results_regional",
-        "rabbitmq.write:votacion/live_results_regional"
+        "rabbitmq.write:votacion/live_results_regional",
+        "rabbitmq.write:votacion/live_results_regional/results.*"
       ],
       "audiences": [
         "kafka",
@@ -78,9 +79,14 @@
       "secret_hash": "$2a$12$c621ly6vrIv5fldkj8bEQ.m5Z4txglC0XXgcU1zz8yy.xFbLnA2tS",
       "scopes": [
         "rabbitmq.configure:votacion/amq.gen-*",
+        "rabbitmq.configure:votacion/spring.gen-*",
+        "rabbitmq.configure:votacion/live_results_global",
         "rabbitmq.read:votacion/live_results_global",
         "rabbitmq.read:votacion/amq.gen-*",
-        "rabbitmq.write:votacion/amq.gen-*"
+        "rabbitmq.read:votacion/spring.gen-*",
+        "rabbitmq.write:votacion/amq.gen-*",
+        "rabbitmq.write:votacion/spring.gen-*",
+        "rabbitmq.write:votacion/live_results_global"
       ],
       "audiences": [
         "rabbitmq"
@@ -91,9 +97,16 @@
       "secret_hash": "$2a$12$0S5kanbidvYznhFOtRp9FullZTOWqHIF5P/wj/ZP0IdSUFa/z2z5i",
       "scopes": [
         "rabbitmq.configure:votacion/amq.gen-*",
+        "rabbitmq.configure:votacion/spring.gen-*",
+        "rabbitmq.configure:votacion/live_results_regional",
         "rabbitmq.read:votacion/live_results_regional",
+        "rabbitmq.read:votacion/live_results_regional/*",
         "rabbitmq.read:votacion/amq.gen-*",
-        "rabbitmq.write:votacion/amq.gen-*"
+        "rabbitmq.read:votacion/spring.gen-*",
+        "rabbitmq.write:votacion/amq.gen-*",
+        "rabbitmq.write:votacion/spring.gen-*",
+        "rabbitmq.write:votacion/spring.gen-*/*",
+        "rabbitmq.write:votacion/live_results_regional"
       ],
       "audiences": [
         "rabbitmq"
