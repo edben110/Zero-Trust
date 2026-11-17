@@ -1,0 +1,8 @@
+target/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+config/clientes.json
+config/*.real.json

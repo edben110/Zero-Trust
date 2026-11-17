@@ -1,0 +1,7 @@
+target/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+config/votantes.json

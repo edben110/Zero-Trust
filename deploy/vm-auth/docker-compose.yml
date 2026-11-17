@@ -1,0 +1,35 @@
+# vm-auth: zona de identidad. Solo auth_server, unico emisor de JWT.
+# Uso: cp .env.example .env  (editar)  &&  docker compose up -d --build
+services:
+  auth_server:
+    build:
+      context: ../../Back/services/auth_server
+    image: zerotrust/auth-server:${IMAGE_TAG:-1.0}
+    restart: unless-stopped
+    ports:
+      - "443:8443"   # 443 en la VM, 8443 en el contenedor (SERVER_PORT)
+    environment:
+      AUTH_ISSUER: ${AUTH_ISSUER:?defina AUTH_ISSUER}
+      AUTH_CLIENTS_FILE: /config/clientes.json
+      AUTH_SIGNING_KEY_FILE: /config/firma.pem
+      AUTH_SIGNING_KEY_ID: ${AUTH_SIGNING_KEY_ID:?defina AUTH_SIGNING_KEY_ID}
+      AUTH_TOKEN_TTL: ${AUTH_TOKEN_TTL:-300}
+      AUTH_TLS_KEYSTORE: /config/tls.p12
+      AUTH_TLS_KEYSTORE_PASSWORD: ${AUTH_TLS_KEYSTORE_PASSWORD:?defina AUTH_TLS_KEYSTORE_PASSWORD}
+      SERVER_PORT: "8443"
+    volumes:
+      - ./secrets/firma.pem:/config/firma.pem:ro
+      - ./secrets/tls.p12:/config/tls.p12:ro
+      - ./secrets/clientes.json:/config/clientes.json:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 384M
