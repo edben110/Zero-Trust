@@ -1,6 +1,7 @@
 package com.zerotrust.votingapi.adapter.web;
 
 import com.zerotrust.votingapi.adapter.config.ResolutorIpOrigen;
+import com.zerotrust.votingapi.adapter.config.RepositorioCatalogo;
 import com.zerotrust.votingapi.domain.Candidato;
 import com.zerotrust.votingapi.domain.CandidateId;
 import com.zerotrust.votingapi.domain.Catalogo;
@@ -37,6 +38,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -59,13 +62,17 @@ class CapaWebVotacionTest {
 
     private MockMvc mvc(boolean confiarEnCabeceras) {
         Catalogo catalogo = new Catalogo(
-                List.of(new Candidato(new CandidateId(CANDIDATO), "Lucía Marín Ospina", "Movimiento Ceiba")),
+                List.of(new Candidato(new CandidateId(CANDIDATO), "Lucía Marín Ospina", "Movimiento Ceiba"),
+                        new Candidato(new CandidateId("3e4f5061-7283-4d94-8ea5-c6d7e8f90a1b"),
+                                "Segundo candidato", "Otra lista")),
                 List.of(new Region("norte"), new Region("sur")));
+        RepositorioCatalogo repositorio = mock(RepositorioCatalogo.class);
+        lenient().when(repositorio.actual()).thenReturn(catalogo);
         ServicioVotacion servicio = new ServicioVotacion(validador, publicador,
                 Clock.fixed(Instant.parse("2026-11-14T15:00:00Z"), ZoneOffset.UTC), () -> VOTE_ID);
-        VotoController votos = new VotoController(servicio, catalogo,
+        VotoController votos = new VotoController(servicio, repositorio,
                 ResolutorIpOrigen.desde(String.valueOf(confiarEnCabeceras)));
-        return MockMvcBuilders.standaloneSetup(votos, new CatalogoController(catalogo))
+        return MockMvcBuilders.standaloneSetup(votos, new CatalogoController(repositorio))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
@@ -164,7 +171,9 @@ class CapaWebVotacionTest {
         mvc(false).perform(get("/catalog"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"candidates\":[{\"candidateId\":\"" + CANDIDATO
-                        + "\",\"name\":\"Lucía Marín Ospina\",\"list\":\"Movimiento Ceiba\"}],"
+                        + "\",\"name\":\"Lucía Marín Ospina\",\"list\":\"Movimiento Ceiba\"},"
+                        + "{\"candidateId\":\"3e4f5061-7283-4d94-8ea5-c6d7e8f90a1b\","
+                        + "\"name\":\"Segundo candidato\",\"list\":\"Otra lista\"}],"
                         + "\"regions\":[\"norte\",\"sur\"]}", true));
     }
 

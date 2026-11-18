@@ -1,12 +1,11 @@
 package com.zerotrust.votingapi.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.votingapi.adapter.config.LectorCatalogo;
+import com.zerotrust.votingapi.adapter.config.RepositorioCatalogo;
 import com.zerotrust.votingapi.adapter.config.OrigenesCors;
 import com.zerotrust.votingapi.adapter.config.ResolutorIpOrigen;
 import com.zerotrust.votingapi.adapter.kafka.PublicadorVotosKafka;
 import com.zerotrust.votingapi.adapter.rabbit.ValidadorVotanteRpc;
-import com.zerotrust.votingapi.domain.Catalogo;
 import com.zerotrust.votingapi.port.PublicadorVotos;
 import com.zerotrust.votingapi.port.ValidadorVotante;
 import com.zerotrust.votingapi.service.ServicioVotacion;
@@ -19,8 +18,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Duration;
@@ -31,16 +28,16 @@ public class BeansVotacion {
 
     // Fail-fast: sin un catálogo válido el servicio no arranca.
     @Bean
-    Catalogo catalogo(Environment entorno) {
+    RepositorioCatalogo catalogo(Environment entorno, ObjectMapper json) {
         String ruta = entorno.getProperty("CATALOG_FILE");
         if (ruta == null || ruta.isBlank()) {
             throw new IllegalStateException("CATALOG_FILE: variable obligatoria sin definir");
         }
-        try {
-            return new LectorCatalogo().interpretar(Files.readAllBytes(Path.of(ruta)));
-        } catch (IOException e) {
-            throw new IllegalStateException("CATALOG_FILE: no se puede leer el archivo indicado");
+        String estado = entorno.getProperty("CATALOG_STATE_FILE");
+        if (estado == null || estado.isBlank()) {
+            throw new IllegalStateException("CATALOG_STATE_FILE: variable obligatoria sin definir");
         }
+        return new RepositorioCatalogo(Path.of(ruta), Path.of(estado), json);
     }
 
     @Bean
