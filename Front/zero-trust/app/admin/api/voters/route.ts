@@ -5,10 +5,10 @@ import { llamarApi, mismoOrigen, sesionValida } from "@/lib/admin-server";
 export async function POST(req: NextRequest) {
   if (!sesionValida(req) || !mismoOrigen(req)) return new Response(null, { status: 403 });
   const body = await req.json().catch(() => null);
-  if (typeof body?.cedula !== "string" || typeof body?.fullName !== "string" || typeof body?.region !== "string") {
-    return Response.json({ error: "Cédula, nombre y región son obligatorios." }, { status: 400 });
+  if (typeof body?.cedula !== "string" || typeof body?.region !== "string") {
+    return Response.json({ error: "Cédula y región son obligatorias." }, { status: 400 });
   }
   return llamarApi("POST", "/internal/admin/voters", {
-    cedula: body.cedula, fullName: body.fullName, region: body.region,
+    cedula: body.cedula, region: body.region,
   });
 }

@@ -45,12 +45,12 @@ public class PublicadorElegiblesKafka implements PublicadorElegibles {
     private String serializar(VotanteInscrito votante) {
         try {
             return json.writeValueAsString(new EventoVotanteElegible(votante.voterId().valor(),
-                    votante.nombre().valor(), votante.region().valor(), votante.inscritoEn().toString()));
+                    votante.region().valor(), votante.inscritoEn().toString()));
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("no se pudo serializar el votante", e);
         }
     }
 
-    record EventoVotanteElegible(String voterId, String fullName, String region, String registeredAt) {
+    record EventoVotanteElegible(String voterId, String region, String registeredAt) {
     }
 }

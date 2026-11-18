@@ -42,6 +42,8 @@ export type ResultadoVoto =
   | { tipo: "invalido"; campos: string[] }
   | { tipo: "no-habilitado" }
   | { tipo: "ya-voto" }
+  | { tipo: "region-incorrecta" }
+  | { tipo: "anulado" }
   | { tipo: "no-disponible" }
   | { tipo: "error" };
 

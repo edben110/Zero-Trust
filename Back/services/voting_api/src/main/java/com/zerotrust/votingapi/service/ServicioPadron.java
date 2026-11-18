@@ -3,7 +3,6 @@ package com.zerotrust.votingapi.service;
 import com.zerotrust.votingapi.domain.Catalogo;
 import com.zerotrust.votingapi.domain.Cedula;
 import com.zerotrust.votingapi.domain.ElectionId;
-import com.zerotrust.votingapi.domain.NombreCompleto;
 import com.zerotrust.votingapi.domain.Region;
 import com.zerotrust.votingapi.domain.SolicitudVotoInvalidaException;
 import com.zerotrust.votingapi.domain.VotanteInscrito;
@@ -43,10 +42,9 @@ public class ServicioPadron {
 
     // Inscripción y publicación forman una sola unidad: si Kafka no confirma, la fila se revierte
     // y el administrador puede reintentar. Si el documento ya estaba, lanza VotanteYaInscritoException.
-    public void inscribir(String cedula, String nombre, String region) {
+    public void inscribir(String cedula, String region) {
         List<String> invalidos = new ArrayList<>();
         Cedula documento = convertir(() -> new Cedula(cedula), "cedula", invalidos);
-        NombreCompleto nombreCompleto = convertir(() -> new NombreCompleto(nombre), "fullName", invalidos);
         Region laRegion = convertir(() -> new Region(region), "region", invalidos);
         if (laRegion != null && !catalogo.get().existeRegion(laRegion)) {
             invalidos.add("region");
@@ -54,7 +52,7 @@ public class ServicioPadron {
         if (!invalidos.isEmpty()) {
             throw new SolicitudVotoInvalidaException(invalidos);
         }
-        VotanteInscrito votante = new VotanteInscrito(derivador.derivar(documento, eleccion), nombreCompleto, laRegion,
+        VotanteInscrito votante = new VotanteInscrito(derivador.derivar(documento, eleccion), laRegion,
                 reloj.instant());
         transaccion.ejecutar(() -> {
             repositorio.inscribir(votante);

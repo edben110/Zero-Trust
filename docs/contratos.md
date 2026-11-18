@@ -56,7 +56,7 @@ AUTH_TOKEN_URL, AUTH_JWKS_URL, CLIENT_ID, CLIENT_SECRET, KAFKA_BOOTSTRAP, RABBIT
 ## Kafka
 | Topic | Productor | Consumidor | Key | Payload (JSON) |
 |---|---|---|---|---|
-| eligible_voters (compactado) | voter_registration_service, voting_api (altas del panel de administración) | user_validation_service | voterId | `{"voterId":"<uuid>","fullName":"<string>","region":"<string>","registeredAt":"<ISO-8601>"}` |
+| eligible_voters (compactado) | voter_registration_service, voting_api (altas del panel de administración) | user_validation_service | voterId | `{"voterId":"<uuid>","region":"<string>","registeredAt":"<ISO-8601>"}` |
 | raw_votes | voting_api | vote_processor, regional_rollup_service, bot_detector_service, analytics_archiver | voteId | `{"voteId":"<uuid>","voterId":"<uuid>","candidateId":"<uuid>","region":"<string>","sourceIp":"<string>","timestamp":"<ISO-8601>"}` |
 | security_alerts | bot_detector_service | — | ip | `{"ip":"<string>","riskLevel":"NORMAL\|SOSPECHOSA\|BLOQUEADA","voteCount":<int>,"windowSeconds":<int>,"detectedAt":"<ISO-8601>"}` |
 
@@ -93,12 +93,13 @@ POST /voter-id (propuesto): consulta del código de votante a partir de la cédu
 
 POST /internal/admin/voters (propuesto): alta en el padrón desde el panel de administración. Solo la llama el servidor del front con la cabecera `X-Admin-Token` (`ADMIN_API_TOKEN`).
 ```json
-{ "cedula": "<string>", "fullName": "<string>", "region": "<string>" }
+{ "cedula": "<string>", "region": "<string>" }
 ```
+El nombre del votante no se solicita ni se almacena: `registered_voters` conserva solo el UUID derivado, la región y la fecha de inscripción.
 | Código | Cuerpo | Cuándo |
 |---|---|---|
 | 201 | `{"registered":true}` | Inscrito en `registered_voters` y publicado en `eligible_voters` (misma transacción) |
-| 400 | `{"error":"invalid_request","fields":[...]}` | Cédula, nombre o región inválidos; la región debe estar en el catálogo vigente |
+| 400 | `{"error":"invalid_request","fields":[...]}` | Cédula o región inválidas; la región debe estar en el catálogo vigente |
 | 401 | — | Sin token o token incorrecto |
 | 409 | `{"error":"already_registered","message":"..."}` | Ese documento ya está en el padrón de la elección |
 | 503 | `{"error":"validation_unavailable"}` | Kafka o PostgreSQL no confirmaron. No se inscribió nada |
@@ -150,11 +151,15 @@ spring.kafka.ssl.trust-store-type=PKCS12
 
 | Código | Cuerpo | Cuándo |
 |---|---|---|
-| 200 | `{"voteId":"<uuid>","receivedAt":"<ISO-8601>"}` | Votante habilitado y voto publicado en `raw_votes` |
+| 200 | `{"voteId":"<uuid>","receivedAt":"<ISO-8601>"}` | Votante habilitado, región coincidente con el padrón y voto publicado en `raw_votes` |
 | 400 | `{"error":"invalid_request","fields":[...]}` | Payload inválido, candidato o región fuera del catálogo |
 | 403 | `{"error":"voter_not_eligible"}` | user_validation_service respondió `{"valid":false}` |
 | 409 | `{"error":"already_voted","message":"Ya se registró un voto para este documento en esta elección"}` | Ese voterId ya votó en esta elección |
+| 409 | `{"error":"vote_invalidated","message":"..."}` | Segunda selección de una región distinta de la registrada: el voto queda anulado en la jornada |
+| 422 | `{"error":"wrong_region","message":"error esa no es la region que ud designo"}` | Primera selección de una región distinta de la registrada. Queda un único intento |
 | 503 | `{"error":"validation_unavailable"}` | Sin respuesta RPC en `RPC_TIMEOUT_MS`, broker o PostgreSQL caídos. No se registró nada: se puede reintentar |
+
+La región enviada se compara en el servidor con `registered_voters.region`; no se confía en la selección del navegador. Los fallos se cuentan por jornada (`voter_region_attempts`): el primero responde 422, el segundo anula el voto con 409 y, desde entonces, cualquier intento responde 409 hasta que el administrador inicie otra votación.
 
 `sourceIp` es la dirección remota de la petición. `X-Forwarded-For` solo se usa si `TRUST_FORWARDED_HEADERS=true` (detrás de un proxy de confianza), para que un cliente no pueda falsificar su IP ante bot_detector_service.
 
@@ -167,7 +172,7 @@ spring.kafka.ssl.trust-store-type=PKCS12
 | CORS_ALLOWED_ORIGINS | voting_api | Orígenes permitidos, separados por comas, sin comodín |
 | TRUST_FORWARDED_HEADERS | voting_api | `true` solo detrás de un proxy de confianza (por defecto `false`) |
 | RPC_TIMEOUT_MS | voting_api | Espera máxima de la respuesta RPC (por defecto 3000) |
-| VOTERS_FILE | voter_registration_service | Ruta del JSON con el padrón inicial. Cada registro trae `cedula`, `fullName` y `region` |
+| VOTERS_FILE | voter_registration_service | Ruta del JSON con el padrón inicial. Cada registro trae `cedula` y `region` |
 | ELECTION_ID | voting_api, voter_registration_service | Elección en curso (1 a 64 caracteres `A-Z a-z 0-9 . _ -`). Igual en ambos |
 | VOTER_HMAC_KEY | voting_api, voter_registration_service | Clave HMAC en Base64, mínimo 32 bytes. Igual en ambos, secreta y estable durante la elección |
 | DB_URL, DB_USER, DB_PASSWORD | voting_api | PostgreSQL para `voter_election_usage` |

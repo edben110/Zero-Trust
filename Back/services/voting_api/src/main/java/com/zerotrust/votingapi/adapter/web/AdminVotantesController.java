@@ -33,7 +33,7 @@ public class AdminVotantesController {
     }
 
     // cedula es Object a propósito: un número JSON perdería los ceros iniciales, así que solo se acepta texto.
-    public record DatosVotante(Object cedula, String fullName, String region) {
+    public record DatosVotante(Object cedula, String region) {
 
         String cedulaTexto() {
             return cedula instanceof String texto ? texto : null;
@@ -52,9 +52,9 @@ public class AdminVotantesController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         if (datos == null) {
-            datos = new DatosVotante(null, null, null);
+            datos = new DatosVotante(null, null);
         }
-        servicio.inscribir(datos.cedulaTexto(), datos.fullName(), datos.region());
+        servicio.inscribir(datos.cedulaTexto(), datos.region());
         return ResponseEntity.status(HttpStatus.CREATED).cacheControl(CacheControl.noStore())
                 .body(Map.of("registered", true));
     }

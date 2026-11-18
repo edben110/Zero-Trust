@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookieAdmin, crearSesion, mismoOrigen, sesionValida, validarLogin } from "@/lib/admin-server";
+import { cerrarSesion, cookieAdmin, crearSesion, mismoOrigen, sesionValida, validarLogin } from "@/lib/admin-server";
 
 export async function GET(req: NextRequest) {
   return NextResponse.json({ autenticado: sesionValida(req) },
@@ -29,7 +29,8 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   if (!mismoOrigen(req)) return new Response(null, { status: 403 });
+  cerrarSesion(req);
   const res = NextResponse.json({ autenticado: false });
-  res.cookies.set({ ...cookieAdmin, value: "", maxAge: 0 });
+  res.cookies.set({ ...cookieAdmin, value: "", maxAge: 0, expires: new Date(0) });
   return res;
 }

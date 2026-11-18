@@ -22,6 +22,7 @@ Compose hace los dos pasos: `docker compose up -d --build` compila las imagenes 
 2. `cd deploy/<vm> && cp .env.example .env` y completar los valores.
 3. Crear los archivos de la tabla siguiente.
 4. `docker compose up -d --build`.
+5. En `vm-brokers`, si la base ya existía, aplicar `docs/migrations/*.sql` antes de actualizar los servicios que usan el esquema nuevo.
 
 Orden: vm-auth, vm-brokers, vm-init, vm-core, vm-api, vm-app. Los servicios que se conectan a Kafka tienen `restart` y reintentan hasta que auth_server y los brokers respondan.
 

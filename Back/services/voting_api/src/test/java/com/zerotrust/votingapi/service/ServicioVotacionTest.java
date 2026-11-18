@@ -46,14 +46,17 @@ import com.zerotrust.votingapi.domain.ComprobanteVoto;
 import com.zerotrust.votingapi.domain.ElectionId;
 import com.zerotrust.votingapi.domain.PublicacionNoDisponibleException;
 import com.zerotrust.votingapi.domain.Region;
+import com.zerotrust.votingapi.domain.RegionIncorrectaException;
 import com.zerotrust.votingapi.domain.SolicitudVoto;
 import com.zerotrust.votingapi.domain.SourceIp;
 import com.zerotrust.votingapi.domain.ValidacionNoDisponibleException;
 import com.zerotrust.votingapi.domain.VotanteNoHabilitadoException;
 import com.zerotrust.votingapi.domain.VoteId;
 import com.zerotrust.votingapi.domain.VoterId;
+import com.zerotrust.votingapi.domain.VotoAnuladoException;
 import com.zerotrust.votingapi.domain.VotoDuplicadoException;
 import com.zerotrust.votingapi.domain.VotoEmitido;
+import com.zerotrust.votingapi.port.ControlRegionVotante;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
 import com.zerotrust.votingapi.port.PublicadorVotos;
 import com.zerotrust.votingapi.port.RegistroParticipacion;
@@ -120,7 +123,8 @@ class ServicioVotacionTest {
 
         @BeforeEach
         void construir() {
-            servicio = new ServicioVotacion(validador, publicador, registro, transaccion, ELECCION,
+            servicio = new ServicioVotacion(validador, publicador, registro, voto -> { },
+                    (e, v, r) -> ControlRegionVotante.Resultado.CORRECTA, transaccion, ELECCION,
                     Clock.fixed(AHORA, ZoneOffset.UTC), () -> VOTE_ID);
         }
 
@@ -230,7 +234,8 @@ class ServicioVotacionTest {
         }
 
         private ServicioVotacion servicioDe(ElectionId eleccion) {
-            return new ServicioVotacion(validador, publicador, almacen, almacen, eleccion,
+            return new ServicioVotacion(validador, publicador, almacen, voto -> { },
+                    (e, v, r) -> ControlRegionVotante.Resultado.CORRECTA, almacen, eleccion,
                     Clock.fixed(AHORA, ZoneOffset.UTC), UUID::randomUUID);
         }
 
@@ -315,6 +320,75 @@ class ServicioVotacionTest {
             assertThat(aceptados).isEqualTo(1);
             assertThat(publicados.get()).isEqualTo(1);
             assertThat(almacen.usados).hasSize(1);
+        }
+    }
+
+    @Nested
+    @ExtendWith(MockitoExtension.class)
+    @DisplayName("Verificación de la región registrada")
+    class RegionRegistrada {
+
+        @Mock
+        private ValidadorVotante validador;
+        @Mock
+        private PublicadorVotos publicador;
+        @Mock
+        private RegistroParticipacion registro;
+        @Mock
+        private ControlRegionVotante controlRegion;
+        @Mock
+        private EjecutorTransaccional transaccion;
+
+        private ServicioVotacion servicio;
+
+        @BeforeEach
+        void construir() {
+            servicio = new ServicioVotacion(validador, publicador, registro, voto -> { }, controlRegion,
+                    transaccion, ELECCION, Clock.fixed(AHORA, ZoneOffset.UTC), () -> VOTE_ID);
+            when(validador.estaHabilitado(any())).thenReturn(true);
+        }
+
+        @SuppressWarnings("unchecked")
+        private void transaccionEjecutaLaAccion() {
+            when(transaccion.ejecutar(any(Supplier.class))).thenAnswer(i -> ((Supplier<?>) i.getArgument(0)).get());
+        }
+
+        @Test
+        @DisplayName("Una región correcta registra y publica el voto")
+        void correcta() {
+            transaccionEjecutaLaAccion();
+            when(controlRegion.evaluar(ELECCION, new VoterId(VOTANTE), new Region("norte")))
+                    .thenReturn(ControlRegionVotante.Resultado.CORRECTA);
+
+            assertThat(servicio.votar(solicitud(VOTANTE), IP)).isNotNull();
+
+            verify(registro).registrar(ELECCION, new VoterId(VOTANTE));
+            verify(publicador).publicar(any());
+        }
+
+        @Test
+        @DisplayName("La primera región incorrecta responde con la advertencia y no registra ni publica")
+        void primerError() {
+            transaccionEjecutaLaAccion();
+            when(controlRegion.evaluar(any(), any(), any())).thenReturn(ControlRegionVotante.Resultado.PRIMER_ERROR);
+
+            assertThrows(RegionIncorrectaException.class, () -> servicio.votar(solicitud(VOTANTE), IP));
+
+            // El fallo se contabiliza dentro de la transacción; el error se lanza después para no revertirlo.
+            verify(transaccion).ejecutar(any());
+            verifyNoInteractions(registro, publicador);
+        }
+
+        @Test
+        @DisplayName("La segunda región incorrecta anula el voto sin registrarlo ni publicarlo")
+        void anulado() {
+            transaccionEjecutaLaAccion();
+            when(controlRegion.evaluar(any(), any(), any())).thenReturn(ControlRegionVotante.Resultado.ANULADO);
+
+            assertThrows(VotoAnuladoException.class, () -> servicio.votar(solicitud(VOTANTE), IP));
+
+            verify(transaccion).ejecutar(any());
+            verifyNoInteractions(registro, publicador);
         }
     }
 }

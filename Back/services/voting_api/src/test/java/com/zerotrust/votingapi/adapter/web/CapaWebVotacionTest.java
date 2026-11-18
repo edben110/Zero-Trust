@@ -54,6 +54,7 @@ import com.zerotrust.votingapi.domain.VotoDuplicadoException;
 import com.zerotrust.votingapi.domain.VoterId;
 import com.zerotrust.votingapi.domain.VotoEmitido;
 import com.zerotrust.votingapi.exception.GlobalExceptionHandler;
+import com.zerotrust.votingapi.port.ControlRegionVotante;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
 import com.zerotrust.votingapi.port.PublicadorVotos;
 import com.zerotrust.votingapi.port.RegistroParticipacion;
@@ -120,6 +121,10 @@ class CapaWebVotacionTest {
     }
 
     private MockMvc mvc(boolean confiarEnCabeceras) {
+        return mvc(confiarEnCabeceras, (e, v, r) -> ControlRegionVotante.Resultado.CORRECTA);
+    }
+
+    private MockMvc mvc(boolean confiarEnCabeceras, ControlRegionVotante controlRegion) {
         Catalogo catalogo = new Catalogo(
                 List.of(new Candidato(new CandidateId(CANDIDATO), "Lucía Marín Ospina", "Movimiento Ceiba"),
                         new Candidato(new CandidateId("3e4f5061-7283-4d94-8ea5-c6d7e8f90a1b"),
@@ -127,8 +132,9 @@ class CapaWebVotacionTest {
                 List.of(new Region("norte"), new Region("sur")));
         RepositorioCatalogo repositorio = mock(RepositorioCatalogo.class);
         lenient().when(repositorio.actual()).thenReturn(catalogo);
-        ServicioVotacion servicio = new ServicioVotacion(validador, publicador, registro, new TransaccionDirecta(),
-                ELECCION, Clock.fixed(Instant.parse("2026-11-14T15:00:00Z"), ZoneOffset.UTC), () -> VOTE_ID);
+        ServicioVotacion servicio = new ServicioVotacion(validador, publicador, registro, voto -> { }, controlRegion,
+                new TransaccionDirecta(), ELECCION, Clock.fixed(Instant.parse("2026-11-14T15:00:00Z"), ZoneOffset.UTC),
+                () -> VOTE_ID);
         VotoController votos = new VotoController(servicio, repositorio,
                 ResolutorIpOrigen.desde(String.valueOf(confiarEnCabeceras)));
         ConsultaVoterIdController consulta = new ConsultaVoterIdController(
@@ -216,6 +222,35 @@ class CapaWebVotacionTest {
                 .andExpect(content().json("{\"error\":\"already_voted\","
                         + "\"message\":\"Ya se registró un voto para este documento en esta elección\"}", true));
 
+        verify(publicador, never()).publicar(any());
+    }
+
+    @Test
+    @DisplayName("Una región distinta de la registrada responde 422 y no publica el voto")
+    void regionIncorrecta() throws Exception {
+        when(validador.estaHabilitado(any())).thenReturn(true);
+
+        mvc(false, (e, v, r) -> ControlRegionVotante.Resultado.PRIMER_ERROR)
+                .perform(post("/vote").contentType(MediaType.APPLICATION_JSON).content(CUERPO))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(content().json("{\"error\":\"wrong_region\","
+                        + "\"message\":\"error esa no es la region que ud designo\"}", true));
+
+        verify(registro, never()).registrar(any(), any());
+        verify(publicador, never()).publicar(any());
+    }
+
+    @Test
+    @DisplayName("Un voto anulado por dos regiones incorrectas responde 409 vote_invalidated")
+    void votoAnulado() throws Exception {
+        when(validador.estaHabilitado(any())).thenReturn(true);
+
+        mvc(false, (e, v, r) -> ControlRegionVotante.Resultado.ANULADO)
+                .perform(post("/vote").contentType(MediaType.APPLICATION_JSON).content(CUERPO))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("vote_invalidated"));
+
+        verify(registro, never()).registrar(any(), any());
         verify(publicador, never()).publicar(any());
     }
 

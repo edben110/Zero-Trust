@@ -8,10 +8,10 @@
 -- Votantes registrados
 -- Poblada por voter_registration_service (Sebas) al arrancar el sistema.
 -- voter_id es el UUID derivado de la cedula (el mismo que devuelve POST /voter-id); la cedula no se guarda.
+-- No se almacenan datos personales como el nombre: solo region y fecha de inscripcion.
 CREATE TABLE IF NOT EXISTS registered_voters (
     id            BIGSERIAL    PRIMARY KEY,
     voter_id      VARCHAR(36)  NOT NULL UNIQUE,  -- UUID
-    full_name     VARCHAR(255) NOT NULL,
     region        VARCHAR(100) NOT NULL,
     registered_at TIMESTAMPTZ  NOT NULL
 );
@@ -35,6 +35,15 @@ CREATE TABLE IF NOT EXISTS election_state (
 );
 INSERT INTO election_state (id, run_id) VALUES (1, gen_random_uuid())
 ON CONFLICT (id) DO NOTHING;
+
+-- Dos selecciones incorrectas de región anulan el voto en la jornada activa.
+-- Solo se guarda el UUID pseudónimo del votante, nunca la cédula ni su nombre.
+CREATE TABLE IF NOT EXISTS voter_region_attempts (
+    run_id      UUID        NOT NULL,
+    voter_uuid  VARCHAR(36) NOT NULL,
+    failures    SMALLINT    NOT NULL CHECK (failures BETWEEN 1 AND 2),
+    PRIMARY KEY (run_id, voter_uuid)
+);
 
 -- Proyección transaccional de votos aceptados, fuente común de ambos escrutinios.
 -- Las filas de jornadas anteriores quedan separadas por run_id.

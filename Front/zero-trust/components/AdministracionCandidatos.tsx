@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import type { Candidato, Catalogo } from "@/lib/contrato";
 import { leerCatalogo } from "@/lib/validacion";
 import { AdministracionPadron } from "./AdministracionPadron";
@@ -9,6 +10,7 @@ const campo = "w-full border border-tinta bg-papel px-3 py-2 outline-offset-2 fo
 const boton = "border-2 border-tinta bg-tinta px-5 py-2 font-medium text-papel hover:bg-papel hover:text-tinta disabled:opacity-50";
 
 export function AdministracionCandidatos() {
+  const router = useRouter();
   const [autenticado, setAutenticado] = useState(false);
   const [cargando, setCargando] = useState(true);
   const [usuario, setUsuario] = useState("");
@@ -22,7 +24,12 @@ export function AdministracionCandidatos() {
 
   const cargar = useCallback(async () => {
     const res = await fetch("/admin/api/candidates", { cache: "no-store" });
-    if (res.status === 401 || res.status === 403) { setAutenticado(false); return; }
+    if (res.status === 401 || res.status === 403) {
+      setAutenticado(false);
+      setCatalogo(null);
+      setAviso("La sesión terminó o fue reemplazada por el acceso desde otro dispositivo. Ingrese nuevamente.");
+      return;
+    }
     const datos = res.ok ? leerCatalogo(await res.json()) : null;
     if (datos) setCatalogo(datos);
     else setAviso("No fue posible cargar el catálogo.");
@@ -87,9 +94,16 @@ export function AdministracionCandidatos() {
 
   async function cerrar() {
     if (faltan && !window.confirm("Solo hay un candidato. Cree otro antes de salir para habilitar la votación. ¿Cerrar sesión de todas formas?")) return;
-    await fetch("/admin/api/session", { method: "DELETE" });
+    try {
+      await fetch("/admin/api/session", { method: "DELETE", cache: "no-store" });
+    } catch {
+      // El estado local también se cierra si el servidor no responde.
+    }
     setAutenticado(false);
     setCatalogo(null);
+    setUsuario("");
+    setPassword("");
+    router.refresh();
   }
 
   async function mutar(metodo: "POST" | "PUT" | "DELETE", id?: string) {

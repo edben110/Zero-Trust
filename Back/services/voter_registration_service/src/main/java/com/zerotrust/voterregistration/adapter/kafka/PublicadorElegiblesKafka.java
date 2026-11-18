@@ -47,11 +47,11 @@ public class PublicadorElegiblesKafka implements PublicadorElegibles {
         }
     }
 
-    // Payload exacto de eligible_voters en docs/contratos.md.
-    record EventoVotanteElegible(String voterId, String fullName, String region, String registeredAt) {
+    // El consumidor del padrón solo requiere voterId; se conserva región y fecha para trazabilidad.
+    record EventoVotanteElegible(String voterId, String region, String registeredAt) {
 
         static EventoVotanteElegible de(VotanteRegistrado votante) {
-            return new EventoVotanteElegible(votante.voterId().valor(), votante.nombreCompleto().valor(),
+            return new EventoVotanteElegible(votante.voterId().valor(),
                     votante.region().valor(), votante.registradoEn().toString());
         }
     }

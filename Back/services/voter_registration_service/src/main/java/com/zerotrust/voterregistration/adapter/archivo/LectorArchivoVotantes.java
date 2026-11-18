@@ -41,8 +41,7 @@ public class LectorArchivoVotantes {
             if (!nodo.isObject()) {
                 throw new PadronInvalidoException("registro [" + i + "]: debe ser un objeto");
             }
-            crudos.add(new RegistroVotanteCrudo(voterIdDe(texto(nodo, "cedula"), i), texto(nodo, "fullName"),
-                    texto(nodo, "region")));
+            crudos.add(new RegistroVotanteCrudo(voterIdDe(texto(nodo, "cedula"), i), texto(nodo, "region")));
         }
         return crudos;
     }

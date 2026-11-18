@@ -51,8 +51,12 @@ export async function enviarVoto(solicitud: SolicitudVoto): Promise<ResultadoVot
   if (respuesta.status === 403) {
     return { tipo: "no-habilitado" };
   }
+  if (respuesta.status === 422) {
+    return { tipo: "region-incorrecta" };
+  }
   if (respuesta.status === 409) {
-    return { tipo: "ya-voto" };
+    return (cuerpo as { error?: unknown } | null)?.error === "vote_invalidated"
+      ? { tipo: "anulado" } : { tipo: "ya-voto" };
   }
   if (respuesta.status === 503) {
     return { tipo: "no-disponible" };

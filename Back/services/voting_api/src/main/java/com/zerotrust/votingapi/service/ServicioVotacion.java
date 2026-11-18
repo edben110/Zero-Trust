@@ -8,10 +8,13 @@ import com.zerotrust.votingapi.domain.ComprobanteVoto;
 import com.zerotrust.votingapi.domain.ElectionId;
 import com.zerotrust.votingapi.domain.SolicitudVoto;
 import com.zerotrust.votingapi.domain.SourceIp;
+import com.zerotrust.votingapi.domain.RegionIncorrectaException;
 import com.zerotrust.votingapi.domain.VotanteNoHabilitadoException;
+import com.zerotrust.votingapi.domain.VotoAnuladoException;
 import com.zerotrust.votingapi.domain.VoteId;
 import com.zerotrust.votingapi.domain.VotoEmitido;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
+import com.zerotrust.votingapi.port.ControlRegionVotante;
 import com.zerotrust.votingapi.port.PublicadorVotos;
 import com.zerotrust.votingapi.port.RegistroParticipacion;
 import com.zerotrust.votingapi.port.RegistroVotoAceptado;
@@ -23,24 +26,21 @@ public class ServicioVotacion {
     private final PublicadorVotos publicador;
     private final RegistroParticipacion registro;
     private final RegistroVotoAceptado aceptados;
+    private final ControlRegionVotante controlRegion;
     private final EjecutorTransaccional transaccion;
     private final ElectionId eleccion;
     private final Clock reloj;
     private final Supplier<UUID> generadorIds;
 
     public ServicioVotacion(ValidadorVotante validador, PublicadorVotos publicador, RegistroParticipacion registro,
-                             EjecutorTransaccional transaccion, ElectionId eleccion, Clock reloj,
-                             Supplier<UUID> generadorIds) {
-        this(validador, publicador, registro, voto -> { }, transaccion, eleccion, reloj, generadorIds);
-    }
-
-    public ServicioVotacion(ValidadorVotante validador, PublicadorVotos publicador, RegistroParticipacion registro,
-                            RegistroVotoAceptado aceptados, EjecutorTransaccional transaccion,
-                            ElectionId eleccion, Clock reloj, Supplier<UUID> generadorIds) {
+                            RegistroVotoAceptado aceptados, ControlRegionVotante controlRegion,
+                            EjecutorTransaccional transaccion, ElectionId eleccion, Clock reloj,
+                            Supplier<UUID> generadorIds) {
         this.validador = validador;
         this.publicador = publicador;
         this.registro = registro;
         this.aceptados = aceptados;
+        this.controlRegion = controlRegion;
         this.transaccion = transaccion;
         this.eleccion = eleccion;
         this.reloj = reloj;
@@ -56,11 +56,21 @@ public class ServicioVotacion {
             throw new VotanteNoHabilitadoException();
         }
         VotoEmitido voto = VotoEmitido.emitir(solicitud, sourceIp, VoteId.de(generadorIds.get()), reloj.instant());
-        return transaccion.ejecutar(() -> {
+        ResultadoTransaccion resultado = transaccion.ejecutar(() -> {
+            ControlRegionVotante.Resultado region = controlRegion.evaluar(eleccion, solicitud.voterId(), solicitud.region());
+            if (region != ControlRegionVotante.Resultado.CORRECTA) {
+                return new ResultadoTransaccion(null, region);
+            }
             registro.registrar(eleccion, solicitud.voterId());
             aceptados.registrar(voto);
             publicador.publicar(voto);
-            return new ComprobanteVoto(voto.voteId(), voto.timestamp());
+            return new ResultadoTransaccion(new ComprobanteVoto(voto.voteId(), voto.timestamp()), region);
         });
+        // Fuera de la transacción: lanzarlas adentro revertiría el contador de errores.
+        if (resultado.region() == ControlRegionVotante.Resultado.PRIMER_ERROR) throw new RegionIncorrectaException();
+        if (resultado.region() == ControlRegionVotante.Resultado.ANULADO) throw new VotoAnuladoException();
+        return resultado.comprobante();
     }
+
+    private record ResultadoTransaccion(ComprobanteVoto comprobante, ControlRegionVotante.Resultado region) { }
 }
