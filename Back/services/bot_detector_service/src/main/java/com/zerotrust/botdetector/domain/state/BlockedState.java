@@ -11,12 +11,17 @@ public final class BlockedState implements IpRiskState {
 
     @Override
     public void onVoteReceived(IpTrafficContext context) {
-        // La IP sigue intentando votar estando bloqueada → alerta crítica
+        // La IP sigue intentando votar estando bloqueada: alerta crítica.
         context.requestAlert();
     }
 
     @Override
     public String name() {
         return "BLOQUEADA";
+    }
+
+    @Override
+    public boolean esFinal() {
+        return true;
     }
 }

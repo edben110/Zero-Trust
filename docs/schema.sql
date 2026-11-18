@@ -80,7 +80,20 @@ CREATE TABLE IF NOT EXISTS fraud_incidents (
     risk_level     VARCHAR(20)  NOT NULL,  -- NORMAL | SOSPECHOSA | BLOQUEADA
     vote_count     INT          NOT NULL,
     window_seconds INT          NOT NULL,
+    origin         VARCHAR(10)  NOT NULL DEFAULT 'LIVE'
+                                CHECK (origin IN ('LIVE', 'DRILL')),
     detected_at    TIMESTAMPTZ  NOT NULL
+);
+
+-- Proyección del patron State: una fila por IP con el nivel vigente.
+-- La escribe bot_detector_service; el panel de administracion la consulta.
+CREATE TABLE IF NOT EXISTS ip_risk_state (
+    ip             VARCHAR(45)  PRIMARY KEY,
+    risk_level     VARCHAR(20)  NOT NULL CHECK (risk_level IN ('NORMAL', 'SOSPECHOSA', 'BLOQUEADA')),
+    vote_count     INT          NOT NULL CHECK (vote_count >= 0),
+    window_seconds INT          NOT NULL CHECK (window_seconds > 0),
+    first_seen     TIMESTAMPTZ  NOT NULL,
+    last_seen      TIMESTAMPTZ  NOT NULL
 );
 
 -- Indices para consultas forenses frecuentes
@@ -88,3 +101,7 @@ CREATE INDEX IF NOT EXISTS idx_vote_audit_voter_id    ON vote_audit (voter_id);
 CREATE INDEX IF NOT EXISTS idx_vote_audit_voted_at    ON vote_audit (voted_at);
 CREATE INDEX IF NOT EXISTS idx_fraud_incidents_ip     ON fraud_incidents (ip);
 CREATE INDEX IF NOT EXISTS idx_fraud_incidents_level  ON fraud_incidents (risk_level);
+CREATE INDEX IF NOT EXISTS idx_fraud_incidents_ip_detected_at
+    ON fraud_incidents (ip, detected_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ip_risk_state_level    ON ip_risk_state (risk_level);
+CREATE INDEX IF NOT EXISTS idx_ip_risk_state_last_seen ON ip_risk_state (last_seen DESC);

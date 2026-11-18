@@ -58,8 +58,10 @@ AUTH_TOKEN_URL, AUTH_JWKS_URL, CLIENT_ID, CLIENT_SECRET, KAFKA_BOOTSTRAP, RABBIT
 |---|---|---|---|---|
 | eligible_voters (compactado) | voter_registration_service, voting_api (altas del panel de administración) | user_validation_service | voterId | `{"voterId":"<uuid>","region":"<string>","registeredAt":"<ISO-8601>"}` |
 | raw_votes | voting_api | vote_processor, regional_rollup_service, bot_detector_service, analytics_archiver | voteId | `{"voteId":"<uuid>","voterId":"<uuid>","candidateId":"<uuid>","region":"<string>","sourceIp":"<string>","timestamp":"<ISO-8601>"}` |
-| security_alerts | bot_detector_service | — | ip | `{"ip":"<string>","riskLevel":"NORMAL\|SOSPECHOSA\|BLOQUEADA","voteCount":<int>,"windowSeconds":<int>,"detectedAt":"<ISO-8601>"}` |
+| security_alerts | bot_detector_service | — | ip | `{"ip":"<string>","riskLevel":"NORMAL\|SOSPECHOSA\|BLOQUEADA","voteCount":<int>,"windowSeconds":<int>,"origin":"LIVE\|DRILL","detectedAt":"<ISO-8601>"}` |
+| security_drills | voting_api (panel de administración) | bot_detector_service | ip | `{"action":"EVALUATE\|RESET","ip":"<string>","votes":<int>}` |
 
+- `security_drills` permite probar la detección con IPs reales sin escribir en `raw_votes`: el detector aplica el mismo patrón State y marca el incidente con `origin=DRILL`, distinguible de `LIVE`.
 - Con TTL de 300 s, los clientes Kafka deben usar `sasl.login.refresh.buffer.seconds=30` (propuesto Sebas).
 
 ## RabbitMQ

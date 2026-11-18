@@ -1,7 +1,10 @@
 package com.zerotrust.botdetector.adapter.persistence;
 
+import com.zerotrust.botdetector.domain.model.AlertOrigin;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,6 +38,10 @@ public class FraudIncidentEntity {
     @Column(nullable = false)
     private int windowSeconds;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private AlertOrigin origin;
+
     @Column(nullable = false)
     private Instant detectedAt;
 
@@ -42,19 +49,21 @@ public class FraudIncidentEntity {
     protected FraudIncidentEntity() {}
 
     public FraudIncidentEntity(String ip, String riskLevel, int voteCount,
-                                int windowSeconds, Instant detectedAt) {
+                                int windowSeconds, AlertOrigin origin, Instant detectedAt) {
         this.ip            = ip;
         this.riskLevel     = riskLevel;
         this.voteCount     = voteCount;
         this.windowSeconds = windowSeconds;
+        this.origin        = origin;
         this.detectedAt    = detectedAt;
     }
 
     // Accesores de solo lectura
-    public Long    getId()           { return id; }
-    public String  getIp()           { return ip; }
-    public String  getRiskLevel()    { return riskLevel; }
-    public int     getVoteCount()    { return voteCount; }
-    public int     getWindowSeconds(){ return windowSeconds; }
-    public Instant getDetectedAt()   { return detectedAt; }
+    public Long        getId()            { return id; }
+    public String      getIp()            { return ip; }
+    public String      getRiskLevel()     { return riskLevel; }
+    public int         getVoteCount()     { return voteCount; }
+    public int         getWindowSeconds() { return windowSeconds; }
+    public AlertOrigin getOrigin()        { return origin; }
+    public Instant     getDetectedAt()    { return detectedAt; }
 }

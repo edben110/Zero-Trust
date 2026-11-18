@@ -26,6 +26,7 @@ public class JpaFraudIncidentRepository implements FraudIncidentRepository {
                 alert.riskLevel(),
                 alert.voteCount(),
                 alert.windowSeconds(),
+                alert.origin(),
                 alert.detectedAt()
         );
         jpaRepository.save(entity);
