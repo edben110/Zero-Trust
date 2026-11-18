@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import type { Candidato, Catalogo } from "@/lib/contrato";
 import { leerCatalogo } from "@/lib/validacion";
+import { AdministracionPadron } from "./AdministracionPadron";
 
 const campo = "w-full border border-tinta bg-papel px-3 py-2 outline-offset-2 focus:outline focus:outline-sello";
 const boton = "border-2 border-tinta bg-tinta px-5 py-2 font-medium text-papel hover:bg-papel hover:text-tinta disabled:opacity-50";
@@ -133,7 +134,8 @@ export function AdministracionCandidatos() {
     </form>
   );
 
-  return <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
+  return <>
+  <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,22rem)]">
     <section aria-label="Listado de candidatos">
       <div className="flex items-center justify-between border-b-2 border-tinta pb-3">
         <h2 className="font-serif text-2xl">Candidatos ({catalogo?.candidates.length ?? "…" })</h2>
@@ -169,5 +171,7 @@ export function AdministracionCandidatos() {
         className="ml-3 text-sm underline">Cancelar</button>}
       {aviso && <p role="status" className="mt-4 text-sello">{aviso}</p>}
     </form>
-  </div>;
+  </div>
+  <AdministracionPadron regiones={catalogo?.regions ?? []} />
+  </>;
 }

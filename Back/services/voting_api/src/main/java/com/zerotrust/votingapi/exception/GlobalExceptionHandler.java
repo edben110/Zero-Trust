@@ -3,6 +3,8 @@ package com.zerotrust.votingapi.exception;
 import com.zerotrust.votingapi.domain.ServicioNoDisponibleException;
 import com.zerotrust.votingapi.domain.SolicitudVotoInvalidaException;
 import com.zerotrust.votingapi.domain.VotanteNoHabilitadoException;
+import com.zerotrust.votingapi.domain.VotanteFueraDelPadronException;
+import com.zerotrust.votingapi.domain.VotanteYaInscritoException;
 import com.zerotrust.votingapi.domain.VotoDuplicadoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> noHabilitado() {
         LOG.warn("Voto rechazado: votante no habilitado");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.de("voter_not_eligible"));
+    }
+
+    // POST /voter-id: se avisa antes de votar y no se entrega el código.
+    @ExceptionHandler(VotanteFueraDelPadronException.class)
+    public ResponseEntity<ErrorResponse> fueraDelPadron() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponse.con("voter_not_registered",
+                "El titular de este documento no se encuentra habilitado en el padrón. "
+                        + "Por favor pídale al administrador que lo añada."));
+    }
+
+    @ExceptionHandler(VotanteYaInscritoException.class)
+    public ResponseEntity<ErrorResponse> yaInscrito() {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.con("already_registered",
+                "Este documento ya está inscrito en el padrón de esta elección."));
     }
 
     @ExceptionHandler(VotoDuplicadoException.class)

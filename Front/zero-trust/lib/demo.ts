@@ -57,7 +57,8 @@ export async function consultarDemo(cedula: string): Promise<ResultadoConsulta> 
   if (normalizada === null) {
     return { tipo: "invalido" };
   }
-  return { tipo: "encontrado", voterId: CODIGOS_DEMO.get(normalizada) ?? crypto.randomUUID() };
+  const voterId = CODIGOS_DEMO.get(normalizada);
+  return voterId === undefined ? { tipo: "no-registrado" } : { tipo: "encontrado", voterId };
 }
 
 // Simula los conteos que publicarían los dashboard workers, creciendo cada pocos segundos.

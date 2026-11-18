@@ -10,6 +10,8 @@ function mensajeDeFallo(resultado: Exclude<ResultadoConsulta, { tipo: "encontrad
   switch (resultado.tipo) {
     case "invalido":
       return "El número de cédula no es válido. Escriba de 6 a 10 dígitos.";
+    case "no-registrado":
+      return "El titular de este documento no se encuentra habilitado en el padrón. Por favor pídale al administrador que lo añada.";
     case "no-disponible":
       return "El servicio no está disponible en este momento. Intente de nuevo en unos minutos.";
     case "error":
@@ -41,6 +43,9 @@ export function ConsultaCodigo() {
       setCedula("");   // la cédula no se conserva en pantalla después de la consulta
       setCodigo(resultado.voterId);
       return;
+    }
+    if (resultado.tipo === "no-registrado") {
+      setCedula("");
     }
     setError(mensajeDeFallo(resultado));
   }

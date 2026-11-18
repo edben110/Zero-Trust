@@ -51,6 +51,7 @@ import com.zerotrust.votingapi.domain.Region;
 import com.zerotrust.votingapi.domain.SourceIp;
 import com.zerotrust.votingapi.domain.ValidacionNoDisponibleException;
 import com.zerotrust.votingapi.domain.VotoDuplicadoException;
+import com.zerotrust.votingapi.domain.VoterId;
 import com.zerotrust.votingapi.domain.VotoEmitido;
 import com.zerotrust.votingapi.exception.GlobalExceptionHandler;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
@@ -131,7 +132,7 @@ class CapaWebVotacionTest {
         VotoController votos = new VotoController(servicio, repositorio,
                 ResolutorIpOrigen.desde(String.valueOf(confiarEnCabeceras)));
         ConsultaVoterIdController consulta = new ConsultaVoterIdController(
-                new ServicioIdentificacion(new DerivadorVoterIdHmac(clavePrueba()), ELECCION));
+                new ServicioIdentificacion(new DerivadorVoterIdHmac(clavePrueba()), validador, ELECCION));
         return MockMvcBuilders.standaloneSetup(votos, consulta, new CatalogoController(repositorio))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
@@ -233,21 +234,51 @@ class CapaWebVotacionTest {
     }
 
     @Test
-    @DisplayName("POST /voter-id devuelve el UUID derivado de la cédula, sin caché, y no registra la cédula")
+    @DisplayName("POST /voter-id de un inscrito devuelve el UUID derivado, sin caché, y no registra la cédula")
     void consultaVoterId() throws Exception {
+        when(validador.estaHabilitado(new VoterId("fae9cb04-ba2b-87ef-882c-f39dd70dbaa1"))).thenReturn(true);
+
         mvc(false).perform(post("/voter-id").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"cedula\":\"" + CEDULA + "\"}"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Cache-Control", "no-store"))
                 .andExpect(content().json("{\"voterId\":\"fae9cb04-ba2b-87ef-882c-f39dd70dbaa1\"}", true));
 
-        verifyNoInteractions(validador, publicador, registro);
+        verifyNoInteractions(publicador, registro);
         assertThat(todoLoRegistrado()).doesNotContain(CEDULA);
+    }
+
+    @Test
+    @DisplayName("POST /voter-id de alguien fuera del padrón responde 404 con el aviso y sin el código")
+    void consultaFueraDelPadron() throws Exception {
+        when(validador.estaHabilitado(any())).thenReturn(false);
+
+        mvc(false).perform(post("/voter-id").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"cedula\":\"" + CEDULA + "\"}"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().json("{\"error\":\"voter_not_registered\",\"message\":\"El titular de este "
+                        + "documento no se encuentra habilitado en el padrón. Por favor pídale al administrador "
+                        + "que lo añada.\"}", true))
+                .andExpect(content().string(not(containsString("fae9cb04"))));
+
+        assertThat(todoLoRegistrado()).doesNotContain(CEDULA);
+    }
+
+    @Test
+    @DisplayName("POST /voter-id responde 503 si no se puede consultar el padrón")
+    void consultaSinPadron() throws Exception {
+        when(validador.estaHabilitado(any())).thenThrow(new ValidacionNoDisponibleException());
+
+        mvc(false).perform(post("/voter-id").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"cedula\":\"" + CEDULA + "\"}"))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(content().json("{\"error\":\"validation_unavailable\"}", true));
     }
 
     @Test
     @DisplayName("POST /voter-id da el mismo UUID para dos escrituras equivalentes de la cédula")
     void consultaEquivalentes() throws Exception {
+        when(validador.estaHabilitado(any())).thenReturn(true);
         for (String escritura : List.of("0.012.345.678", " 0012345678 ")) {
             mvc(false).perform(post("/voter-id").contentType(MediaType.APPLICATION_JSON)
                             .content("{\"cedula\":\"" + escritura + "\"}"))

@@ -84,6 +84,9 @@ export async function consultarCodigo(cedula: string): Promise<ResultadoConsulta
   if (respuesta.status === 400) {
     return { tipo: "invalido" };
   }
+  if (respuesta.status === 404) {
+    return { tipo: "no-registrado" };
+  }
   if (respuesta.status === 503) {
     return { tipo: "no-disponible" };
   }

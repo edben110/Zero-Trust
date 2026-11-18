@@ -56,7 +56,7 @@ AUTH_TOKEN_URL, AUTH_JWKS_URL, CLIENT_ID, CLIENT_SECRET, KAFKA_BOOTSTRAP, RABBIT
 ## Kafka
 | Topic | Productor | Consumidor | Key | Payload (JSON) |
 |---|---|---|---|---|
-| eligible_voters (compactado) | voter_registration_service | user_validation_service | voterId | `{"voterId":"<uuid>","fullName":"<string>","region":"<string>","registeredAt":"<ISO-8601>"}` |
+| eligible_voters (compactado) | voter_registration_service, voting_api (altas del panel de administración) | user_validation_service | voterId | `{"voterId":"<uuid>","fullName":"<string>","region":"<string>","registeredAt":"<ISO-8601>"}` |
 | raw_votes | voting_api | vote_processor, regional_rollup_service, bot_detector_service, analytics_archiver | voteId | `{"voteId":"<uuid>","voterId":"<uuid>","candidateId":"<uuid>","region":"<string>","sourceIp":"<string>","timestamp":"<ISO-8601>"}` |
 | security_alerts | bot_detector_service | — | ip | `{"ip":"<string>","riskLevel":"NORMAL\|SOSPECHOSA\|BLOQUEADA","voteCount":<int>,"windowSeconds":<int>,"detectedAt":"<ISO-8601>"}` |
 
@@ -86,8 +86,22 @@ POST /voter-id (propuesto): consulta del código de votante a partir de la cédu
 ```
 | Código | Cuerpo | Cuándo |
 |---|---|---|
-| 200 | `{"voterId":"<uuid>"}` (con `Cache-Control: no-store`) | Cédula con formato válido, esté o no en el padrón |
+| 200 | `{"voterId":"<uuid>"}` (con `Cache-Control: no-store`) | El titular está en el padrón (consulta RPC a user_validation_service) |
+| 404 | `{"error":"voter_not_registered","message":"El titular de este documento no se encuentra habilitado en el padrón. Por favor pídale al administrador que lo añada."}` | El titular no está en el padrón. No se entrega el código |
+| 503 | `{"error":"validation_unavailable"}` | No se pudo consultar el padrón |
 | 400 | `{"error":"invalid_request","fields":["cedula"]}` | Cédula ausente, numérica o con formato inválido |
+
+POST /internal/admin/voters (propuesto): alta en el padrón desde el panel de administración. Solo la llama el servidor del front con la cabecera `X-Admin-Token` (`ADMIN_API_TOKEN`).
+```json
+{ "cedula": "<string>", "fullName": "<string>", "region": "<string>" }
+```
+| Código | Cuerpo | Cuándo |
+|---|---|---|
+| 201 | `{"registered":true}` | Inscrito en `registered_voters` y publicado en `eligible_voters` (misma transacción) |
+| 400 | `{"error":"invalid_request","fields":[...]}` | Cédula, nombre o región inválidos; la región debe estar en el catálogo vigente |
+| 401 | — | Sin token o token incorrecto |
+| 409 | `{"error":"already_registered","message":"..."}` | Ese documento ya está en el padrón de la elección |
+| 503 | `{"error":"validation_unavailable"}` | Kafka o PostgreSQL no confirmaron. No se inscribió nada |
 
 ## Cliente de token (todos los servicios)
 > Propuesto por Sebas, pendiente de validar con el equipo. Comprobado contra kafka-clients 3.6.2 y amqp-client 5.19.0 (los que gestiona Spring Boot 3.2.5).
@@ -178,7 +192,7 @@ spring.kafka.ssl.trust-store-type=PKCS12
 - **Flujo:** la persona escribe su cédula en `/mi-codigo` del front, `POST /voter-id` le devuelve su `voterId` y con él vota en el tarjetón (`POST /vote`, sin cambios en el payload).
 - **Cédula:** se normaliza igual en el servidor y en el front (NFKC, sin espacios ni puntos, de 6 a 10 dígitos ASCII, conservando los ceros iniciales). Solo vive en memoria durante la petición: no se guarda, no va en la URL ni en logs ni en mensajes de error.
 - **voterId:** UUID versión 8 (RFC 9562) con los primeros 128 bits de `HMAC-SHA-256(VOTER_HMAC_KEY, "zerotrust-voter-v1" 0x00 ELECTION_ID 0x00 cédula)` y los bits de versión y variante. La misma cédula da el mismo UUID en la misma elección y otro en una elección distinta. voting_api y voter_registration_service lo calculan igual. Vector de prueba: clave = bytes 0..31, elección `elecciones-2026`, cédula `0012345678` → `fae9cb04-ba2b-87ef-882c-f39dd70dbaa1`.
-- **`/voter-id` responde igual esté o no la cédula en el padrón:** así no revela quién está inscrito. La habilitación se comprueba al votar (403).
+- **`/voter-id` avisa si el titular no está en el padrón (404) y no entrega el código.** Esto revela a quien conozca una cédula si está inscrita. El administrador puede inscribirla desde el panel (`POST /internal/admin/voters`); voting_api guarda solo el UUID en `registered_voters` y lo publica en `eligible_voters` (ACL de escritura para `voting_api`).
 - **Voto único:** `voter_election_usage(election_id, voter_uuid)` con `UNIQUE (election_id, voter_uuid)`. voting_api inserta con `ON CONFLICT DO NOTHING` y publica en `raw_votes` en la misma transacción: si la publicación falla, se revierte y se puede reintentar. Con solicitudes simultáneas solo una pasa.
 - **El voterId permite votar:** quien conozca la cédula de otra persona puede obtener su código. No hay verificación de titularidad.
 - **Cambiar la clave o el ELECTION_ID durante la elección cambia todos los UUID:** el padrón dejaría de coincidir y una cédula podría volver a votar.

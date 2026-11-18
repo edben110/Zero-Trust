@@ -5,17 +5,22 @@ import com.zerotrust.votingapi.adapter.config.RepositorioCatalogo;
 import com.zerotrust.votingapi.adapter.config.OrigenesCors;
 import com.zerotrust.votingapi.adapter.config.ResolutorIpOrigen;
 import com.zerotrust.votingapi.adapter.crypto.DerivadorVoterIdHmac;
+import com.zerotrust.votingapi.adapter.kafka.PublicadorElegiblesKafka;
 import com.zerotrust.votingapi.adapter.kafka.PublicadorVotosKafka;
 import com.zerotrust.votingapi.adapter.persistence.EjecutorTransaccionalSpring;
 import com.zerotrust.votingapi.adapter.persistence.RegistroParticipacionJdbc;
+import com.zerotrust.votingapi.adapter.persistence.RepositorioPadronJdbc;
 import com.zerotrust.votingapi.adapter.rabbit.ValidadorVotanteRpc;
 import com.zerotrust.votingapi.domain.ElectionId;
 import com.zerotrust.votingapi.port.DerivadorVoterId;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
+import com.zerotrust.votingapi.port.PublicadorElegibles;
 import com.zerotrust.votingapi.port.PublicadorVotos;
 import com.zerotrust.votingapi.port.RegistroParticipacion;
+import com.zerotrust.votingapi.port.RepositorioPadron;
 import com.zerotrust.votingapi.port.ValidadorVotante;
 import com.zerotrust.votingapi.service.ServicioIdentificacion;
+import com.zerotrust.votingapi.service.ServicioPadron;
 import com.zerotrust.votingapi.service.ServicioVotacion;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -106,8 +111,30 @@ public class BeansVotacion {
     }
 
     @Bean
-    ServicioIdentificacion servicioIdentificacion(DerivadorVoterId derivador, ElectionId eleccion) {
-        return new ServicioIdentificacion(derivador, eleccion);
+    ServicioIdentificacion servicioIdentificacion(DerivadorVoterId derivador, ValidadorVotante validador,
+                                                  ElectionId eleccion) {
+        return new ServicioIdentificacion(derivador, validador, eleccion);
+    }
+
+    @Bean
+    RepositorioPadron repositorioPadron(JdbcTemplate jdbc) {
+        return new RepositorioPadronJdbc(jdbc);
+    }
+
+    @Bean
+    PublicadorElegibles publicadorElegibles(KafkaTemplate<String, String> plantilla, ObjectMapper json,
+                                            @Value("${votacion.topic-padron}") String topic,
+                                            @Value("${votacion.publicacion-timeout-ms}") long esperaMs) {
+        return new PublicadorElegiblesKafka(plantilla, topic, json, Duration.ofMillis(esperaMs));
+    }
+
+    // Las regiones válidas son las del catálogo vigente (el que edita el panel de administración).
+    @Bean
+    ServicioPadron servicioPadron(DerivadorVoterId derivador, RepositorioPadron repositorio,
+                                  PublicadorElegibles publicador, EjecutorTransaccional transaccion,
+                                  RepositorioCatalogo catalogo, ElectionId eleccion) {
+        return new ServicioPadron(derivador, repositorio, publicador, transaccion, catalogo::actual, eleccion,
+                Clock.systemUTC());
     }
 
     @Bean

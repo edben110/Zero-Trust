@@ -48,6 +48,7 @@ export type ResultadoVoto =
 // POST /voter-id: la cédula va en el cuerpo y nunca en la URL; la respuesta es el código para votar.
 export type ResultadoConsulta =
   | { tipo: "encontrado"; voterId: string }
+  | { tipo: "no-registrado" }
   | { tipo: "invalido" }
   | { tipo: "no-disponible" }
   | { tipo: "error" };

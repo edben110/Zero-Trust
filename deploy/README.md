@@ -44,6 +44,7 @@ Los archivos montados los lee el usuario `appuser` del contenedor (uid 100): deb
 - `vm-api` y `vm-init` deben tener el mismo `ELECTION_ID` y la misma `VOTER_HMAC_KEY` (Base64, minimo 32 bytes; `openssl rand -base64 32`). La clave es secreta y no debe cambiar durante la eleccion.
 - `voting_api` usa PostgreSQL (tabla `voter_election_usage`): nftables debe permitir `vm-api -> vm-brokers:5432`.
 - El padron (`VOTERS_FILE`) trae cedulas; `voter_registration_service` guarda solo el UUID derivado.
+- El panel de administracion tambien inscribe votantes: `voting_api` escribe en `registered_voters` y publica en `eligible_voters` (ACL en `vm-brokers/kafka/init.sh`). Tras cambiar ese script hay que volver a ejecutar `kafka-init`.
 - La cedula viaja en el cuerpo de `POST /voter-id`: en produccion hace falta TLS delante de `voting_api` (443).
 
 ## Recursos y replicas
