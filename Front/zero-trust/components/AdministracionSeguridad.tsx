@@ -100,12 +100,15 @@ export function AdministracionSeguridad() {
   const [votos, setVotos] = useState("12");
   const [aviso, setAviso] = useState<{ texto: string; error: boolean } | null>(null);
   const [ocupado, setOcupado] = useState(false);
+  const [actualizadoEn, setActualizadoEn] = useState<string | null>(null);
 
   const descargar = useCallback(async (): Promise<Datos | null> => {
     try {
       const res = await fetch("/admin/api/security/incidents", { cache: "no-store" });
       if (res.status === 401 || res.status === 403) return null;
-      return res.ok ? leerDatos(await res.json()) : null;
+      if (!res.ok) return null;
+      setActualizadoEn(new Date().toLocaleTimeString("es-CO"));
+      return leerDatos(await res.json());
     } catch {
       // El refresco automático es best-effort; el aviso lo da una acción explícita.
       return null;
@@ -198,6 +201,13 @@ export function AdministracionSeguridad() {
     <section aria-label="Detección de ataques" className="mt-12 border-t-2 border-tinta pt-8">
       <h2 className="font-serif text-2xl">Detección de ataques por IP</h2>
       <p className="mt-2 text-sm text-tinta-suave">Consultando el estado del detector…</p>
+      <p className="mt-1 text-xs text-tinta-suave">
+        Si esta sección no carga, la sesión pudo expirar: vuelva a iniciar sesión o pulse «Reintentar».
+      </p>
+      <button type="button" onClick={() => void actualizar()} disabled={ocupado}
+        className="mt-4 border-2 border-tinta px-5 py-2 font-medium text-tinta disabled:opacity-50">
+        {ocupado ? "Consultando…" : "Reintentar"}
+      </button>
     </section>
   );
 
@@ -243,6 +253,29 @@ export function AdministracionSeguridad() {
         {" "}· región incorrecta <strong className="cifras">{summary.wrongRegion}</strong>.
       </p>
 
+      <div className="mt-6 border-2 border-sello p-4 sm:flex sm:items-center sm:justify-between sm:gap-6">
+        <div>
+          <h3 className="font-serif text-lg">Mantenimiento</h3>
+          <p className="mt-1 max-w-2xl text-sm text-tinta-suave">
+            <strong>Borrar incidentes y estados</strong> vacía el histórico de incidentes y deja en cero
+            los contadores de las IPs observadas. No borra votos, candidatos ni el padrón.
+          </p>
+          <p className="mt-1 text-xs text-tinta-suave">
+            Última lectura: <span className="cifras">{actualizadoEn ?? "sin datos"}</span>
+          </p>
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-3 sm:mt-0 sm:justify-end">
+          <button type="button" onClick={() => void actualizar()} disabled={ocupado}
+            className="border-2 border-tinta px-5 py-2 font-medium text-tinta hover:bg-tinta hover:text-papel disabled:opacity-50">
+            {ocupado ? "Actualizando…" : "Actualizar ahora"}
+          </button>
+          <button type="button" onClick={() => void purgar()} disabled={ocupado}
+            className="border-2 border-sello bg-sello px-5 py-2 font-medium text-papel hover:bg-papel hover:text-sello disabled:opacity-50">
+            Borrar incidentes y estados
+          </button>
+        </div>
+      </div>
+
       <form onSubmit={simular} className="mt-8 grid gap-5 border border-tinta p-6 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <label className="block text-sm font-medium">Dirección IP real o de prueba
           <input className={`${campo} mt-2 font-mono`} value={ip} onChange={(e) => setIp(e.target.value)}
@@ -257,13 +290,6 @@ export function AdministracionSeguridad() {
           <button type="button" onClick={() => void reiniciar()} disabled={ocupado}
             className="border-2 border-sello px-5 py-2 font-medium text-sello disabled:opacity-50">
             Restablecer IP
-          </button>
-          <button type="button" onClick={() => void actualizar()} disabled={ocupado} className="text-sm underline underline-offset-4">
-            {ocupado ? "Actualizando…" : "Actualizar ahora"}
-          </button>
-          <button type="button" onClick={() => void purgar()} disabled={ocupado}
-            className="ml-auto border-2 border-sello bg-sello px-5 py-2 font-medium text-papel hover:bg-papel hover:text-sello disabled:opacity-50">
-            Borrar incidentes y estados
           </button>
         </div>
         <div aria-live="polite" className="sm:col-span-2">
