@@ -1,42 +1,34 @@
 [
   {
     "cedula": "1020304051",
-    "fullName": "Mariana Cárdenas Ruiz",
     "region": "norte"
   },
   {
     "cedula": "1020304052",
-    "fullName": "Julián Esteban Correa",
     "region": "sur"
   },
   {
     "cedula": "1020304053",
-    "fullName": "Daniela Restrepo Vélez",
     "region": "oriente"
   },
   {
     "cedula": "1020304054",
-    "fullName": "Camilo Andrés Salazar",
     "region": "occidente"
   },
   {
     "cedula": "1020304055",
-    "fullName": "Paula Andrea Mejía",
     "region": "centro"
   },
   {
     "cedula": "1020304056",
-    "fullName": "Tomás Herrera Gil",
     "region": "norte"
   },
   {
     "cedula": "1020304057",
-    "fullName": "Sara Lucía Montoya",
     "region": "sur"
   },
   {
     "cedula": "1020304058",
-    "fullName": "Felipe Arango Duque",
     "region": "centro"
   }
 ]

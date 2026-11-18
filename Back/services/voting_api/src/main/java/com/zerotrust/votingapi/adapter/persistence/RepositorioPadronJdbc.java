@@ -11,8 +11,8 @@ import java.sql.Timestamp;
 // un alta repetida no inserta nada y se informa como ya inscrito, incluso con dos altas simultáneas.
 public class RepositorioPadronJdbc implements RepositorioPadron {
 
-    private static final String INSERTAR = "INSERT INTO registered_voters (voter_id, full_name, region, registered_at) "
-            + "VALUES (?, ?, ?, ?) ON CONFLICT (voter_id) DO NOTHING";
+    private static final String INSERTAR = "INSERT INTO registered_voters (voter_id, region, registered_at) "
+            + "VALUES (?, ?, ?) ON CONFLICT (voter_id) DO NOTHING";
 
     private final JdbcTemplate jdbc;
 
@@ -22,7 +22,7 @@ public class RepositorioPadronJdbc implements RepositorioPadron {
 
     @Override
     public void inscribir(VotanteInscrito votante) {
-        int insertadas = jdbc.update(INSERTAR, votante.voterId().valor(), votante.nombre().valor(),
+        int insertadas = jdbc.update(INSERTAR, votante.voterId().valor(),
                 votante.region().valor(), Timestamp.from(votante.inscritoEn()));
         if (insertadas == 0) {
             throw new VotanteYaInscritoException();

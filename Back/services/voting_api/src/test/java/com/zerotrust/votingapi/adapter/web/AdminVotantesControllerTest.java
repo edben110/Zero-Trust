@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AdminVotantesControllerTest {
 
     private static final String TOKEN = "token-de-prueba-0123456789abcdefghij";
-    private static final String CUERPO = "{\"cedula\":\"1020304051\",\"fullName\":\"Ana Pérez\",\"region\":\"norte\"}";
+    private static final String CUERPO = "{\"cedula\":\"1020304051\",\"region\":\"norte\"}";
 
     @Mock
     private ServicioPadron servicio;
@@ -61,16 +61,16 @@ class AdminVotantesControllerTest {
                 .andExpect(header().string("Cache-Control", "no-store"))
                 .andExpect(content().json("{\"registered\":true}", true));
 
-        verify(servicio).inscribir("1020304051", "Ana Pérez", "norte");
+        verify(servicio).inscribir("1020304051", "norte");
     }
 
     @Test
     @DisplayName("Una cédula enviada como número llega como ausente (perdería los ceros iniciales)")
     void cedulaNumerica() throws Exception {
-        doThrow(new SolicitudVotoInvalidaException(List.of("cedula"))).when(servicio).inscribir(isNull(), any(), any());
+        doThrow(new SolicitudVotoInvalidaException(List.of("cedula"))).when(servicio).inscribir(isNull(), any());
 
         mvc().perform(post("/internal/admin/voters").contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"cedula\":1020304051,\"fullName\":\"Ana\",\"region\":\"norte\"}")
+                         .content("{\"cedula\":1020304051,\"region\":\"norte\"}")
                         .header("X-Admin-Token", TOKEN))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json("{\"error\":\"invalid_request\",\"fields\":[\"cedula\"]}", true));
@@ -79,7 +79,7 @@ class AdminVotantesControllerTest {
     @Test
     @DisplayName("Un documento ya inscrito responde 409 con el mensaje")
     void yaInscrito() throws Exception {
-        doThrow(new VotanteYaInscritoException()).when(servicio).inscribir(any(), any(), any());
+        doThrow(new VotanteYaInscritoException()).when(servicio).inscribir(any(), any());
 
         mvc().perform(post("/internal/admin/voters").contentType(MediaType.APPLICATION_JSON).content(CUERPO)
                         .header("X-Admin-Token", TOKEN))

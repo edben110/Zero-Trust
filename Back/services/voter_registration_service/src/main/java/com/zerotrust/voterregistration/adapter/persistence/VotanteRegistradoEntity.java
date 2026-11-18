@@ -21,9 +21,6 @@ public class VotanteRegistradoEntity {
     @Column(name = "voter_id", nullable = false, unique = true, length = 36, updatable = false)
     private String voterId;
 
-    @Column(name = "full_name", nullable = false, length = 255, updatable = false)
-    private String fullName;
-
     @Column(name = "region", nullable = false, length = 100, updatable = false)
     private String region;
 
@@ -34,19 +31,14 @@ public class VotanteRegistradoEntity {
         // exigido por JPA
     }
 
-    public VotanteRegistradoEntity(String voterId, String fullName, String region, Instant registeredAt) {
+    public VotanteRegistradoEntity(String voterId, String region, Instant registeredAt) {
         this.voterId = voterId;
-        this.fullName = fullName;
         this.region = region;
         this.registeredAt = registeredAt;
     }
 
     public String getVoterId() {
         return voterId;
-    }
-
-    String getFullName() {
-        return fullName;
     }
 
     String getRegion() {

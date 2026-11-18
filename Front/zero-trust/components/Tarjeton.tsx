@@ -28,6 +28,10 @@ function mensajeDeRechazo(resultado: Exclude<ResultadoVoto, { tipo: "aceptado" }
       return "Este código no está habilitado para votar.";
     case "ya-voto":
       return "Ya se registró un voto para este documento en esta elección.";
+    case "region-incorrecta":
+      return "error esa no es la region que ud designo. Le queda un intento para seleccionar la región registrada.";
+    case "anulado":
+      return "Su voto quedó anulado por dos selecciones incorrectas de región. No puede votar en esta votación.";
     case "no-disponible":
       return "La validación del votante no está disponible en este momento. Su voto no se registró; intente de nuevo en unos minutos.";
     case "error":

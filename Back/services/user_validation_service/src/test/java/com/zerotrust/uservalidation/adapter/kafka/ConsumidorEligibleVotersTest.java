@@ -22,7 +22,7 @@ class ConsumidorEligibleVotersTest {
 
     private static final String ID = "3f2b8c1e-6d4a-4b7e-9c21-0a5d6e7f8a9b";
     private static final String PAYLOAD = "{\"voterId\":\"" + ID
-            + "\",\"fullName\":\"Ana Pérez\",\"region\":\"norte\",\"registeredAt\":\"2026-11-14T10:00:00Z\"}";
+            + "\",\"region\":\"norte\",\"registeredAt\":\"2026-11-14T10:00:00Z\"}";
 
     @Nested
     @DisplayName("LectorRegistroElegible")

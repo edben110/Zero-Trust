@@ -16,15 +16,15 @@ import java.util.Set;
  * a una estrategia intercambiable (patrón Strategy).
  *
  * Invariantes:
- *  - Un votante solo puede votar una vez en cada región (en la práctica solo vota en una).
+     *  - Un votante solo se cuenta una vez en toda la elección, aunque llegue con otra región.
  *  - Los conteos internos no son accesibles directamente desde fuera.
  */
 public final class RegionalVoteAccumulator {
 
     private final RegionalConsolidationStrategy strategy;
 
-    // región → (voterId → ya procesado)
-    private final Map<String, Set<String>>  seenVoters = new HashMap<>();
+    // Mismo criterio que el agregado nacional: identidad global, no por región.
+    private final Set<String> seenVoters = new HashSet<>();
     // región → candidateId → conteo
     private final Map<String, Map<String, Long>> counts = new HashMap<>();
 
@@ -42,11 +42,10 @@ public final class RegionalVoteAccumulator {
         String voterId    = event.voterId();
         String candidateId = event.candidateId();
 
-        Set<String> voters = seenVoters.computeIfAbsent(region, k -> new HashSet<>());
-        if (voters.contains(voterId)) {
+        if (seenVoters.contains(voterId)) {
             return false;
         }
-        voters.add(voterId);
+        seenVoters.add(voterId);
 
         Map<String, Long> regionCounts = counts.computeIfAbsent(region, k -> new HashMap<>());
         regionCounts.merge(candidateId, 1L, Long::sum);

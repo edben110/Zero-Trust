@@ -6,6 +6,8 @@ import com.zerotrust.votingapi.domain.VotanteNoHabilitadoException;
 import com.zerotrust.votingapi.domain.VotanteFueraDelPadronException;
 import com.zerotrust.votingapi.domain.VotanteYaInscritoException;
 import com.zerotrust.votingapi.domain.VotoDuplicadoException;
+import com.zerotrust.votingapi.domain.RegionIncorrectaException;
+import com.zerotrust.votingapi.domain.VotoAnuladoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -62,6 +64,19 @@ public class GlobalExceptionHandler {
         LOG.warn("Voto rechazado: el votante ya votó en esta elección");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.con("already_voted",
                 "Ya se registró un voto para este documento en esta elección"));
+    }
+
+    @ExceptionHandler(RegionIncorrectaException.class)
+    public ResponseEntity<ErrorResponse> regionIncorrecta() {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(ErrorResponse.con("wrong_region", "error esa no es la region que ud designo"));
+    }
+
+    @ExceptionHandler(VotoAnuladoException.class)
+    public ResponseEntity<ErrorResponse> votoAnulado() {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ErrorResponse.con("vote_invalidated",
+                        "El voto quedó anulado: seleccionó dos veces una región distinta de la registrada."));
     }
 
     // Base de datos caída o transacción fallida: no se registró nada y la persona puede reintentar.

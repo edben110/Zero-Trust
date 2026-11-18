@@ -9,7 +9,6 @@ const boton = "border-2 border-tinta bg-tinta px-5 py-2 font-medium text-papel h
 
 const MENSAJES_CAMPO: Record<string, string> = {
   cedula: "La cédula no es válida (de 6 a 10 dígitos).",
-  fullName: "Escriba el nombre completo.",
   region: "Seleccione una región del tarjetón.",
 };
 
@@ -27,7 +26,6 @@ function mensajeDeError(estado: number, datos: unknown): string {
 // Alta de votantes en el padrón. La cédula no se guarda: el servidor solo guarda el código derivado de ella.
 export function AdministracionPadron({ regiones }: { regiones: string[] }) {
   const [cedula, setCedula] = useState("");
-  const [nombre, setNombre] = useState("");
   const [region, setRegion] = useState("");
   const [aviso, setAviso] = useState<{ texto: string; error: boolean } | null>(null);
   const [ocupado, setOcupado] = useState(false);
@@ -39,8 +37,8 @@ export function AdministracionPadron({ regiones }: { regiones: string[] }) {
       setAviso({ texto: MENSAJES_CAMPO.cedula, error: true });
       return;
     }
-    if (nombre.trim() === "" || region === "") {
-      setAviso({ texto: "Complete el nombre y la región.", error: true });
+    if (region === "") {
+      setAviso({ texto: "Seleccione una región.", error: true });
       return;
     }
     setOcupado(true);
@@ -49,7 +47,7 @@ export function AdministracionPadron({ regiones }: { regiones: string[] }) {
       const res = await fetch("/admin/api/voters", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cedula: normalizada, fullName: nombre.trim(), region }),
+        body: JSON.stringify({ cedula: normalizada, region }),
       });
       const datos = await res.json().catch(() => null);
       if (!res.ok) {
@@ -57,7 +55,6 @@ export function AdministracionPadron({ regiones }: { regiones: string[] }) {
         return;
       }
       setCedula("");
-      setNombre("");
       setRegion("");
       setAviso({ texto: "Votante inscrito. Ya puede consultar su código en «Mi código de votante».", error: false });
     } catch {
@@ -88,11 +85,6 @@ export function AdministracionPadron({ regiones }: { regiones: string[] }) {
             placeholder="1234567890"
             required
           />
-        </label>
-        <label className="block text-sm font-medium">
-          Nombre completo
-          <input className={`${campo} mt-2`} maxLength={255} autoComplete="off" value={nombre}
-            onChange={(e) => setNombre(e.target.value)} required />
         </label>
         <label className="block text-sm font-medium">
           Región

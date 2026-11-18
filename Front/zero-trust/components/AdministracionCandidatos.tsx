@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import type { Candidato, Catalogo } from "@/lib/contrato";
 import { leerCatalogo } from "@/lib/validacion";
 import { AdministracionPadron } from "./AdministracionPadron";
@@ -9,6 +10,7 @@ const campo = "w-full border border-tinta bg-papel px-3 py-2 outline-offset-2 fo
 const boton = "border-2 border-tinta bg-tinta px-5 py-2 font-medium text-papel hover:bg-papel hover:text-tinta disabled:opacity-50";
 
 export function AdministracionCandidatos() {
+  const router = useRouter();
   const [autenticado, setAutenticado] = useState(false);
   const [cargando, setCargando] = useState(true);
   const [usuario, setUsuario] = useState("");
@@ -22,7 +24,12 @@ export function AdministracionCandidatos() {
 
   const cargar = useCallback(async () => {
     const res = await fetch("/admin/api/candidates", { cache: "no-store" });
-    if (res.status === 401 || res.status === 403) { setAutenticado(false); return; }
+    if (res.status === 401 || res.status === 403) {
+      setAutenticado(false);
+      setCatalogo(null);
+      setAviso("La sesión terminó o fue reemplazada por el acceso desde otro dispositivo. Ingrese nuevamente.");
+      return;
+    }
     const datos = res.ok ? leerCatalogo(await res.json()) : null;
     if (datos) setCatalogo(datos);
     else setAviso("No fue posible cargar el catálogo.");
@@ -87,9 +94,16 @@ export function AdministracionCandidatos() {
 
   async function cerrar() {
     if (faltan && !window.confirm("Solo hay un candidato. Cree otro antes de salir para habilitar la votación. ¿Cerrar sesión de todas formas?")) return;
-    await fetch("/admin/api/session", { method: "DELETE" });
+    try {
+      await fetch("/admin/api/session", { method: "DELETE", cache: "no-store" });
+    } catch {
+      // El estado local también se cierra si el servidor no responde.
+    }
     setAutenticado(false);
     setCatalogo(null);
+    setUsuario("");
+    setPassword("");
+    router.refresh();
   }
 
   async function mutar(metodo: "POST" | "PUT" | "DELETE", id?: string) {
@@ -113,6 +127,19 @@ export function AdministracionCandidatos() {
     finally { setOcupado(false); }
   }
 
+  async function reiniciarVotacion() {
+    if (!window.confirm("¿Iniciar otra votación con los mismos candidatos? Los votos actuales dejarán de contarse y cada votante podrá votar de nuevo. Esta acción no se puede deshacer.")) return;
+    setOcupado(true);
+    setAviso("");
+    try {
+      const respuesta = await fetch("/admin/api/election/reset", { method: "POST" });
+      const datos = await respuesta.json();
+      if (!respuesta.ok) { setAviso(datos.error ?? "No se pudo reiniciar la votación."); return; }
+      setAviso("Nueva votación iniciada. Los candidatos se conservaron y los resultados comienzan en cero.");
+    } catch { setAviso("No se pudo comunicar con el servidor."); }
+    finally { setOcupado(false); }
+  }
+
   function editar(c: Candidato) {
     setEditando(c.candidateId);
     setNombre(c.name);
@@ -123,6 +150,10 @@ export function AdministracionCandidatos() {
   if (!autenticado) return (
     <form onSubmit={iniciar} className="mt-10 max-w-md border border-tinta p-6 sm:p-8">
       <h2 className="font-serif text-2xl">Acceso administrativo</h2>
+      <p className="mt-3 text-sm text-sello">
+        Acceda solo por http://localhost:3001/admin con el túnel SSM abierto.
+        Network en su propio navegador mostrará la contraseña enviada; fuera del túnel HTTP no la cifra.
+      </p>
       <label className="mt-6 block text-sm font-medium">Usuario
         <input className={`${campo} mt-2`} autoComplete="username" value={usuario} onChange={(e) => setUsuario(e.target.value)} required />
       </label>
@@ -173,5 +204,14 @@ export function AdministracionCandidatos() {
     </form>
   </div>
   <AdministracionPadron regiones={catalogo?.regions ?? []} />
+  <section className="mt-8 border border-sello p-6" aria-label="Nueva votación">
+    <h2 className="font-serif text-2xl">Iniciar otra votación</h2>
+    <p className="mt-2">Conserva los candidatos y el padrón, reinicia los resultados y habilita un nuevo voto por persona.</p>
+    <button type="button" disabled={ocupado || !catalogo || catalogo.candidates.length < 2}
+      onClick={() => void reiniciarVotacion()}
+      className="mt-4 border-2 border-sello px-5 py-2 font-medium text-sello disabled:opacity-50">
+      Reiniciar votación
+    </button>
+  </section>
   </>;
 }

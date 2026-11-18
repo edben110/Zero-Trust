@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.votingapi.adapter.kafka.PublicadorElegiblesKafka;
 import com.zerotrust.votingapi.adapter.persistence.RepositorioPadronJdbc;
-import com.zerotrust.votingapi.domain.NombreCompleto;
 import com.zerotrust.votingapi.domain.PublicacionNoDisponibleException;
 import com.zerotrust.votingapi.domain.Region;
 import com.zerotrust.votingapi.domain.VotanteInscrito;
@@ -39,7 +38,7 @@ class AdaptadoresPadronTest {
 
     private static final Instant AHORA = Instant.parse("2026-11-18T10:00:00Z");
     private static final VotanteInscrito VOTANTE = new VotanteInscrito(
-            new VoterId("fae9cb04-ba2b-87ef-882c-f39dd70dbaa1"), new NombreCompleto("Ana Pérez"), new Region("norte"),
+            new VoterId("fae9cb04-ba2b-87ef-882c-f39dd70dbaa1"), new Region("norte"),
             AHORA);
 
     @Nested
@@ -50,7 +49,7 @@ class AdaptadoresPadronTest {
         private JdbcTemplate jdbc;
 
         @Test
-        @DisplayName("Debe insertar en registered_voters el UUID, el nombre, la región y la fecha, sin la cédula")
+        @DisplayName("Debe insertar en registered_voters el UUID, la región y la fecha, sin datos personales")
         void inserta() {
             when(jdbc.update(anyString(), any(Object[].class))).thenReturn(1);
             ArgumentCaptor<String> sql = ArgumentCaptor.forClass(String.class);
@@ -60,7 +59,7 @@ class AdaptadoresPadronTest {
 
             verify(jdbc).update(sql.capture(), parametros.capture());
             assertThat(sql.getValue()).contains("registered_voters").contains("ON CONFLICT (voter_id) DO NOTHING");
-            assertThat(parametros.getValue()).containsExactly("fae9cb04-ba2b-87ef-882c-f39dd70dbaa1", "Ana Pérez",
+            assertThat(parametros.getValue()).containsExactly("fae9cb04-ba2b-87ef-882c-f39dd70dbaa1",
                     "norte", Timestamp.from(AHORA));
         }
 
@@ -95,10 +94,10 @@ class AdaptadoresPadronTest {
 
             JsonNode evento = new ObjectMapper().readTree(valor.getValue());
             assertThat(evento.get("voterId").asText()).isEqualTo("fae9cb04-ba2b-87ef-882c-f39dd70dbaa1");
-            assertThat(evento.get("fullName").asText()).isEqualTo("Ana Pérez");
+            assertThat(evento.has("fullName")).isFalse();
             assertThat(evento.get("region").asText()).isEqualTo("norte");
             assertThat(evento.get("registeredAt").asText()).isEqualTo("2026-11-18T10:00:00Z");
-            assertThat(evento.size()).isEqualTo(4);
+            assertThat(evento.size()).isEqualTo(3);
         }
 
         @Test

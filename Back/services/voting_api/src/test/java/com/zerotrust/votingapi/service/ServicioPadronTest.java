@@ -85,7 +85,7 @@ class ServicioPadronTest {
         ArgumentCaptor<VotanteInscrito> inscrito = ArgumentCaptor.forClass(VotanteInscrito.class);
 
         // Act
-        servicio.inscribir("0.012.345.678", "  Ana Pérez  ", "norte");
+        servicio.inscribir("0.012.345.678", "norte");
 
         // Assert
         verify(repositorio).inscribir(inscrito.capture());
@@ -93,7 +93,6 @@ class ServicioPadronTest {
         VotanteInscrito votante = inscrito.getValue();
         assertThat(votante.voterId()).isEqualTo(new VoterId("fae9cb04-ba2b-87ef-882c-f39dd70dbaa1"));
         assertThat(votante.voterId()).isEqualTo(DERIVADOR.derivar(new Cedula("0012345678"), ELECCION));
-        assertThat(votante.nombre().valor()).isEqualTo("Ana Pérez");
         assertThat(votante.region()).isEqualTo(new Region("norte"));
         assertThat(votante.inscritoEn()).isEqualTo(AHORA);
         assertThat(votante.toString()).doesNotContain("0012345678");
@@ -104,7 +103,7 @@ class ServicioPadronTest {
     void orden() {
         transaccionEjecutaLaAccion();
 
-        servicio.inscribir("1020304051", "Ana", "sur");
+        servicio.inscribir("1020304051", "sur");
 
         InOrder orden = inOrder(transaccion, repositorio, publicador);
         orden.verify(transaccion).ejecutar(any());
@@ -116,12 +115,12 @@ class ServicioPadronTest {
     @DisplayName("Debe reunir los campos inválidos, incluida una región fuera del catálogo, sin tocar BD ni Kafka")
     void invalidos() {
         SolicitudVotoInvalidaException todos = assertThrows(SolicitudVotoInvalidaException.class,
-                () -> servicio.inscribir("12ab", " ", "centro"));
+                () -> servicio.inscribir("12ab", "centro"));
         SolicitudVotoInvalidaException ausentes = assertThrows(SolicitudVotoInvalidaException.class,
-                () -> servicio.inscribir(null, null, null));
+                () -> servicio.inscribir(null, null));
 
-        assertThat(todos.campos()).containsExactly("cedula", "fullName", "region");
-        assertThat(ausentes.campos()).containsExactly("cedula", "fullName", "region");
+        assertThat(todos.campos()).containsExactly("cedula", "region");
+        assertThat(ausentes.campos()).containsExactly("cedula", "region");
         verifyNoInteractions(repositorio, publicador, transaccion);
     }
 
@@ -131,7 +130,7 @@ class ServicioPadronTest {
         transaccionEjecutaLaAccion();
         doThrow(new VotanteYaInscritoException()).when(repositorio).inscribir(any());
 
-        assertThrows(VotanteYaInscritoException.class, () -> servicio.inscribir("1020304051", "Ana", "norte"));
+        assertThrows(VotanteYaInscritoException.class, () -> servicio.inscribir("1020304051", "norte"));
 
         verify(publicador, never()).publicar(any());
     }
@@ -142,7 +141,7 @@ class ServicioPadronTest {
         transaccionEjecutaLaAccion();
         doThrow(new PublicacionNoDisponibleException()).when(publicador).publicar(any());
 
-        assertThrows(PublicacionNoDisponibleException.class, () -> servicio.inscribir("1020304051", "Ana", "norte"));
+        assertThrows(PublicacionNoDisponibleException.class, () -> servicio.inscribir("1020304051", "norte"));
 
         verify(repositorio).inscribir(any());
     }

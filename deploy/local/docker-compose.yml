@@ -337,9 +337,9 @@ services:
     image: zerotrust/vote-processor:1.0
     <<: *seguridad
     depends_on:
-      <<: *esperar-brokers
+      <<: [*esperar-brokers, *esperar-db]
     environment:
-      <<: [*entorno-token, *java-opts-tls]
+      <<: [*entorno-token, *java-opts-tls, *db]
       CLIENT_ID: vote_processor
       CLIENT_SECRET: ${SECRET_VOTE_PROCESSOR:-Dev.VoteProcessor-04}
     volumes:
@@ -347,6 +347,7 @@ services:
     networks:
       - net-auth
       - net-brokers
+      - net-db
     deploy:
       resources:
         limits:
@@ -359,9 +360,9 @@ services:
     image: zerotrust/regional-rollup-service:1.0
     <<: *seguridad
     depends_on:
-      <<: *esperar-brokers
+      <<: [*esperar-brokers, *esperar-db]
     environment:
-      <<: [*entorno-token, *java-opts-tls]
+      <<: [*entorno-token, *java-opts-tls, *db]
       CLIENT_ID: regional_rollup_service
       CLIENT_SECRET: ${SECRET_REGIONAL_ROLLUP_SERVICE:-Dev.RegionalRollup-05}
     volumes:
@@ -369,6 +370,7 @@ services:
     networks:
       - net-auth
       - net-brokers
+      - net-db
     deploy:
       resources:
         limits:
@@ -449,6 +451,7 @@ services:
       <<: *esperar-brokers
     environment:
       <<: [*entorno-token, *java-opts-tls]
+      DASHBOARD_ALLOWED_ORIGINS: http://localhost:${FRONT_PORT:-3001}
       CLIENT_ID: global_dashboard_worker
       CLIENT_SECRET: ${SECRET_GLOBAL_DASHBOARD_WORKER:-Dev.GlobalDashboard-08}
       SERVER_PORT: "8080"
@@ -476,6 +479,7 @@ services:
       <<: *esperar-brokers
     environment:
       <<: [*entorno-token, *java-opts-tls]
+      DASHBOARD_ALLOWED_ORIGINS: http://localhost:${FRONT_PORT:-3001}
       CLIENT_ID: regional_dashboard_worker
       CLIENT_SECRET: ${SECRET_REGIONAL_DASHBOARD_WORKER:-Dev.RegionalDashboard-09}
       SERVER_PORT: "8081"
@@ -509,7 +513,7 @@ services:
       # Panel de administracion (servidor de Next -> voting_api por la red interna). Valores de DESARROLLO.
       ADMIN_API_URL: http://voting-api:8080
       ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:-dev-only-admin-api-token-0123456789abcdef}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-dev-admin-password}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:?genere un hash con scripts/hash-admin-password.mjs}
       ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:-dev-only-admin-session-secret-0123456789}
     read_only: true
     tmpfs:

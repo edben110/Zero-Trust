@@ -9,7 +9,6 @@ import com.zerotrust.voterregistration.adapter.persistence.RepositorioPadronJpa;
 import com.zerotrust.voterregistration.adapter.persistence.VotanteJpaRepository;
 import com.zerotrust.voterregistration.adapter.persistence.VotanteRegistradoEntity;
 import com.zerotrust.voterregistration.domain.ElectionId;
-import com.zerotrust.voterregistration.domain.NombreCompleto;
 import com.zerotrust.voterregistration.domain.PadronInicial;
 import com.zerotrust.voterregistration.domain.PadronInvalidoException;
 import com.zerotrust.voterregistration.domain.Region;
@@ -53,7 +52,7 @@ class AdaptadoresRegistroTest {
     private static final Instant AHORA = Instant.parse("2026-11-14T08:00:00Z");
 
     private static VotanteRegistrado votante(String id) {
-        return new VotanteRegistrado(new VoterId(id), new NombreCompleto("Ana Pérez"), new Region("norte"), AHORA);
+        return new VotanteRegistrado(new VoterId(id), new Region("norte"), AHORA);
     }
 
     @Nested
@@ -79,9 +78,9 @@ class AdaptadoresRegistroTest {
         @DisplayName("Debe reemplazar la cédula por el mismo UUID que devuelve POST /voter-id de voting_api")
         void lee() {
             List<RegistroVotanteCrudo> crudos = lector.interpretar(("[{\"cedula\":\"" + CEDULA
-                    + "\",\"fullName\":\"Ana Pérez\",\"region\":\"norte\"}]").getBytes(StandardCharsets.UTF_8));
+                    + "\",\"region\":\"norte\"}]").getBytes(StandardCharsets.UTF_8));
 
-            assertThat(crudos).containsExactly(new RegistroVotanteCrudo(VOTER_ID_CEDULA, "Ana Pérez", "norte"));
+            assertThat(crudos).containsExactly(new RegistroVotanteCrudo(VOTER_ID_CEDULA, "norte"));
             assertThat(crudos.get(0).toString()).doesNotContain(CEDULA);
         }
 
@@ -89,8 +88,8 @@ class AdaptadoresRegistroTest {
         @DisplayName("Dos escrituras equivalentes de la cédula dan el mismo UUID")
         void equivalentes() {
             List<RegistroVotanteCrudo> crudos = lector.interpretar(
-                    ("[{\"cedula\":\"1.234.567.890\",\"fullName\":\"A\",\"region\":\"norte\"},"
-                            + "{\"cedula\":\" 1234567890 \",\"fullName\":\"B\",\"region\":\"sur\"}]")
+                    ("[{\"cedula\":\"1.234.567.890\",\"region\":\"norte\"},"
+                            + "{\"cedula\":\" 1234567890 \",\"region\":\"sur\"}]")
                             .getBytes(StandardCharsets.UTF_8));
 
             assertThat(crudos.get(0).voterId()).isEqualTo(crudos.get(1).voterId());
@@ -99,9 +98,9 @@ class AdaptadoresRegistroTest {
         @Test
         @DisplayName("Una cédula ausente, numérica o mal formada invalida el archivo sin revelar su valor")
         void cedulaInvalida() {
-            for (String registro : List.of("{\"fullName\":\"A\",\"region\":\"norte\"}",
-                    "{\"cedula\":12345678,\"fullName\":\"A\",\"region\":\"norte\"}",
-                    "{\"cedula\":\"98765x4321\",\"fullName\":\"A\",\"region\":\"norte\"}")) {
+            for (String registro : List.of("{\"region\":\"norte\"}",
+                    "{\"cedula\":12345678,\"region\":\"norte\"}",
+                    "{\"cedula\":\"98765x4321\",\"region\":\"norte\"}")) {
                 PadronInvalidoException error = assertThrows(PadronInvalidoException.class,
                         () -> lector.interpretar(("[" + registro + "]").getBytes(StandardCharsets.UTF_8)));
 
@@ -185,7 +184,7 @@ class AdaptadoresRegistroTest {
             publicador().publicar(votante(ID_1));
 
             assertThat(valor.getValue()).isEqualTo("{\"voterId\":\"" + ID_1
-                    + "\",\"fullName\":\"Ana Pérez\",\"region\":\"norte\",\"registeredAt\":\"2026-11-14T08:00:00Z\"}");
+                    + "\",\"region\":\"norte\",\"registeredAt\":\"2026-11-14T08:00:00Z\"}");
         }
 
         @Test

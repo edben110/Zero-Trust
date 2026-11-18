@@ -31,20 +31,11 @@ class PadronInicialTest {
         }
 
         @Test
-        @DisplayName("NombreCompleto y Region no pueden estar vacíos ni pasar del largo de la tabla")
+        @DisplayName("Region no puede estar vacía ni pasar del largo de la tabla")
         void largos() {
-            assertThrows(IllegalArgumentException.class, () -> new NombreCompleto(" "));
-            assertThrows(IllegalArgumentException.class, () -> new NombreCompleto("a".repeat(256)));
             assertThrows(IllegalArgumentException.class, () -> new Region(""));
             assertThrows(IllegalArgumentException.class, () -> new Region("r".repeat(101)));
-            assertThrows(IllegalArgumentException.class, () -> new NombreCompleto(null));
-            assertThat(new NombreCompleto("a".repeat(255)).valor()).hasSize(255);
-        }
-
-        @Test
-        @DisplayName("NombreCompleto no debe aparecer en toString para no filtrarse en logs")
-        void nombreNoEnLogs() {
-            assertThat(new NombreCompleto("Ana Pérez").toString()).doesNotContain("Ana");
+            assertThrows(IllegalArgumentException.class, () -> new Region(null));
         }
     }
 
@@ -57,8 +48,8 @@ class PadronInicialTest {
         void mapea() {
             // Arrange
             List<RegistroVotanteCrudo> crudos = List.of(
-                    new RegistroVotanteCrudo(ID_1, "Ana Pérez", "norte"),
-                    new RegistroVotanteCrudo(ID_2, "Luis Gómez", "sur"));
+                    new RegistroVotanteCrudo(ID_1, "norte"),
+                    new RegistroVotanteCrudo(ID_2, "sur"));
 
             // Act
             PadronInicial padron = PadronInicial.desde(crudos, AHORA);
@@ -73,28 +64,28 @@ class PadronInicialTest {
         @DisplayName("Un registro inválido invalida todo el padrón e indica la posición y el campo")
         void registroInvalido() {
             List<RegistroVotanteCrudo> crudos = List.of(
-                    new RegistroVotanteCrudo(ID_1, "Ana Pérez", "norte"),
-                    new RegistroVotanteCrudo(ID_2, " ", "sur"));
+                    new RegistroVotanteCrudo(ID_1, "norte"),
+                    new RegistroVotanteCrudo(ID_2, " "));
 
             PadronInvalidoException error = assertThrows(PadronInvalidoException.class,
                     () -> PadronInicial.desde(crudos, AHORA));
 
-            assertThat(error.getMessage()).contains("[1]").contains("fullName").doesNotContain("Ana");
+            assertThat(error.getMessage()).contains("[1]").contains("region");
         }
 
         @Test
         @DisplayName("Un voterId repetido o un padrón vacío son inválidos")
         void repetidoOVacio() {
             assertThrows(PadronInvalidoException.class, () -> PadronInicial.desde(List.of(
-                    new RegistroVotanteCrudo(ID_1, "Ana", "norte"),
-                    new RegistroVotanteCrudo(ID_1.toUpperCase(), "Otra", "sur")), AHORA));
+                    new RegistroVotanteCrudo(ID_1, "norte"),
+                    new RegistroVotanteCrudo(ID_1.toUpperCase(), "sur")), AHORA));
             assertThrows(PadronInvalidoException.class, () -> PadronInicial.desde(List.of(), AHORA));
         }
 
         @Test
         @DisplayName("La lista de votantes no se puede modificar desde fuera")
         void inmutable() {
-            PadronInicial padron = PadronInicial.desde(List.of(new RegistroVotanteCrudo(ID_1, "Ana", "norte")), AHORA);
+            PadronInicial padron = PadronInicial.desde(List.of(new RegistroVotanteCrudo(ID_1, "norte")), AHORA);
 
             assertThrows(UnsupportedOperationException.class, () -> padron.votantes().clear());
         }
