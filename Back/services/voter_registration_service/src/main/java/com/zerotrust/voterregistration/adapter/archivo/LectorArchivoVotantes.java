@@ -1,17 +1,29 @@
 package com.zerotrust.voterregistration.adapter.archivo;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.voterregistration.domain.PadronInvalidoException;
-import com.zerotrust.voterregistration.domain.RegistroVotanteCrudo;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zerotrust.voterregistration.domain.Cedula;
+import com.zerotrust.voterregistration.domain.ElectionId;
+import com.zerotrust.voterregistration.domain.PadronInvalidoException;
+import com.zerotrust.voterregistration.domain.RegistroVotanteCrudo;
+import com.zerotrust.voterregistration.port.DerivadorVoterId;
+
+// El archivo trae la cédula de cada votante; aquí mismo se convierte en el UUID derivado (el mismo que devuelve
+// POST /voter-id de voting_api). La cédula no sale de este método: ni PostgreSQL ni Kafka la reciben.
 public class LectorArchivoVotantes {
 
     private final ObjectMapper json = new ObjectMapper();
+    private final DerivadorVoterId derivador;
+    private final ElectionId eleccion;
+
+    public LectorArchivoVotantes(DerivadorVoterId derivador, ElectionId eleccion) {
+        this.derivador = derivador;
+        this.eleccion = eleccion;
+    }
 
     public List<RegistroVotanteCrudo> interpretar(byte[] contenido) {
         JsonNode raiz;
@@ -29,9 +41,19 @@ public class LectorArchivoVotantes {
             if (!nodo.isObject()) {
                 throw new PadronInvalidoException("registro [" + i + "]: debe ser un objeto");
             }
-            crudos.add(new RegistroVotanteCrudo(texto(nodo, "voterId"), texto(nodo, "fullName"), texto(nodo, "region")));
+            crudos.add(new RegistroVotanteCrudo(voterIdDe(texto(nodo, "cedula"), i), texto(nodo, "fullName"),
+                    texto(nodo, "region")));
         }
         return crudos;
+    }
+
+    // El mensaje de error no incluye el valor de la cédula.
+    private String voterIdDe(String cedula, int posicion) {
+        try {
+            return derivador.derivar(new Cedula(cedula), eleccion).valor();
+        } catch (IllegalArgumentException e) {
+            throw new PadronInvalidoException("registro [" + posicion + "]: cedula inválida");
+        }
     }
 
     private static String texto(JsonNode nodo, String campo) {

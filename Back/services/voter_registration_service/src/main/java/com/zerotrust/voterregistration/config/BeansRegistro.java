@@ -6,6 +6,9 @@ import com.zerotrust.voterregistration.adapter.archivo.LectorArchivoVotantes;
 import com.zerotrust.voterregistration.adapter.kafka.PublicadorElegiblesKafka;
 import com.zerotrust.voterregistration.adapter.persistence.RepositorioPadronJpa;
 import com.zerotrust.voterregistration.adapter.persistence.VotanteJpaRepository;
+import com.zerotrust.voterregistration.adapter.crypto.DerivadorVoterIdHmac;
+import com.zerotrust.voterregistration.domain.ElectionId;
+import com.zerotrust.voterregistration.port.DerivadorVoterId;
 import com.zerotrust.voterregistration.port.FuentePadron;
 import com.zerotrust.voterregistration.port.PublicadorElegibles;
 import com.zerotrust.voterregistration.port.RepositorioPadron;
@@ -23,13 +26,36 @@ import java.time.Duration;
 @Configuration
 public class BeansRegistro {
 
+    // Fail-fast: ELECTION_ID y VOTER_HMAC_KEY deben ser los mismos que usa voting_api, o el padrón no coincidiría.
     @Bean
-    FuentePadron fuentePadron(Environment entorno) {
+    ElectionId eleccion(Environment entorno) {
+        String valor = entorno.getProperty("ELECTION_ID");
+        if (valor == null || valor.isBlank()) {
+            throw new IllegalStateException("ELECTION_ID: variable obligatoria sin definir");
+        }
+        try {
+            return new ElectionId(valor);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("ELECTION_ID: " + e.getMessage());
+        }
+    }
+
+    @Bean
+    DerivadorVoterId derivadorVoterId(Environment entorno) {
+        try {
+            return DerivadorVoterIdHmac.desdeBase64(entorno.getProperty("VOTER_HMAC_KEY"));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("VOTER_HMAC_KEY: " + e.getMessage());
+        }
+    }
+
+    @Bean
+    FuentePadron fuentePadron(Environment entorno, DerivadorVoterId derivador, ElectionId eleccion) {
         String ruta = entorno.getProperty("VOTERS_FILE");
         if (ruta == null || ruta.isBlank()) {
             throw new IllegalStateException("VOTERS_FILE: variable obligatoria sin definir");
         }
-        return new FuentePadronArchivo(Path.of(ruta), new LectorArchivoVotantes());
+        return new FuentePadronArchivo(Path.of(ruta), new LectorArchivoVotantes(derivador, eleccion));
     }
 
     @Bean

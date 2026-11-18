@@ -7,12 +7,24 @@
 
 -- Votantes registrados
 -- Poblada por voter_registration_service (Sebas) al arrancar el sistema.
+-- voter_id es el UUID derivado de la cedula (el mismo que devuelve POST /voter-id); la cedula no se guarda.
 CREATE TABLE IF NOT EXISTS registered_voters (
     id            BIGSERIAL    PRIMARY KEY,
     voter_id      VARCHAR(36)  NOT NULL UNIQUE,  -- UUID
     full_name     VARCHAR(255) NOT NULL,
     region        VARCHAR(100) NOT NULL,
     registered_at TIMESTAMPTZ  NOT NULL
+);
+
+-- Voto unico por eleccion
+-- voting_api registra aqui el voterId (UUID derivado de la cedula con HMAC-SHA-256) en la misma transaccion
+-- que publica el voto. La cedula NUNCA se guarda: solo el UUID.
+-- La restriccion UNIQUE es la que impide el voto doble, incluso con solicitudes simultaneas.
+CREATE TABLE IF NOT EXISTS voter_election_usage (
+    election_id VARCHAR(64) NOT NULL,
+    voter_uuid  VARCHAR(36) NOT NULL,
+    used_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uq_voter_election_usage UNIQUE (election_id, voter_uuid)
 );
 
 -- Auditoria de votos aceptados

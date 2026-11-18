@@ -1,0 +1,14 @@
+import { NextRequest } from "next/server";
+import { accesoSeguro, llamarApi, mismoOrigen, sesionValida } from "@/lib/admin-server";
+
+// Alta en el padrón. La cédula solo pasa por aquí en el cuerpo de la petición: no se registra ni se guarda.
+export async function POST(req: NextRequest) {
+  if (!accesoSeguro(req) || !sesionValida(req) || !mismoOrigen(req)) return new Response(null, { status: 403 });
+  const body = await req.json().catch(() => null);
+  if (typeof body?.cedula !== "string" || typeof body?.fullName !== "string" || typeof body?.region !== "string") {
+    return Response.json({ error: "Cédula, nombre y región son obligatorios." }, { status: 400 });
+  }
+  return llamarApi("POST", "/internal/admin/voters", {
+    cedula: body.cedula, fullName: body.fullName, region: body.region,
+  });
+}

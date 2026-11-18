@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { enviarVoto } from "@/lib/api";
 import type { Catalogo, Comprobante as DatosComprobante, ResultadoVoto } from "@/lib/contrato";
@@ -25,6 +26,8 @@ function mensajeDeRechazo(resultado: Exclude<ResultadoVoto, { tipo: "aceptado" }
         : resultado.campos.map((campo) => MENSAJES_CAMPO[campo] ?? `Revise el campo ${campo}.`).join(" ");
     case "no-habilitado":
       return "Este código no está habilitado para votar.";
+    case "ya-voto":
+      return "Ya se registró un voto para este documento en esta elección.";
     case "no-disponible":
       return "La validación del votante no está disponible en este momento. Su voto no se registró; intente de nuevo en unos minutos.";
     case "error":
@@ -115,7 +118,11 @@ function Formulario({ catalogo, alAceptar }: { catalogo: Catalogo; alAceptar: (c
       <fieldset>
         <legend className="font-serif text-xl">1. Su código de votante</legend>
         <label htmlFor="voterId" className="mt-3 block text-sm text-tinta-suave">
-          Es el código único que recibió al inscribirse en el padrón.
+          Si no lo tiene, obténgalo con su cédula en{" "}
+          <Link href="/mi-codigo" className="underline hover:text-tinta">
+            Mi código de votante
+          </Link>
+          .
         </label>
         <input
           id="voterId"

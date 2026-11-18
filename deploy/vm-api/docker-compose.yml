@@ -22,13 +22,22 @@ services:
       SPRING_RABBITMQ_VIRTUAL_HOST: votacion   # los scopes de los tokens apuntan a este vhost
       TRUSTSTORE_FILE: /certs/truststore.p12
       TRUSTSTORE_PASSWORD: ${TRUSTSTORE_PASSWORD:?defina TRUSTSTORE_PASSWORD}
+      ELECTION_ID: ${ELECTION_ID:?defina ELECTION_ID}
+      VOTER_HMAC_KEY: ${VOTER_HMAC_KEY:?defina VOTER_HMAC_KEY}
+      DB_URL: jdbc:postgresql://vm-brokers:5432/${POSTGRES_DB:-zerotrust}
+      DB_USER: ${DB_USER:?defina DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD}
       CATALOG_FILE: /config/catalogo.json
+      # Catalogo editable desde el panel de administracion; persiste en el volumen catalog-data.
+      CATALOG_STATE_FILE: /data/catalogo.json
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?defina ADMIN_API_TOKEN}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?defina CORS_ALLOWED_ORIGINS}
       TRUST_FORWARDED_HEADERS: ${TRUST_FORWARDED_HEADERS:-false}
       RPC_TIMEOUT_MS: ${RPC_TIMEOUT_MS:-3000}
     volumes:
       - ./secrets/truststore.p12:/certs/truststore.p12:ro
       - ./config/catalogo.json:/config/catalogo.json:ro
+      - catalog-data:/data
     read_only: true
     tmpfs:
       - /tmp
@@ -41,3 +50,6 @@ services:
         limits:
           cpus: "1.00"
           memory: 512M
+
+volumes:
+  catalog-data:

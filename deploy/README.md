@@ -40,6 +40,13 @@ Orden: vm-auth, vm-brokers, vm-init, vm-core, vm-api, vm-app. Los servicios que 
 
 Los archivos montados los lee el usuario `appuser` del contenedor (uid 100): deben ser legibles por otros (`chmod 644`) o tener ese propietario.
 
+## Codigo de votante y voto unico
+- `vm-api` y `vm-init` deben tener el mismo `ELECTION_ID` y la misma `VOTER_HMAC_KEY` (Base64, minimo 32 bytes; `openssl rand -base64 32`). La clave es secreta y no debe cambiar durante la eleccion.
+- `voting_api` usa PostgreSQL (tabla `voter_election_usage`): nftables debe permitir `vm-api -> vm-brokers:5432`.
+- El padron (`VOTERS_FILE`) trae cedulas; `voter_registration_service` guarda solo el UUID derivado.
+- El panel de administracion tambien inscribe votantes: `voting_api` escribe en `registered_voters` y publica en `eligible_voters` (ACL en `vm-brokers/kafka/init.sh`). Tras cambiar ese script hay que volver a ejecutar `kafka-init`.
+- La cedula viaja en el cuerpo de `POST /voter-id`: en produccion hace falta TLS delante de `voting_api` (443).
+
 ## Recursos y replicas
 Limites de CPU y memoria en `deploy.resources.limits`, y `-XX:MaxRAMPercentage=75.0` en la JVM (definido en cada Dockerfile). Replicas: `analytics_archiver` x2, `user_validation_service` x2 y los dos dashboard workers x2. `vote_processor` y `regional_rollup_service` son una sola instancia (stateful, ver `docs/contratos.md`).
 

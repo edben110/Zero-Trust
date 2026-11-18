@@ -82,6 +82,16 @@ services:
         NEXT_PUBLIC_WS_REGIONAL_URL: ${PUBLIC_WS_REGIONAL_URL:?defina PUBLIC_WS_REGIONAL_URL}
     image: zerotrust/front:${IMAGE_TAG:-1.0}
     restart: unless-stopped
+    extra_hosts:
+      - "vm-api:${VM_API_IP:?defina VM_API_IP}"
+    environment:
+      # Panel de administracion: el servidor de Next llama a voting_api (vm-api) con el token compartido.
+      ADMIN_API_URL: http://vm-api:80
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:?defina ADMIN_API_TOKEN}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?defina ADMIN_PASSWORD}
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:?defina ADMIN_SESSION_SECRET}
+      # "1" solo con TLS delante del front y el puerto 3000 cerrado al exterior.
+      ADMIN_HTTPS_READY: ${ADMIN_HTTPS_READY:-0}
     ports:
       - "3000:3000"
     read_only: true

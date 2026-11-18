@@ -9,7 +9,7 @@ export default function AdminPage() {
       <p className="text-sm font-semibold uppercase tracking-widest text-sello">Mesa electoral · Administración</p>
       <h1 className="mt-3 font-serif text-4xl sm:text-5xl">Candidatos del tarjetón</h1>
       <p className="mt-4 max-w-2xl text-tinta-suave">
-        Los cambios se publican en el catálogo de votación. Para habilitar una votación se requieren al menos dos candidatos.
+        Los cambios se publican en el catálogo de votación. Para habilitar una votación se requieren al menos dos candidatos. Más abajo puede inscribir votantes en el padrón.
       </p>
       <AdministracionCandidatos />
     </main>
