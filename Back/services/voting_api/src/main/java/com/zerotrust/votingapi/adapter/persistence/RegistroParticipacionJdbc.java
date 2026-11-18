@@ -11,8 +11,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 // si la primera confirma, ON CONFLICT no inserta nada (duplicado); si revierte, la segunda sí inserta.
 public class RegistroParticipacionJdbc implements RegistroParticipacion {
 
-    private static final String INSERTAR = "INSERT INTO voter_election_usage (election_id, voter_uuid, used_at) "
-            + "VALUES (?, ?, now()) ON CONFLICT (election_id, voter_uuid) DO NOTHING";
+    // El bloqueo compartido serializa el registro con la rotación del run_id.
+    private static final String INSERTAR = "WITH actual AS (SELECT run_id FROM election_state WHERE id=1 FOR SHARE) "
+            + "INSERT INTO voter_election_usage (election_id, voter_uuid, used_at) "
+            + "SELECT ?, ?, now() FROM actual WHERE true "
+            + "ON CONFLICT (election_id, voter_uuid) DO NOTHING";
 
     private final JdbcTemplate jdbc;
 

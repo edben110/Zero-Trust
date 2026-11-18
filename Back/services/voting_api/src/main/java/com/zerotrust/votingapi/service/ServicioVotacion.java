@@ -14,6 +14,7 @@ import com.zerotrust.votingapi.domain.VotoEmitido;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
 import com.zerotrust.votingapi.port.PublicadorVotos;
 import com.zerotrust.votingapi.port.RegistroParticipacion;
+import com.zerotrust.votingapi.port.RegistroVotoAceptado;
 import com.zerotrust.votingapi.port.ValidadorVotante;
 
 public class ServicioVotacion {
@@ -21,17 +22,25 @@ public class ServicioVotacion {
     private final ValidadorVotante validador;
     private final PublicadorVotos publicador;
     private final RegistroParticipacion registro;
+    private final RegistroVotoAceptado aceptados;
     private final EjecutorTransaccional transaccion;
     private final ElectionId eleccion;
     private final Clock reloj;
     private final Supplier<UUID> generadorIds;
 
     public ServicioVotacion(ValidadorVotante validador, PublicadorVotos publicador, RegistroParticipacion registro,
-                            EjecutorTransaccional transaccion, ElectionId eleccion, Clock reloj,
-                            Supplier<UUID> generadorIds) {
+                             EjecutorTransaccional transaccion, ElectionId eleccion, Clock reloj,
+                             Supplier<UUID> generadorIds) {
+        this(validador, publicador, registro, voto -> { }, transaccion, eleccion, reloj, generadorIds);
+    }
+
+    public ServicioVotacion(ValidadorVotante validador, PublicadorVotos publicador, RegistroParticipacion registro,
+                            RegistroVotoAceptado aceptados, EjecutorTransaccional transaccion,
+                            ElectionId eleccion, Clock reloj, Supplier<UUID> generadorIds) {
         this.validador = validador;
         this.publicador = publicador;
         this.registro = registro;
+        this.aceptados = aceptados;
         this.transaccion = transaccion;
         this.eleccion = eleccion;
         this.reloj = reloj;
@@ -49,6 +58,7 @@ public class ServicioVotacion {
         VotoEmitido voto = VotoEmitido.emitir(solicitud, sourceIp, VoteId.de(generadorIds.get()), reloj.instant());
         return transaccion.ejecutar(() -> {
             registro.registrar(eleccion, solicitud.voterId());
+            aceptados.registrar(voto);
             publicador.publicar(voto);
             return new ComprobanteVoto(voto.voteId(), voto.timestamp());
         });

@@ -9,6 +9,7 @@ import com.zerotrust.votingapi.adapter.kafka.PublicadorElegiblesKafka;
 import com.zerotrust.votingapi.adapter.kafka.PublicadorVotosKafka;
 import com.zerotrust.votingapi.adapter.persistence.EjecutorTransaccionalSpring;
 import com.zerotrust.votingapi.adapter.persistence.RegistroParticipacionJdbc;
+import com.zerotrust.votingapi.adapter.persistence.RegistroVotoAceptadoJdbc;
 import com.zerotrust.votingapi.adapter.persistence.RepositorioPadronJdbc;
 import com.zerotrust.votingapi.adapter.rabbit.ValidadorVotanteRpc;
 import com.zerotrust.votingapi.domain.ElectionId;
@@ -17,6 +18,7 @@ import com.zerotrust.votingapi.port.EjecutorTransaccional;
 import com.zerotrust.votingapi.port.PublicadorElegibles;
 import com.zerotrust.votingapi.port.PublicadorVotos;
 import com.zerotrust.votingapi.port.RegistroParticipacion;
+import com.zerotrust.votingapi.port.RegistroVotoAceptado;
 import com.zerotrust.votingapi.port.RepositorioPadron;
 import com.zerotrust.votingapi.port.ValidadorVotante;
 import com.zerotrust.votingapi.service.ServicioIdentificacion;
@@ -66,9 +68,19 @@ public class BeansVotacion {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registro) {
-                registro.addMapping("/**")
+                // Las rutas administrativas solo son accesibles desde el BFF con token,
+                // nunca se habilitan mediante CORS para navegadores.
+                registro.addMapping("/vote")
                         .allowedOrigins(cors.origenes().toArray(String[]::new))
-                        .allowedMethods("GET", "POST")
+                        .allowedMethods("POST")
+                        .allowedHeaders("Content-Type");
+                registro.addMapping("/voter-id")
+                        .allowedOrigins(cors.origenes().toArray(String[]::new))
+                        .allowedMethods("POST")
+                        .allowedHeaders("Content-Type");
+                registro.addMapping("/catalog")
+                        .allowedOrigins(cors.origenes().toArray(String[]::new))
+                        .allowedMethods("GET")
                         .allowedHeaders("Content-Type");
             }
         };
@@ -143,15 +155,21 @@ public class BeansVotacion {
     }
 
     @Bean
+    RegistroVotoAceptado registroVotoAceptado(JdbcTemplate jdbc) {
+        return new RegistroVotoAceptadoJdbc(jdbc);
+    }
+
+    @Bean
     EjecutorTransaccional ejecutorTransaccional(PlatformTransactionManager gestor) {
         return new EjecutorTransaccionalSpring(gestor);
     }
 
     @Bean
     ServicioVotacion servicioVotacion(ValidadorVotante validador, PublicadorVotos publicador,
-                                      RegistroParticipacion registro, EjecutorTransaccional transaccion,
+                                       RegistroParticipacion registro, RegistroVotoAceptado aceptados,
+                                       EjecutorTransaccional transaccion,
                                       ElectionId eleccion) {
-        return new ServicioVotacion(validador, publicador, registro, transaccion, eleccion, Clock.systemUTC(),
+        return new ServicioVotacion(validador, publicador, registro, aceptados, transaccion, eleccion, Clock.systemUTC(),
                 UUID::randomUUID);
     }
 }

@@ -1,29 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { accesoSeguro, cookieAdmin, crearSesion, mismoOrigen, sesionValida, validarLogin } from "@/lib/admin-server";
+import { cookieAdmin, crearSesion, mismoOrigen, sesionValida, validarLogin } from "@/lib/admin-server";
 
 export async function GET(req: NextRequest) {
-  return NextResponse.json({ autenticado: accesoSeguro(req) && sesionValida(req) },
+  return NextResponse.json({ autenticado: sesionValida(req) },
     { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function POST(req: NextRequest) {
-  if (!accesoSeguro(req)) return NextResponse.json({ error: "La administración requiere HTTPS." }, { status: 403 });
   if (!mismoOrigen(req)) return NextResponse.json({ error: "Origen no permitido." }, { status: 403 });
   const datos = await req.json().catch(() => null);
   if (typeof datos?.usuario !== "string" || typeof datos?.password !== "string" ||
-      !validarLogin(datos.usuario, datos.password)) {
-    return NextResponse.json({ error: "Credenciales incorrectas o demasiados intentos." }, { status: 401 });
+      datos.usuario.length > 64 || datos.password.length > 256) {
+    return NextResponse.json({ error: "Credenciales incorrectas." }, { status: 401 });
   }
-  const res = NextResponse.json({ autenticado: true });
-  res.cookies.set({ ...cookieAdmin, value: crearSesion(),
-    secure: req.nextUrl.hostname !== "localhost" && req.nextUrl.hostname !== "127.0.0.1" });
+  const resultado = validarLogin(datos.usuario, datos.password);
+  if (resultado === "limitado") {
+    return NextResponse.json({ error: "Demasiados intentos. Espere 15 minutos." },
+      { status: 429, headers: { "Retry-After": "900", "Cache-Control": "no-store" } });
+  }
+  if (resultado !== "ok") {
+    return NextResponse.json({ error: "Credenciales incorrectas." },
+      { status: 401, headers: { "Cache-Control": "no-store" } });
+  }
+  const res = NextResponse.json({ autenticado: true }, { headers: { "Cache-Control": "no-store" } });
+  res.cookies.set({ ...cookieAdmin, value: crearSesion() });
   return res;
 }
 
 export async function DELETE(req: NextRequest) {
   if (!mismoOrigen(req)) return new Response(null, { status: 403 });
   const res = NextResponse.json({ autenticado: false });
-  res.cookies.set({ ...cookieAdmin, value: "", maxAge: 0,
-    secure: req.nextUrl.hostname !== "localhost" && req.nextUrl.hostname !== "127.0.0.1" });
+  res.cookies.set({ ...cookieAdmin, value: "", maxAge: 0 });
   return res;
 }

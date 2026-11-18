@@ -27,6 +27,28 @@ CREATE TABLE IF NOT EXISTS voter_election_usage (
     CONSTRAINT uq_voter_election_usage UNIQUE (election_id, voter_uuid)
 );
 
+-- Epoch de la votación visible. Rotarlo permite otra jornada con el mismo
+-- padrón y candidatos sin mezclar los resultados anteriores.
+CREATE TABLE IF NOT EXISTS election_state (
+    id     INT PRIMARY KEY CHECK (id = 1),
+    run_id UUID NOT NULL
+);
+INSERT INTO election_state (id, run_id) VALUES (1, gen_random_uuid())
+ON CONFLICT (id) DO NOTHING;
+
+-- Proyección transaccional de votos aceptados, fuente común de ambos escrutinios.
+-- Las filas de jornadas anteriores quedan separadas por run_id.
+CREATE TABLE IF NOT EXISTS accepted_votes (
+    run_id       UUID         NOT NULL,
+    vote_id      VARCHAR(36)  NOT NULL UNIQUE,
+    voter_uuid   VARCHAR(36)  NOT NULL,
+    candidate_id VARCHAR(36)  NOT NULL,
+    region       VARCHAR(100) NOT NULL,
+    voted_at     TIMESTAMPTZ  NOT NULL,
+    PRIMARY KEY (run_id, voter_uuid)
+);
+CREATE INDEX IF NOT EXISTS idx_accepted_votes_run_region ON accepted_votes (run_id, region);
+
 -- Auditoria de votos aceptados
 -- Cada voto que pasa validacion queda registrado aqui de forma inmutable.
 -- Poblada por analytics_archiver (Sebas).

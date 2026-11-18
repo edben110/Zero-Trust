@@ -1,5 +1,5 @@
 import "server-only";
-import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 
 const COOKIE = "zt_admin";
@@ -9,21 +9,14 @@ let ventana = 0;
 
 function configuracion() {
   const clave = process.env.ADMIN_SESSION_SECRET;
-  const password = process.env.ADMIN_PASSWORD;
+  const passwordHash = process.env.ADMIN_PASSWORD_HASH;
   const apiToken = process.env.ADMIN_API_TOKEN;
   const apiUrl = process.env.ADMIN_API_URL;
-  if (!clave || clave.length < 32 || !password || !apiToken || apiToken.length < 32 || !apiUrl) {
-    throw new Error("Configure ADMIN_SESSION_SECRET, ADMIN_PASSWORD, ADMIN_API_TOKEN y ADMIN_API_URL");
+  if (!clave || clave.length < 32 || !/^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(passwordHash ?? "") ||
+      !apiToken || apiToken.length < 32 || !apiUrl) {
+    throw new Error("Configure ADMIN_SESSION_SECRET, ADMIN_PASSWORD_HASH, ADMIN_API_TOKEN y ADMIN_API_URL");
   }
-  return { clave, password, apiToken, apiUrl: apiUrl.replace(/\/+$/, "") };
-}
-
-export function accesoSeguro(req: NextRequest) {
-  // ADMIN_HTTPS_READY solo debe activarse tras poner TLS delante del front y cerrar
-  // el acceso directo a :3000: X-Forwarded-Proto no es fiable si el puerto es público.
-  const local = req.nextUrl.hostname === "localhost" || req.nextUrl.hostname === "127.0.0.1";
-  return local || (process.env.ADMIN_HTTPS_READY === "1" &&
-    req.headers.get("x-forwarded-proto") === "https");
+  return { clave, passwordHash: passwordHash!, apiToken, apiUrl: apiUrl.replace(/\/+$/, "") };
 }
 
 export function mismoOrigen(req: NextRequest) {
@@ -31,8 +24,7 @@ export function mismoOrigen(req: NextRequest) {
   if (!origen) return false;
   try {
     const url = new URL(origen);
-    return url.host === req.headers.get("host") &&
-      (url.protocol === "https:" || accesoSeguro(req));
+    return url.host === req.headers.get("host") && url.protocol === req.nextUrl.protocol;
   } catch { return false; }
 }
 
@@ -42,14 +34,18 @@ function iguales(a: string, b: string) {
   return timingSafeEqual(x, y);
 }
 
-export function validarLogin(usuario: string, password: string) {
+export function validarLogin(usuario: string, password: string): "ok" | "incorrecto" | "limitado" {
   const ahora = Date.now();
   if (ahora - ventana > 15 * 60_000) { ventana = ahora; fallos = 0; }
-  if (fallos >= 5) return false;
-  const valido = iguales(usuario, "admin") && iguales(password, configuracion().password);
+  if (fallos >= 5) return "limitado";
+  const [, salHex, claveHex] = configuracion().passwordHash.split(":");
+  const esperado = Buffer.from(claveHex, "hex");
+  const calculado = scryptSync(password, Buffer.from(salHex, "hex"), esperado.length,
+    { N: 16384, r: 8, p: 1, maxmem: 64 * 1024 * 1024 });
+  const valido = iguales(usuario, "admin") && timingSafeEqual(calculado, esperado);
   if (!valido) fallos++;
   else fallos = 0;
-  return valido;
+  return valido ? "ok" : "incorrecto";
 }
 
 export function crearSesion() {
@@ -71,7 +67,7 @@ export function sesionValida(req: NextRequest) {
   return timingSafeEqual(Buffer.from(partes[2], "hex"), Buffer.from(firma, "hex"));
 }
 
-export const cookieAdmin = { name: COOKIE, httpOnly: true, secure: true,
+export const cookieAdmin = { name: COOKIE, httpOnly: true, secure: false,
   sameSite: "strict" as const, path: "/admin", maxAge: VIDA };
 
 export async function llamarApi(metodo: string, ruta: string, body?: unknown) {

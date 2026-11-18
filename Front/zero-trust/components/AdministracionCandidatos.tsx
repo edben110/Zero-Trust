@@ -113,6 +113,19 @@ export function AdministracionCandidatos() {
     finally { setOcupado(false); }
   }
 
+  async function reiniciarVotacion() {
+    if (!window.confirm("¿Iniciar otra votación con los mismos candidatos? Los votos actuales dejarán de contarse y cada votante podrá votar de nuevo. Esta acción no se puede deshacer.")) return;
+    setOcupado(true);
+    setAviso("");
+    try {
+      const respuesta = await fetch("/admin/api/election/reset", { method: "POST" });
+      const datos = await respuesta.json();
+      if (!respuesta.ok) { setAviso(datos.error ?? "No se pudo reiniciar la votación."); return; }
+      setAviso("Nueva votación iniciada. Los candidatos se conservaron y los resultados comienzan en cero.");
+    } catch { setAviso("No se pudo comunicar con el servidor."); }
+    finally { setOcupado(false); }
+  }
+
   function editar(c: Candidato) {
     setEditando(c.candidateId);
     setNombre(c.name);
@@ -123,6 +136,10 @@ export function AdministracionCandidatos() {
   if (!autenticado) return (
     <form onSubmit={iniciar} className="mt-10 max-w-md border border-tinta p-6 sm:p-8">
       <h2 className="font-serif text-2xl">Acceso administrativo</h2>
+      <p className="mt-3 text-sm text-sello">
+        Acceda solo por http://localhost:3001/admin con el túnel SSM abierto.
+        Network en su propio navegador mostrará la contraseña enviada; fuera del túnel HTTP no la cifra.
+      </p>
       <label className="mt-6 block text-sm font-medium">Usuario
         <input className={`${campo} mt-2`} autoComplete="username" value={usuario} onChange={(e) => setUsuario(e.target.value)} required />
       </label>
@@ -173,5 +190,14 @@ export function AdministracionCandidatos() {
     </form>
   </div>
   <AdministracionPadron regiones={catalogo?.regions ?? []} />
+  <section className="mt-8 border border-sello p-6" aria-label="Nueva votación">
+    <h2 className="font-serif text-2xl">Iniciar otra votación</h2>
+    <p className="mt-2">Conserva los candidatos y el padrón, reinicia los resultados y habilita un nuevo voto por persona.</p>
+    <button type="button" disabled={ocupado || !catalogo || catalogo.candidates.length < 2}
+      onClick={() => void reiniciarVotacion()}
+      className="mt-4 border-2 border-sello px-5 py-2 font-medium text-sello disabled:opacity-50">
+      Reiniciar votación
+    </button>
+  </section>
   </>;
 }

@@ -60,7 +60,11 @@ Los dashboard workers publican un puerto por replica: global 8080-8081, regional
 - El front corre con `next start` y los `node_modules` completos, porque `next.config.ts` necesita `typescript` en ejecucion.
 
 ## Prueba local (`deploy/local/`)
-Un solo `docker-compose.yml` que simula las 6 VMs en tu maquina, sin crear VMs ni editar `.env`.
+ Un solo `docker-compose.yml` que simula las 6 VMs en tu maquina, sin crear VMs.
+ Antes de levantarlo, exporta `ADMIN_PASSWORD_HASH` generado con
+ `node Front/zero-trust/scripts/hash-admin-password.mjs < ruta/clave-local.txt`
+ desde la raíz del repositorio. La contraseña debe tener al menos 20 caracteres;
+ no incluyas el archivo de texto en Git.
 
 ```
 cd deploy/local
@@ -78,3 +82,20 @@ Verificado con esta prueba: secretos y JWT, Kafka y RabbitMQ validando el token,
 
 Pendiente (codigo de otros servicios, no de este compose): `vote_processor`, `regional_rollup_service`, `bot_detector_service` y los dos dashboard workers se reinician en bucle porque no tienen cliente de token. Los dos primeros y `bot_detector_service` fallan por falta de JAAS de Kafka; los workers, porque RabbitMQ rechaza su login PLAIN sin JWT.
 Tambien hay que acordar los scopes de RabbitMQ: el ejemplo no da `configure` sobre `user_validation_queue`, y la prueba local lo anade en `secrets-init.sh`. Los clientes RabbitMQ usan el vhost `votacion` (`SPRING_RABBITMQ_VIRTUAL_HOST`).
+
+## Despliegue real en AWS (`deploy/aws/`)
+Un unico script de Bash + AWS CLI crea (o actualiza) las 6 instancias con los mismos
+composes de este directorio, su red y sus Security Groups, y las gobierna con SSM
+(sin abrir el puerto 22). Tambien genera los secretos de la tabla anterior.
+
+```bash
+export AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... AWS_DEFAULT_REGION=us-east-1
+./deploy/aws/zerotrust-aws.sh deploy      # idempotente
+./deploy/aws/zerotrust-aws.sh stop-all    # apagar sin perder discos
+./deploy/aws/zerotrust-aws.sh start-all
+./deploy/aws/zerotrust-aws.sh park        # apagar y borrar la NAT (ahorro)
+./deploy/aws/zerotrust-aws.sh destroy --yes
+```
+
+Topologia, matriz de Security Groups, politica IAM y diferencias con este README:
+`deploy/aws/README.md`.
