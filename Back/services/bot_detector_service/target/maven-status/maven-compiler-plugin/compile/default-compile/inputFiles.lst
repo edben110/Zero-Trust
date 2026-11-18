@@ -1,6 +1,7 @@
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\domain\model\SecurityAlert.java
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\adapter\kafka\SecurityAlertKafkaPublisher.java
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\adapter\persistence\FraudIncidentJpaRepository.java
+C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\adapter\kafka\FraudEventKafkaConsumer.java
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\adapter\kafka\RawVoteKafkaConsumer.java
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\adapter\persistence\FraudIncidentEntity.java
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\service\BotDetectorService.java
@@ -10,6 +11,7 @@ C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\adapter\persistence\JpaFraudIncidentRepository.java
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\config\RelojConfig.java
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\domain\port\RiskStateRepository.java
+C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\domain\model\FraudKind.java
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\domain\port\SecurityAlertPublisher.java
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\domain\state\BlockedState.java
 C:\Users\edben\OneDrive\Desktop\codes\POO\Zero trust\Back\services\bot_detector_service\src\main\java\com\zerotrust\botdetector\domain\state\IpRiskState.java

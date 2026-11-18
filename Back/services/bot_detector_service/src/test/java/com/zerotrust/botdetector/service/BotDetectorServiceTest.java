@@ -1,6 +1,7 @@
 package com.zerotrust.botdetector.service;
 
 import com.zerotrust.botdetector.domain.model.AlertOrigin;
+import com.zerotrust.botdetector.domain.model.FraudKind;
 import com.zerotrust.botdetector.domain.model.SecurityAlert;
 import com.zerotrust.botdetector.domain.port.FraudIncidentRepository;
 import com.zerotrust.botdetector.domain.port.RiskStateRepository;
@@ -18,6 +19,7 @@ import java.time.ZoneOffset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -129,5 +131,41 @@ class BotDetectorServiceTest {
         assertEquals("NORMAL", svc.riskLevelOf("5.5.5.5"));
         assertEquals(0, svc.voteCountOf("5.5.5.5"));
         verify(riskStates).actualizar("5.5.5.5", "NORMAL", 0, 60, AHORA);
+    }
+
+    @Test
+    void registraUnIncidenteDeFraudeSinAlterarElEstadoDeLaIp() {
+        // Arrange
+        BotDetectorService svc = buildService();
+        ArgumentCaptor<SecurityAlert> alerta = ArgumentCaptor.forClass(SecurityAlert.class);
+
+        // Act: voto duplicado reportado por voting_api
+        svc.recordFraud(FraudKind.DUPLICATE_VOTE, "6.6.6.6");
+
+        // Assert: se publica y persiste con su tipo, pero la IP sigue NORMAL
+        verify(alertPublisher).publish(alerta.capture());
+        verify(repository).save(alerta.getValue());
+        assertEquals(FraudKind.DUPLICATE_VOTE, alerta.getValue().kind());
+        assertEquals("NORMAL", alerta.getValue().riskLevel());
+        assertEquals(AlertOrigin.LIVE, alerta.getValue().origin());
+        assertEquals("NORMAL", svc.riskLevelOf("6.6.6.6"));
+        verify(riskStates, never()).actualizar(eq("6.6.6.6"), anyString(), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    void resetAllOlvidaTodosLosContextosEnMemoria() {
+        // Arrange
+        BotDetectorService svc = buildService();
+        svc.evaluate("7.7.7.7");
+        svc.evaluate("7.7.7.7");
+        svc.evaluate("7.7.7.7");
+        assertEquals(3, svc.voteCountOf("7.7.7.7"));
+
+        // Act
+        svc.resetAll();
+
+        // Assert
+        assertEquals("NORMAL", svc.riskLevelOf("7.7.7.7"));
+        assertEquals(0, svc.voteCountOf("7.7.7.7"));
     }
 }

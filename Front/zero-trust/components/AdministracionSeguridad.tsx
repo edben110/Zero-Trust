@@ -10,6 +10,8 @@ type Resumen = {
   incidents: number;
   live: number;
   drills: number;
+  duplicates: number;
+  wrongRegion: number;
   ipsWithIncidents: number;
   currentRisk: Record<string, number>;
 };
@@ -24,6 +26,7 @@ type EstadoIp = {
 type Incidente = {
   id: number;
   ip: string;
+  kind: string;
   riskLevel: string;
   voteCount: number;
   windowSeconds: number;
@@ -37,6 +40,16 @@ const NIVEL: Record<string, { etiqueta: string; clase: string }> = {
   SOSPECHOSA: { etiqueta: "Sospechosa", clase: "border-sello text-sello" },
   BLOQUEADA: { etiqueta: "Bloqueada", clase: "border-papel bg-sello text-papel" },
 };
+
+const TIPO: Record<string, string> = {
+  IP_PATTERN: "Patrón por IP",
+  DUPLICATE_VOTE: "Voto duplicado",
+  WRONG_REGION: "Región incorrecta",
+};
+
+function tipo(valor: string) {
+  return TIPO[valor] ?? valor ?? "—";
+}
 
 function nivel(valor: string) {
   return NIVEL[valor] ?? { etiqueta: valor, clase: "border-tinta text-tinta" };
@@ -67,6 +80,8 @@ function leerDatos(cuerpo: unknown): Datos | null {
       incidents: Number(resumen.incidents ?? 0),
       live: Number(resumen.live ?? 0),
       drills: Number(resumen.drills ?? 0),
+      duplicates: Number(resumen.duplicates ?? 0),
+      wrongRegion: Number(resumen.wrongRegion ?? 0),
       ipsWithIncidents: Number(resumen.ipsWithIncidents ?? 0),
       currentRisk: {
         NORMAL: Number(riesgo.NORMAL ?? 0),
@@ -158,6 +173,27 @@ export function AdministracionSeguridad() {
       `Reinicio enviado para ${ip.trim()}. La IP vuelve a NORMAL y sus contadores a cero.`);
   }
 
+  // El sondeo cada 3 s ya refresca la vista; este botón fuerza la lectura y
+  // deja constancia visible de que sí se consultó el servidor.
+  async function actualizar() {
+    setOcupado(true);
+    setAviso(null);
+    const leidos = await descargar();
+    if (leidos) {
+      setDatos(leidos);
+      setAviso({ texto: `Estado actualizado a las ${new Date().toLocaleTimeString("es-CO")}.`, error: false });
+    } else {
+      setAviso({ texto: "No se pudo actualizar. Verifique la sesión y vuelva a iniciar sesión.", error: true });
+    }
+    setOcupado(false);
+  }
+
+  async function purgar() {
+    if (!window.confirm("Se eliminarán TODOS los incidentes y los estados por IP. Los contadores quedarán en cero y la acción no se puede deshacer. ¿Continuar?")) return;
+    await llamar("/admin/api/security/purge", {},
+      "Incidentes y estados por IP eliminados. Los contadores quedaron en cero.");
+  }
+
   if (!datos) return (
     <section aria-label="Detección de ataques" className="mt-12 border-t-2 border-tinta pt-8">
       <h2 className="font-serif text-2xl">Detección de ataques por IP</h2>
@@ -201,6 +237,12 @@ export function AdministracionSeguridad() {
         ))}
       </p>
 
+      <p className="mt-2 text-sm text-tinta-suave">
+        Por tipo: patrón por IP <strong className="cifras">{summary.incidents - summary.duplicates - summary.wrongRegion}</strong>
+        {" "}· voto duplicado <strong className="cifras">{summary.duplicates}</strong>
+        {" "}· región incorrecta <strong className="cifras">{summary.wrongRegion}</strong>.
+      </p>
+
       <form onSubmit={simular} className="mt-8 grid gap-5 border border-tinta p-6 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <label className="block text-sm font-medium">Dirección IP real o de prueba
           <input className={`${campo} mt-2 font-mono`} value={ip} onChange={(e) => setIp(e.target.value)}
@@ -216,8 +258,12 @@ export function AdministracionSeguridad() {
             className="border-2 border-sello px-5 py-2 font-medium text-sello disabled:opacity-50">
             Restablecer IP
           </button>
-          <button type="button" onClick={() => void cargar()} disabled={ocupado} className="text-sm underline underline-offset-4">
-            Actualizar ahora
+          <button type="button" onClick={() => void actualizar()} disabled={ocupado} className="text-sm underline underline-offset-4">
+            {ocupado ? "Actualizando…" : "Actualizar ahora"}
+          </button>
+          <button type="button" onClick={() => void purgar()} disabled={ocupado}
+            className="ml-auto border-2 border-sello bg-sello px-5 py-2 font-medium text-papel hover:bg-papel hover:text-sello disabled:opacity-50">
+            Borrar incidentes y estados
           </button>
         </div>
         <div aria-live="polite" className="sm:col-span-2">
@@ -258,30 +304,34 @@ export function AdministracionSeguridad() {
 
       <h3 className="mt-10 border-b border-tinta pb-2 font-serif text-xl">Incidentes recientes ({incidents.length})</h3>
       <p className="mt-2 text-sm text-tinta-suave">
-        Registro append-only en PostgreSQL. <strong>LIVE</strong> es tráfico real; <strong>DRILL</strong> es una
-        prueba lanzada desde este panel.
+        Registro en PostgreSQL. <strong>LIVE</strong> es tráfico real; <strong>DRILL</strong> es una
+        prueba lanzada desde este panel. El botón «Borrar incidentes y estados» vacía este histórico.
       </p>
       <div className="mt-3 overflow-x-auto">
-        <table className="w-full min-w-[46rem] border-collapse text-sm">
+        <table className="w-full min-w-[52rem] border-collapse text-sm">
           <thead>
             <tr className="border-b border-tinta text-left">
               <th className="py-2 pr-3 font-medium">Detectado</th>
               <th className="py-2 pr-3 font-medium">IP</th>
+              <th className="py-2 pr-3 font-medium">Tipo</th>
               <th className="py-2 pr-3 font-medium">Estado</th>
               <th className="py-2 pr-3 font-medium">Votos</th>
               <th className="py-2 font-medium">Origen</th>
             </tr>
           </thead>
           <tbody>
-            {incidents.length === 0 && <tr><td colSpan={5} className="py-4 text-tinta-suave">Sin incidentes registrados.</td></tr>}
+            {incidents.length === 0 && <tr><td colSpan={6} className="py-4 text-tinta-suave">Sin incidentes registrados.</td></tr>}
             {incidents.map((fila) => (
               <tr key={fila.id} className="border-b border-tinta/20">
                 <td className="py-2 pr-3">{fecha(fila.detectedAt)}</td>
                 <td className="py-2 pr-3 font-mono">{fila.ip}</td>
+                <td className="py-2 pr-3">{tipo(fila.kind)}</td>
                 <td className="py-2 pr-3">
-                  <span className={`border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide ${nivel(fila.riskLevel).clase}`}>
-                    {nivel(fila.riskLevel).etiqueta}
-                  </span>
+                  {fila.kind === "IP_PATTERN" ? (
+                    <span className={`border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide ${nivel(fila.riskLevel).clase}`}>
+                      {nivel(fila.riskLevel).etiqueta}
+                    </span>
+                  ) : <span className="text-tinta-suave">—</span>}
                 </td>
                 <td className="cifras py-2 pr-3">{fila.voteCount}</td>
                 <td className="py-2 font-mono text-xs">{fila.origin}</td>

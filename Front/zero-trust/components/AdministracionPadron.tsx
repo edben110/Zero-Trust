@@ -78,7 +78,6 @@ export function AdministracionPadron({ regiones }: { regiones: string[] }) {
             className={`${campo} mt-2 font-mono`}
             inputMode="numeric"
             pattern="[0-9]*"
-            maxLength={10}
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}

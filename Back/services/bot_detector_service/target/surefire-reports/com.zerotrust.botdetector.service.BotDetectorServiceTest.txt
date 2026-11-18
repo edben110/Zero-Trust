@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: com.zerotrust.botdetector.service.BotDetectorServiceTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.654 s -- in com.zerotrust.botdetector.service.BotDetectorServiceTest
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.582 s -- in com.zerotrust.botdetector.service.BotDetectorServiceTest

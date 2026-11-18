@@ -33,8 +33,10 @@ import java.util.concurrent.TimeUnit;
  *   No se escribe en raw_votes: el escrutinio y la auditoría electoral quedan
  *   intactos.
  * - POST /reset: libera una IP BLOQUEADA (estado terminal del patrón State).
+ * - POST /purge: purga el histórico de incidentes y el estado vigente por IP.
+ *   También ordena al detector olvidar sus contextos en memoria.
  * - GET  /incidents: lee de PostgreSQL el estado vigente por IP y el histórico
- *   append-only de fraud_incidents.
+ *   de fraud_incidents (append-only salvo la purga administrativa explícita).
  *
  * Solo lo invoca el BFF autenticado con el token compartido. No usa CORS.
  */
@@ -144,6 +146,38 @@ public final class AdminSeguridadController {
         }
     }
 
+    /**
+     * Purga administrativa: elimina el histórico de incidentes y el estado
+     * vigente por IP. Primero ordena al detector olvidar sus contextos en
+     * memoria; si Kafka no confirma, no se borra nada para no dejar el panel
+     * mostrando ceros mientras el detector sigue contando votos.
+     *
+     * No toca el padrón, los votos aceptados ni los intentos de región: la
+     * jornada electoral sigue siendo la misma.
+     */
+    @PostMapping("/purge")
+    public ResponseEntity<?> purgar(
+            @RequestHeader(value = "X-Admin-Token", required = false) String recibido) {
+        if (!autorizado(recibido)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        try {
+            publicarComando("RESET_ALL");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("error", "No se pudo reiniciar el detector en Kafka; no se borraron registros."));
+        }
+        try {
+            int incidentes = jdbc.update("DELETE FROM fraud_incidents");
+            int estados = jdbc.update("DELETE FROM ip_risk_state");
+            return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                    .body(Map.of("purged", true, "incidents", incidentes, "ips", estados));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("error", "El detector se reinició, pero no se pudo purgar PostgreSQL."));
+        }
+    }
+
     @GetMapping("/incidents")
     public ResponseEntity<?> incidentes(
             @RequestHeader(value = "X-Admin-Token", required = false) String recibido) {
@@ -177,11 +211,20 @@ public final class AdminSeguridadController {
         kafka.send(topic, ip, carga).get(ESPERA_KAFKA_SEGUNDOS, TimeUnit.SECONDS);
     }
 
+    private void publicarComando(String accion) throws Exception {
+        Map<String, Object> mensaje = new LinkedHashMap<>();
+        mensaje.put("action", accion);
+        String carga = json.writeValueAsString(mensaje);
+        kafka.send(topic, "admin", carga).get(ESPERA_KAFKA_SEGUNDOS, TimeUnit.SECONDS);
+    }
+
     private Map<String, Object> resumen() {
         Map<String, Object> totales = jdbc.queryForObject("""
                 SELECT count(*)                                          AS total,
                        count(*) FILTER (WHERE origin = 'LIVE')           AS live,
                        count(*) FILTER (WHERE origin = 'DRILL')          AS drills,
+                       count(*) FILTER (WHERE kind = 'DUPLICATE_VOTE')   AS duplicados,
+                       count(*) FILTER (WHERE kind = 'WRONG_REGION')     AS region,
                        count(DISTINCT ip)                                AS ips
                 FROM fraud_incidents
                 """, (rs, fila) -> {
@@ -189,6 +232,8 @@ public final class AdminSeguridadController {
             m.put("incidents", rs.getLong("total"));
             m.put("live", rs.getLong("live"));
             m.put("drills", rs.getLong("drills"));
+            m.put("duplicates", rs.getLong("duplicados"));
+            m.put("wrongRegion", rs.getLong("region"));
             m.put("ipsWithIncidents", rs.getLong("ips"));
             return m;
         });
@@ -227,7 +272,7 @@ public final class AdminSeguridadController {
 
     private List<Map<String, Object>> incidentesRecientes() {
         return jdbc.query("""
-                SELECT id, ip, risk_level, vote_count, window_seconds, origin, detected_at
+                SELECT id, ip, kind, risk_level, vote_count, window_seconds, origin, detected_at
                 FROM fraud_incidents
                 ORDER BY detected_at DESC, id DESC
                 LIMIT ?
@@ -235,6 +280,7 @@ public final class AdminSeguridadController {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("id", rs.getLong("id"));
             m.put("ip", rs.getString("ip"));
+            m.put("kind", rs.getString("kind"));
             m.put("riskLevel", rs.getString("risk_level"));
             m.put("voteCount", rs.getInt("vote_count"));
             m.put("windowSeconds", rs.getInt("window_seconds"));

@@ -153,7 +153,6 @@ export function AdministracionCandidatos() {
       <h2 className="font-serif text-2xl">Acceso administrativo</h2>
       <p className="mt-3 text-sm text-sello">
         Acceda solo por http://localhost:3001/admin con el túnel SSM abierto.
-        Network en su propio navegador mostrará la contraseña enviada; fuera del túnel HTTP no la cifra.
       </p>
       <label className="mt-6 block text-sm font-medium">Usuario
         <input className={`${campo} mt-2`} autoComplete="username" value={usuario} onChange={(e) => setUsuario(e.target.value)} required />

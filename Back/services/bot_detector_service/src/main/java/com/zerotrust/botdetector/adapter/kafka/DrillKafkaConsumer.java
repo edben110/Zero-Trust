@@ -36,11 +36,15 @@ public class DrillKafkaConsumer {
         try {
             @SuppressWarnings("unchecked")
             Map<String, Object> payload = mapper.readValue(record.value(), Map.class);
+            String action = payload.get("action") instanceof String valor ? valor : "EVALUATE";
+            if ("RESET_ALL".equalsIgnoreCase(action)) {
+                service.resetAll();
+                return;
+            }
             String ip = payload.get("ip") instanceof String valor ? valor.strip() : null;
             if (ip == null || ip.isBlank()) {
                 return;
             }
-            String action = payload.get("action") instanceof String valor ? valor : "EVALUATE";
             if ("RESET".equalsIgnoreCase(action)) {
                 service.reset(ip);
                 return;

@@ -70,7 +70,6 @@ export function ConsultaCodigo() {
           type="text"
           inputMode="numeric"
           pattern="[0-9]*"
-          maxLength={10}
           value={cedula}
           onChange={(evento) => {
             setCedula(soloDigitos(evento.target.value));

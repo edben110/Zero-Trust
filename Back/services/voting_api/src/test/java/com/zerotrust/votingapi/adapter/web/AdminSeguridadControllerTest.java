@@ -94,4 +94,28 @@ class AdminSeguridadControllerTest {
         verify(kafka).send(eq("security_drills"), eq("203.0.113.10"), carga.capture());
         assertTrue(carga.getValue().contains("\"RESET\""));
     }
+
+    @Test
+    void laPurgaExigeTokenYNoBorraSinAutorizacion() {
+        ResponseEntity<?> respuesta = controlador.purgar(null);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, respuesta.getStatusCode());
+        verify(jdbc, never()).update(anyString());
+        verifyNoInteractions(kafka);
+    }
+
+    @Test
+    void laPurgaReiniciaElDetectorYBorraIncidentesYEstados() {
+        kafkaDisponible();
+        when(jdbc.update(anyString())).thenReturn(4, 2);
+        ArgumentCaptor<String> carga = ArgumentCaptor.forClass(String.class);
+
+        ResponseEntity<?> respuesta = controlador.purgar(TOKEN);
+
+        assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+        verify(kafka).send(eq("security_drills"), anyString(), carga.capture());
+        assertTrue(carga.getValue().contains("\"RESET_ALL\""));
+        verify(jdbc).update("DELETE FROM fraud_incidents");
+        verify(jdbc).update("DELETE FROM ip_risk_state");
+    }
 }

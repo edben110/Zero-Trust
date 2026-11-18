@@ -12,6 +12,7 @@ public record SecurityAlert(
         int         voteCount,
         int         windowSeconds,
         AlertOrigin origin,
+        FraudKind   kind,
         Instant     detectedAt
 ) {
     public SecurityAlert {
@@ -30,8 +31,17 @@ public record SecurityAlert(
         if (origin == null) {
             throw new IllegalArgumentException("origin no puede ser nulo");
         }
+        if (kind == null) {
+            throw new IllegalArgumentException("kind no puede ser nulo");
+        }
         if (detectedAt == null) {
             throw new IllegalArgumentException("detectedAt no puede ser nulo");
         }
+    }
+
+    /** Alerta del patrón State: conserva el contrato anterior sin el campo kind. */
+    public SecurityAlert(String ip, String riskLevel, int voteCount, int windowSeconds,
+                         AlertOrigin origin, Instant detectedAt) {
+        this(ip, riskLevel, voteCount, windowSeconds, origin, FraudKind.IP_PATTERN, detectedAt);
     }
 }

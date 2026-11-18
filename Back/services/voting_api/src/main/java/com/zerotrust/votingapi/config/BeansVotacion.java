@@ -6,6 +6,7 @@ import com.zerotrust.votingapi.adapter.config.OrigenesCors;
 import com.zerotrust.votingapi.adapter.config.ResolutorIpOrigen;
 import com.zerotrust.votingapi.adapter.crypto.DerivadorVoterIdHmac;
 import com.zerotrust.votingapi.adapter.kafka.PublicadorElegiblesKafka;
+import com.zerotrust.votingapi.adapter.kafka.PublicadorIncidentesFraudeKafka;
 import com.zerotrust.votingapi.adapter.kafka.PublicadorVotosKafka;
 import com.zerotrust.votingapi.adapter.persistence.EjecutorTransaccionalSpring;
 import com.zerotrust.votingapi.adapter.persistence.RegistroParticipacionJdbc;
@@ -18,6 +19,7 @@ import com.zerotrust.votingapi.port.DerivadorVoterId;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
 import com.zerotrust.votingapi.port.PublicadorElegibles;
 import com.zerotrust.votingapi.port.PublicadorVotos;
+import com.zerotrust.votingapi.port.RegistroIncidentesFraude;
 import com.zerotrust.votingapi.port.RegistroParticipacion;
 import com.zerotrust.votingapi.port.RegistroVotoAceptado;
 import com.zerotrust.votingapi.port.ControlRegionVotante;
@@ -142,6 +144,14 @@ public class BeansVotacion {
         return new PublicadorElegiblesKafka(plantilla, topic, json, Duration.ofMillis(esperaMs));
     }
 
+    // Voto duplicado y región incorrecta se publican como incidentes de fraude.
+    // bot_detector_service los persiste en fraud_incidents (único escritor de la tabla).
+    @Bean
+    RegistroIncidentesFraude registroIncidentesFraude(KafkaTemplate<String, String> plantilla, ObjectMapper json,
+                                                      @Value("${seguridad.fraud-topic:fraud_events}") String topic) {
+        return new PublicadorIncidentesFraudeKafka(plantilla, topic, json);
+    }
+
     // Las regiones válidas son las del catálogo vigente (el que edita el panel de administración).
     @Bean
     ServicioPadron servicioPadron(DerivadorVoterId derivador, RepositorioPadron repositorio,
@@ -174,10 +184,10 @@ public class BeansVotacion {
     @Bean
     ServicioVotacion servicioVotacion(ValidadorVotante validador, PublicadorVotos publicador,
                                        RegistroParticipacion registro, RegistroVotoAceptado aceptados,
-                                       ControlRegionVotante controlRegion,
+                                       ControlRegionVotante controlRegion, RegistroIncidentesFraude incidentes,
                                        EjecutorTransaccional transaccion,
                                       ElectionId eleccion) {
-        return new ServicioVotacion(validador, publicador, registro, aceptados, controlRegion, transaccion, eleccion, Clock.systemUTC(),
-                UUID::randomUUID);
+        return new ServicioVotacion(validador, publicador, registro, aceptados, controlRegion, incidentes, transaccion,
+                eleccion, Clock.systemUTC(), UUID::randomUUID);
     }
 }

@@ -1,6 +1,7 @@
 package com.zerotrust.botdetector.service;
 
 import com.zerotrust.botdetector.domain.model.AlertOrigin;
+import com.zerotrust.botdetector.domain.model.FraudKind;
 import com.zerotrust.botdetector.domain.model.IpTrafficContext;
 import com.zerotrust.botdetector.domain.model.SecurityAlert;
 import com.zerotrust.botdetector.domain.port.FraudIncidentRepository;
@@ -97,6 +98,40 @@ public class BotDetectorService {
         }
         ipContexts.remove(ip);
         riskStates.actualizar(ip, "NORMAL", 0, windowSeconds, clock.instant());
+    }
+
+    /**
+     * Registra un incidente de fraude electoral detectado por voting_api
+     * (voto duplicado o voto anulado por región incorrecta).
+     *
+     * No altera el patrón State de la IP: un doble clic humano no debe
+     * bloquear una dirección. Solo se publica la alerta y se persiste el
+     * incidente con su tipo.
+     */
+    public void recordFraud(FraudKind kind, String ip) {
+        if (kind == null || ip == null || ip.isBlank()) {
+            return;
+        }
+        Instant ahora = clock.instant();
+        SecurityAlert alert = new SecurityAlert(
+                ip,
+                riskLevelOf(ip),
+                voteCountOf(ip),
+                windowSeconds,
+                AlertOrigin.LIVE,
+                kind,
+                ahora
+        );
+        alertPublisher.publish(alert);
+        repository.save(alert);
+    }
+
+    /**
+     * Purga administrativa: olvida todos los contextos en memoria. La fila de
+     * ip_risk_state la elimina el panel en PostgreSQL.
+     */
+    public void resetAll() {
+        ipContexts.clear();
     }
 
     /** Expone el nivel de riesgo actual de una IP (para tests y métricas). */

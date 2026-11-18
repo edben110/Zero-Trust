@@ -1,6 +1,7 @@
 package com.zerotrust.botdetector.adapter.persistence;
 
 import com.zerotrust.botdetector.domain.model.AlertOrigin;
+import com.zerotrust.botdetector.domain.model.FraudKind;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,7 +17,9 @@ import java.time.Instant;
  * Entidad JPA de auditoría para incidentes de fraude.
  * Vive en la capa de adaptadores; el dominio nunca la ve directamente.
  *
- * La tabla es append-only: no se proporcionan métodos de actualización.
+ * La tabla es append-only durante la jornada: no se proporcionan métodos de
+ * actualización. La única excepción es la purga administrativa explícita del
+ * panel, que vacía el histórico completo (nunca edita un incidente suelto).
  */
 @Entity
 @Table(name = "fraud_incidents")
@@ -42,6 +45,10 @@ public class FraudIncidentEntity {
     @Column(nullable = false, length = 10)
     private AlertOrigin origin;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private FraudKind kind;
+
     @Column(nullable = false)
     private Instant detectedAt;
 
@@ -49,12 +56,13 @@ public class FraudIncidentEntity {
     protected FraudIncidentEntity() {}
 
     public FraudIncidentEntity(String ip, String riskLevel, int voteCount,
-                                int windowSeconds, AlertOrigin origin, Instant detectedAt) {
+                                int windowSeconds, AlertOrigin origin, FraudKind kind, Instant detectedAt) {
         this.ip            = ip;
         this.riskLevel     = riskLevel;
         this.voteCount     = voteCount;
         this.windowSeconds = windowSeconds;
         this.origin        = origin;
+        this.kind          = kind;
         this.detectedAt    = detectedAt;
     }
 
@@ -65,5 +73,6 @@ public class FraudIncidentEntity {
     public int         getVoteCount()     { return voteCount; }
     public int         getWindowSeconds() { return windowSeconds; }
     public AlertOrigin getOrigin()        { return origin; }
+    public FraudKind   getKind()          { return kind; }
     public Instant     getDetectedAt()    { return detectedAt; }
 }
