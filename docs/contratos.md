@@ -58,8 +58,12 @@ AUTH_TOKEN_URL, AUTH_JWKS_URL, CLIENT_ID, CLIENT_SECRET, KAFKA_BOOTSTRAP, RABBIT
 |---|---|---|---|---|
 | eligible_voters (compactado) | voter_registration_service, voting_api (altas del panel de administración) | user_validation_service | voterId | `{"voterId":"<uuid>","region":"<string>","registeredAt":"<ISO-8601>"}` |
 | raw_votes | voting_api | vote_processor, regional_rollup_service, bot_detector_service, analytics_archiver | voteId | `{"voteId":"<uuid>","voterId":"<uuid>","candidateId":"<uuid>","region":"<string>","sourceIp":"<string>","timestamp":"<ISO-8601>"}` |
-| security_alerts | bot_detector_service | — | ip | `{"ip":"<string>","riskLevel":"NORMAL\|SOSPECHOSA\|BLOQUEADA","voteCount":<int>,"windowSeconds":<int>,"detectedAt":"<ISO-8601>"}` |
+| security_alerts | bot_detector_service | — | ip | `{"ip":"<string>","riskLevel":"NORMAL\|SOSPECHOSA\|BLOQUEADA","voteCount":<int>,"windowSeconds":<int>,"origin":"LIVE\|DRILL","kind":"IP_PATTERN\|DUPLICATE_VOTE\|WRONG_REGION","detectedAt":"<ISO-8601>"}` |
+| security_drills | voting_api (panel de administración) | bot_detector_service | ip | `{"action":"EVALUATE\|RESET\|RESET_ALL","ip":"<string>","votes":<int>}` |
+| fraud_events | voting_api | bot_detector_service | ip | `{"kind":"DUPLICATE_VOTE\|WRONG_REGION","ip":"<string>"}` |
 
+- `security_drills` permite probar la detección con IPs reales sin escribir en `raw_votes`: el detector aplica el mismo patrón State y marca el incidente con `origin=DRILL`, distinguible de `LIVE`. `RESET_ALL` es la purga administrativa: el detector olvida todos sus contextos en memoria.
+- `fraud_events` transporta incidentes electorales que no son patrones de tráfico: voto duplicado y voto anulado por región incorrecta. bot_detector_service los persiste en `fraud_incidents` con `origin=LIVE` y el `kind` correspondiente, y los republica en `security_alerts`.
 - Con TTL de 300 s, los clientes Kafka deben usar `sasl.login.refresh.buffer.seconds=30` (propuesto Sebas).
 
 ## RabbitMQ
@@ -103,6 +107,16 @@ El nombre del votante no se solicita ni se almacena: `registered_voters` conserv
 | 401 | — | Sin token o token incorrecto |
 | 409 | `{"error":"already_registered","message":"..."}` | Ese documento ya está en el padrón de la elección |
 | 503 | `{"error":"validation_unavailable"}` | Kafka o PostgreSQL no confirmaron. No se inscribió nada |
+
+### Seguridad (solo BFF autenticado, cabecera `X-Admin-Token`)
+| Ruta | Efecto |
+|---|---|
+| `GET /internal/admin/security/incidents` | Estado vigente por IP (`ip_risk_state`), umbrales e histórico de `fraud_incidents` con `kind` y `origin` |
+| `POST /internal/admin/security/drills` | Publica N `EVALUATE` en `security_drills`; el incidente queda con `origin=DRILL` |
+| `POST /internal/admin/security/reset` | Publica `RESET` para una IP: vuelve a NORMAL sin borrar el histórico |
+| `POST /internal/admin/security/purge` | Publica `RESET_ALL` (olvida contextos en memoria) y borra `fraud_incidents` e `ip_risk_state` |
+
+Un voto duplicado y un voto anulado por región incorrecta no se publican en `raw_votes`; voting_api los envía a `fraud_events` y bot_detector_service los guarda como `DUPLICATE_VOTE` y `WRONG_REGION` sin alterar el escrutinio.
 
 ## Cliente de token (todos los servicios)
 > Propuesto por Sebas, pendiente de validar con el equipo. Comprobado contra kafka-clients 3.6.2 y amqp-client 5.19.0 (los que gestiona Spring Boot 3.2.5).

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Candidato, Catalogo } from "@/lib/contrato";
 import { leerCatalogo } from "@/lib/validacion";
 import { AdministracionPadron } from "./AdministracionPadron";
+import { AdministracionSeguridad } from "./AdministracionSeguridad";
 
 const campo = "w-full border border-tinta bg-papel px-3 py-2 outline-offset-2 focus:outline focus:outline-sello";
 const boton = "border-2 border-tinta bg-tinta px-5 py-2 font-medium text-papel hover:bg-papel hover:text-tinta disabled:opacity-50";
@@ -152,7 +153,6 @@ export function AdministracionCandidatos() {
       <h2 className="font-serif text-2xl">Acceso administrativo</h2>
       <p className="mt-3 text-sm text-sello">
         Acceda solo por http://localhost:3001/admin con el túnel SSM abierto.
-        Network en su propio navegador mostrará la contraseña enviada; fuera del túnel HTTP no la cifra.
       </p>
       <label className="mt-6 block text-sm font-medium">Usuario
         <input className={`${campo} mt-2`} autoComplete="username" value={usuario} onChange={(e) => setUsuario(e.target.value)} required />
@@ -204,6 +204,7 @@ export function AdministracionCandidatos() {
     </form>
   </div>
   <AdministracionPadron regiones={catalogo?.regions ?? []} />
+  <AdministracionSeguridad />
   <section className="mt-8 border border-sello p-6" aria-label="Nueva votación">
     <h2 className="font-serif text-2xl">Iniciar otra votación</h2>
     <p className="mt-2">Conserva los candidatos y el padrón, reinicia los resultados y habilita un nuevo voto por persona.</p>

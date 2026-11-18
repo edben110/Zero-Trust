@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { consultarCodigo } from "@/lib/api";
 import type { ResultadoConsulta } from "@/lib/contrato";
-import { normalizarCedula } from "@/lib/validacion";
+import { copiarTexto } from "@/lib/portapapeles";
+import { normalizarCedula, soloDigitos } from "@/lib/validacion";
 
 function mensajeDeFallo(resultado: Exclude<ResultadoConsulta, { tipo: "encontrado" }>): string {
   switch (resultado.tipo) {
@@ -23,13 +24,13 @@ export function ConsultaCodigo() {
   const [cedula, setCedula] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [codigo, setCodigo] = useState<string | null>(null);
-  const [copiado, setCopiado] = useState(false);
+  const [estadoCopia, setEstadoCopia] = useState<"inactivo" | "copiado" | "fallo">("inactivo");
   const [consultando, setConsultando] = useState(false);
 
   async function consultar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setCodigo(null);
-    setCopiado(false);
+    setEstadoCopia("inactivo");
     const normalizada = normalizarCedula(cedula);
     if (normalizada === null) {
       setError("Escriba su número de cédula: de 6 a 10 dígitos.");
@@ -54,12 +55,7 @@ export function ConsultaCodigo() {
     if (codigo === null) {
       return;
     }
-    try {
-      await navigator.clipboard.writeText(codigo);
-      setCopiado(true);
-    } catch {
-      setCopiado(false);
-    }
+    setEstadoCopia((await copiarTexto(codigo)) ? "copiado" : "fallo");
   }
 
   return (
@@ -73,9 +69,10 @@ export function ConsultaCodigo() {
           name="cedula"
           type="text"
           inputMode="numeric"
+          pattern="[0-9]*"
           value={cedula}
           onChange={(evento) => {
-            setCedula(evento.target.value);
+            setCedula(soloDigitos(evento.target.value));
             setError(null);
           }}
           autoComplete="off"
@@ -117,7 +114,7 @@ export function ConsultaCodigo() {
               onClick={copiar}
               className="border border-tinta px-4 py-2 text-sm font-medium hover:bg-tinta hover:text-papel"
             >
-              {copiado ? "Copiado" : "Copiar código"}
+              {estadoCopia === "copiado" ? "Copiado" : "Copiar código"}
             </button>
             <Link
               href="/"
@@ -126,9 +123,14 @@ export function ConsultaCodigo() {
               Ir a votar
             </Link>
           </div>
-          <p aria-live="polite" className="sr-only">
-            {copiado ? "Código copiado al portapapeles" : ""}
-          </p>
+          <div aria-live="polite">
+            {estadoCopia === "fallo" && (
+              <p role="alert" className="mt-3 text-sm text-sello">
+                No se pudo copiar automáticamente. Seleccione el código y cópielo con Ctrl+C.
+              </p>
+            )}
+            {estadoCopia === "copiado" && <p className="sr-only">Código copiado al portapapeles</p>}
+          </div>
         </section>
       )}
     </div>

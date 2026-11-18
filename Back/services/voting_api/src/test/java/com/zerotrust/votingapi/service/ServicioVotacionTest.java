@@ -44,6 +44,7 @@ import com.zerotrust.votingapi.domain.Catalogo;
 import com.zerotrust.votingapi.domain.Cedula;
 import com.zerotrust.votingapi.domain.ComprobanteVoto;
 import com.zerotrust.votingapi.domain.ElectionId;
+import com.zerotrust.votingapi.domain.FraudKind;
 import com.zerotrust.votingapi.domain.PublicacionNoDisponibleException;
 import com.zerotrust.votingapi.domain.Region;
 import com.zerotrust.votingapi.domain.RegionIncorrectaException;
@@ -59,6 +60,7 @@ import com.zerotrust.votingapi.domain.VotoEmitido;
 import com.zerotrust.votingapi.port.ControlRegionVotante;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
 import com.zerotrust.votingapi.port.PublicadorVotos;
+import com.zerotrust.votingapi.port.RegistroIncidentesFraude;
 import com.zerotrust.votingapi.port.RegistroParticipacion;
 import com.zerotrust.votingapi.port.ValidadorVotante;
 
@@ -117,6 +119,8 @@ class ServicioVotacionTest {
         @Mock
         private RegistroParticipacion registro;
         @Mock
+        private RegistroIncidentesFraude incidentes;
+        @Mock
         private EjecutorTransaccional transaccion;
 
         private ServicioVotacion servicio;
@@ -124,7 +128,7 @@ class ServicioVotacionTest {
         @BeforeEach
         void construir() {
             servicio = new ServicioVotacion(validador, publicador, registro, voto -> { },
-                    (e, v, r) -> ControlRegionVotante.Resultado.CORRECTA, transaccion, ELECCION,
+                    (e, v, r) -> ControlRegionVotante.Resultado.CORRECTA, incidentes, transaccion, ELECCION,
                     Clock.fixed(AHORA, ZoneOffset.UTC), () -> VOTE_ID);
         }
 
@@ -153,6 +157,7 @@ class ServicioVotacionTest {
             assertThat(voto.getValue().timestamp()).isEqualTo(AHORA);
             assertThat(comprobante.voteId()).isEqualTo(VoteId.de(VOTE_ID));
             assertThat(comprobante.recibidoEn()).isEqualTo(AHORA);
+            verifyNoInteractions(incidentes);
         }
 
         @Test
@@ -200,6 +205,7 @@ class ServicioVotacionTest {
             assertThrows(VotoDuplicadoException.class, () -> servicio.votar(solicitud(VOTANTE), IP));
 
             verify(publicador, never()).publicar(any());
+            verify(incidentes, times(1)).registrar(FraudKind.DUPLICATE_VOTE, IP);
         }
 
         @Test
@@ -235,7 +241,7 @@ class ServicioVotacionTest {
 
         private ServicioVotacion servicioDe(ElectionId eleccion) {
             return new ServicioVotacion(validador, publicador, almacen, voto -> { },
-                    (e, v, r) -> ControlRegionVotante.Resultado.CORRECTA, almacen, eleccion,
+                    (e, v, r) -> ControlRegionVotante.Resultado.CORRECTA, (tipo, ip) -> { }, almacen, eleccion,
                     Clock.fixed(AHORA, ZoneOffset.UTC), UUID::randomUUID);
         }
 
@@ -337,6 +343,8 @@ class ServicioVotacionTest {
         @Mock
         private ControlRegionVotante controlRegion;
         @Mock
+        private RegistroIncidentesFraude incidentes;
+        @Mock
         private EjecutorTransaccional transaccion;
 
         private ServicioVotacion servicio;
@@ -344,7 +352,7 @@ class ServicioVotacionTest {
         @BeforeEach
         void construir() {
             servicio = new ServicioVotacion(validador, publicador, registro, voto -> { }, controlRegion,
-                    transaccion, ELECCION, Clock.fixed(AHORA, ZoneOffset.UTC), () -> VOTE_ID);
+                    incidentes, transaccion, ELECCION, Clock.fixed(AHORA, ZoneOffset.UTC), () -> VOTE_ID);
             when(validador.estaHabilitado(any())).thenReturn(true);
         }
 
@@ -377,6 +385,7 @@ class ServicioVotacionTest {
             // El fallo se contabiliza dentro de la transacción; el error se lanza después para no revertirlo.
             verify(transaccion).ejecutar(any());
             verifyNoInteractions(registro, publicador);
+            verify(incidentes, never()).registrar(any(), any());
         }
 
         @Test
@@ -389,6 +398,7 @@ class ServicioVotacionTest {
 
             verify(transaccion).ejecutar(any());
             verifyNoInteractions(registro, publicador);
+            verify(incidentes).registrar(FraudKind.WRONG_REGION, IP);
         }
     }
 }

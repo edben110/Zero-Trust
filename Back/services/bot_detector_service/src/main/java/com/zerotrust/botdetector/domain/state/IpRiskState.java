@@ -21,4 +21,12 @@ public interface IpRiskState {
      * Nombre canónico del estado (para serialización y alertas).
      */
     String name();
+
+    /**
+     * Indica si el estado es terminal. BLOQUEADA no se reinicia con la ventana
+     * de tiempo: solo una intervención administrativa devuelve la IP a NORMAL.
+     */
+    default boolean esFinal() {
+        return false;
+    }
 }

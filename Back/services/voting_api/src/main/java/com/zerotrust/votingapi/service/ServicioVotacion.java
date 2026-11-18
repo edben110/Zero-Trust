@@ -6,16 +6,19 @@ import java.util.function.Supplier;
 
 import com.zerotrust.votingapi.domain.ComprobanteVoto;
 import com.zerotrust.votingapi.domain.ElectionId;
+import com.zerotrust.votingapi.domain.FraudKind;
 import com.zerotrust.votingapi.domain.SolicitudVoto;
 import com.zerotrust.votingapi.domain.SourceIp;
 import com.zerotrust.votingapi.domain.RegionIncorrectaException;
 import com.zerotrust.votingapi.domain.VotanteNoHabilitadoException;
 import com.zerotrust.votingapi.domain.VotoAnuladoException;
+import com.zerotrust.votingapi.domain.VotoDuplicadoException;
 import com.zerotrust.votingapi.domain.VoteId;
 import com.zerotrust.votingapi.domain.VotoEmitido;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
 import com.zerotrust.votingapi.port.ControlRegionVotante;
 import com.zerotrust.votingapi.port.PublicadorVotos;
+import com.zerotrust.votingapi.port.RegistroIncidentesFraude;
 import com.zerotrust.votingapi.port.RegistroParticipacion;
 import com.zerotrust.votingapi.port.RegistroVotoAceptado;
 import com.zerotrust.votingapi.port.ValidadorVotante;
@@ -27,6 +30,7 @@ public class ServicioVotacion {
     private final RegistroParticipacion registro;
     private final RegistroVotoAceptado aceptados;
     private final ControlRegionVotante controlRegion;
+    private final RegistroIncidentesFraude incidentes;
     private final EjecutorTransaccional transaccion;
     private final ElectionId eleccion;
     private final Clock reloj;
@@ -34,13 +38,14 @@ public class ServicioVotacion {
 
     public ServicioVotacion(ValidadorVotante validador, PublicadorVotos publicador, RegistroParticipacion registro,
                             RegistroVotoAceptado aceptados, ControlRegionVotante controlRegion,
-                            EjecutorTransaccional transaccion, ElectionId eleccion, Clock reloj,
-                            Supplier<UUID> generadorIds) {
+                            RegistroIncidentesFraude incidentes, EjecutorTransaccional transaccion,
+                            ElectionId eleccion, Clock reloj, Supplier<UUID> generadorIds) {
         this.validador = validador;
         this.publicador = publicador;
         this.registro = registro;
         this.aceptados = aceptados;
         this.controlRegion = controlRegion;
+        this.incidentes = incidentes;
         this.transaccion = transaccion;
         this.eleccion = eleccion;
         this.reloj = reloj;
@@ -56,19 +61,31 @@ public class ServicioVotacion {
             throw new VotanteNoHabilitadoException();
         }
         VotoEmitido voto = VotoEmitido.emitir(solicitud, sourceIp, VoteId.de(generadorIds.get()), reloj.instant());
-        ResultadoTransaccion resultado = transaccion.ejecutar(() -> {
-            ControlRegionVotante.Resultado region = controlRegion.evaluar(eleccion, solicitud.voterId(), solicitud.region());
-            if (region != ControlRegionVotante.Resultado.CORRECTA) {
-                return new ResultadoTransaccion(null, region);
-            }
-            registro.registrar(eleccion, solicitud.voterId());
-            aceptados.registrar(voto);
-            publicador.publicar(voto);
-            return new ResultadoTransaccion(new ComprobanteVoto(voto.voteId(), voto.timestamp()), region);
-        });
+        ResultadoTransaccion resultado;
+        try {
+            resultado = transaccion.ejecutar(() -> {
+                ControlRegionVotante.Resultado region = controlRegion.evaluar(eleccion, solicitud.voterId(), solicitud.region());
+                if (region != ControlRegionVotante.Resultado.CORRECTA) {
+                    return new ResultadoTransaccion(null, region);
+                }
+                registro.registrar(eleccion, solicitud.voterId());
+                aceptados.registrar(voto);
+                publicador.publicar(voto);
+                return new ResultadoTransaccion(new ComprobanteVoto(voto.voteId(), voto.timestamp()), region);
+            });
+        } catch (VotoDuplicadoException e) {
+            // Ya se emitió un voto con este documento: es un incidente, no un error de red.
+            // Se reporta fuera de la transacción para que el rollback no lo descarte.
+            incidentes.registrar(FraudKind.DUPLICATE_VOTE, sourceIp);
+            throw e;
+        }
         // Fuera de la transacción: lanzarlas adentro revertiría el contador de errores.
         if (resultado.region() == ControlRegionVotante.Resultado.PRIMER_ERROR) throw new RegionIncorrectaException();
-        if (resultado.region() == ControlRegionVotante.Resultado.ANULADO) throw new VotoAnuladoException();
+        if (resultado.region() == ControlRegionVotante.Resultado.ANULADO) {
+            // Dos regiones distintas de la registrada: el voto queda anulado y se audita como fraude.
+            incidentes.registrar(FraudKind.WRONG_REGION, sourceIp);
+            throw new VotoAnuladoException();
+        }
         return resultado.comprobante();
     }
 
