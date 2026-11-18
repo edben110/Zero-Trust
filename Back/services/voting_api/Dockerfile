@@ -15,6 +15,7 @@ RUN mvn clean package -DskipTests -B
 FROM eclipse-temurin:17-jre-alpine
 
 RUN addgroup -S appgroup && adduser -S -G appgroup appuser
+RUN mkdir -p /data && chown appuser:appgroup /data
 
 WORKDIR /app
 COPY --from=builder --chown=appuser:appgroup /build/target/voting-api.jar app.jar

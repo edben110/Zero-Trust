@@ -67,6 +67,16 @@ class RegionalVoteAccumulatorTest {
     }
 
     @Test
+    void duplicadoEnOtraRegionNoIncrementaElEscrutinio() {
+        String voterId = UUID.randomUUID().toString();
+        String candidato = UUID.randomUUID().toString();
+        assertTrue(accumulator.accept(event("norte", voterId, candidato)));
+        assertFalse(accumulator.accept(event("sur", voterId, candidato)));
+        assertEquals(1L, accumulator.snapshotFor("norte").results().get(0).voteCount());
+        assertFalse(accumulator.activeRegions().contains("sur"));
+    }
+
+    @Test
     void regionesActivasSeActualizan() {
         // Arrange & Act
         accumulator.accept(event("norte", UUID.randomUUID().toString(), UUID.randomUUID().toString()));

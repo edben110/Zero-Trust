@@ -1,42 +1,34 @@
 [
   {
-    "voterId": "5d1e2f30-4a5b-4c6d-8e7f-9a0b1c2d3e4f",
-    "fullName": "Mariana Cárdenas Ruiz",
+    "cedula": "1020304051",
     "region": "norte"
   },
   {
-    "voterId": "6e2f3041-5b6c-4d7e-9f80-a1b2c3d4e5f6",
-    "fullName": "Julián Esteban Correa",
+    "cedula": "1020304052",
     "region": "sur"
   },
   {
-    "voterId": "7f304152-6c7d-4e8f-8091-b2c3d4e5f607",
-    "fullName": "Daniela Restrepo Vélez",
+    "cedula": "1020304053",
     "region": "oriente"
   },
   {
-    "voterId": "80415263-7d8e-4f90-91a2-c3d4e5f60718",
-    "fullName": "Camilo Andrés Salazar",
+    "cedula": "1020304054",
     "region": "occidente"
   },
   {
-    "voterId": "91526374-8e9f-4a01-a2b3-d4e5f6071829",
-    "fullName": "Paula Andrea Mejía",
+    "cedula": "1020304055",
     "region": "centro"
   },
   {
-    "voterId": "a2637485-9fa0-4b12-b3c4-e5f60718293a",
-    "fullName": "Tomás Herrera Gil",
+    "cedula": "1020304056",
     "region": "norte"
   },
   {
-    "voterId": "b3748596-a0b1-4c23-84d5-f60718293a4b",
-    "fullName": "Sara Lucía Montoya",
+    "cedula": "1020304057",
     "region": "sur"
   },
   {
-    "voterId": "c48596a7-b1c2-4d34-95e6-0718293a4b5c",
-    "fullName": "Felipe Arango Duque",
+    "cedula": "1020304058",
     "region": "centro"
   }
 ]

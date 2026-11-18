@@ -58,8 +58,8 @@ class ServicioRegistroPadronTest {
     @DisplayName("Debe guardar el padrón una vez y después publicar cada votante")
     void registra() {
         // Arrange
-        when(fuente.leer()).thenReturn(List.of(new RegistroVotanteCrudo(ID_1, "Ana", "norte"),
-                new RegistroVotanteCrudo(ID_2, "Luis", "sur")));
+        when(fuente.leer()).thenReturn(List.of(new RegistroVotanteCrudo(ID_1, "norte"),
+                new RegistroVotanteCrudo(ID_2, "sur")));
         when(repositorio.guardarNuevos(anyList())).thenReturn(1);
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<VotanteRegistrado>> guardados = ArgumentCaptor.forClass(List.class);
@@ -81,7 +81,7 @@ class ServicioRegistroPadronTest {
     @Test
     @DisplayName("Cada votante publicado lleva el instante de esta ejecución")
     void publicaConInstante() {
-        when(fuente.leer()).thenReturn(List.of(new RegistroVotanteCrudo(ID_1, "Ana", "norte")));
+        when(fuente.leer()).thenReturn(List.of(new RegistroVotanteCrudo(ID_1, "norte")));
         ArgumentCaptor<VotanteRegistrado> publicado = ArgumentCaptor.forClass(VotanteRegistrado.class);
 
         servicio.registrar();
@@ -94,8 +94,8 @@ class ServicioRegistroPadronTest {
     @Test
     @DisplayName("Con un registro inválido no guarda ni publica nada")
     void registroInvalido() {
-        when(fuente.leer()).thenReturn(List.of(new RegistroVotanteCrudo(ID_1, "Ana", "norte"),
-                new RegistroVotanteCrudo("x", "Luis", "sur")));
+        when(fuente.leer()).thenReturn(List.of(new RegistroVotanteCrudo(ID_1, "norte"),
+                new RegistroVotanteCrudo("x", "sur")));
 
         assertThrows(PadronInvalidoException.class, () -> servicio.registrar());
 
@@ -105,7 +105,7 @@ class ServicioRegistroPadronTest {
     @Test
     @DisplayName("Si la base de datos falla no publica nada")
     void falloBaseDeDatos() {
-        when(fuente.leer()).thenReturn(List.of(new RegistroVotanteCrudo(ID_1, "Ana", "norte")));
+        when(fuente.leer()).thenReturn(List.of(new RegistroVotanteCrudo(ID_1, "norte")));
         when(repositorio.guardarNuevos(anyList())).thenThrow(new IllegalStateException("sin base de datos"));
 
         assertThrows(IllegalStateException.class, () -> servicio.registrar());
@@ -116,7 +116,7 @@ class ServicioRegistroPadronTest {
     @Test
     @DisplayName("Si Kafka falla el error se propaga para terminar con código distinto de 0")
     void falloKafka() {
-        when(fuente.leer()).thenReturn(List.of(new RegistroVotanteCrudo(ID_1, "Ana", "norte")));
+        when(fuente.leer()).thenReturn(List.of(new RegistroVotanteCrudo(ID_1, "norte")));
         doThrow(new IllegalStateException("sin broker")).when(publicador).publicar(any());
 
         assertThrows(IllegalStateException.class, () -> servicio.registrar());

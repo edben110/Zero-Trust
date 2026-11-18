@@ -24,6 +24,16 @@ export function useCatalogo(): { catalogo: EstadoCatalogo; reintentar: () => voi
     };
   }, [intento]);
 
+  useEffect(() => {
+    const actualizar = () => setIntento((anterior) => anterior + 1);
+    window.addEventListener("catalogo-actualizado", actualizar);
+    const intervalo = window.setInterval(actualizar, 2000);
+    return () => {
+      window.removeEventListener("catalogo-actualizado", actualizar);
+      window.clearInterval(intervalo);
+    };
+  }, []);
+
   const reintentar = useCallback(() => {
     setCatalogo({ estado: "cargando" });
     setIntento((anterior) => anterior + 1);

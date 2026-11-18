@@ -22,6 +22,7 @@ Compose hace los dos pasos: `docker compose up -d --build` compila las imagenes 
 2. `cd deploy/<vm> && cp .env.example .env` y completar los valores.
 3. Crear los archivos de la tabla siguiente.
 4. `docker compose up -d --build`.
+5. En `vm-brokers`, si la base ya existía, aplicar `docs/migrations/*.sql` antes de actualizar los servicios que usan el esquema nuevo.
 
 Orden: vm-auth, vm-brokers, vm-init, vm-core, vm-api, vm-app. Los servicios que se conectan a Kafka tienen `restart` y reintentan hasta que auth_server y los brokers respondan.
 
@@ -40,6 +41,13 @@ Orden: vm-auth, vm-brokers, vm-init, vm-core, vm-api, vm-app. Los servicios que 
 
 Los archivos montados los lee el usuario `appuser` del contenedor (uid 100): deben ser legibles por otros (`chmod 644`) o tener ese propietario.
 
+## Codigo de votante y voto unico
+- `vm-api` y `vm-init` deben tener el mismo `ELECTION_ID` y la misma `VOTER_HMAC_KEY` (Base64, minimo 32 bytes; `openssl rand -base64 32`). La clave es secreta y no debe cambiar durante la eleccion.
+- `voting_api` usa PostgreSQL (tabla `voter_election_usage`): nftables debe permitir `vm-api -> vm-brokers:5432`.
+- El padron (`VOTERS_FILE`) trae cedulas; `voter_registration_service` guarda solo el UUID derivado.
+- El panel de administracion tambien inscribe votantes: `voting_api` escribe en `registered_voters` y publica en `eligible_voters` (ACL en `vm-brokers/kafka/init.sh`). Tras cambiar ese script hay que volver a ejecutar `kafka-init`.
+- La cedula viaja en el cuerpo de `POST /voter-id`: en produccion hace falta TLS delante de `voting_api` (443).
+
 ## Recursos y replicas
 Limites de CPU y memoria en `deploy.resources.limits`, y `-XX:MaxRAMPercentage=75.0` en la JVM (definido en cada Dockerfile). Replicas: `analytics_archiver` x2, `user_validation_service` x2 y los dos dashboard workers x2. `vote_processor` y `regional_rollup_service` son una sola instancia (stateful, ver `docs/contratos.md`).
 
@@ -53,7 +61,11 @@ Los dashboard workers publican un puerto por replica: global 8080-8081, regional
 - El front corre con `next start` y los `node_modules` completos, porque `next.config.ts` necesita `typescript` en ejecucion.
 
 ## Prueba local (`deploy/local/`)
-Un solo `docker-compose.yml` que simula las 6 VMs en tu maquina, sin crear VMs ni editar `.env`.
+ Un solo `docker-compose.yml` que simula las 6 VMs en tu maquina, sin crear VMs.
+ Antes de levantarlo, exporta `ADMIN_PASSWORD_HASH` generado con
+ `node Front/zero-trust/scripts/hash-admin-password.mjs < ruta/clave-local.txt`
+ desde la raíz del repositorio. La contraseña debe tener al menos 20 caracteres;
+ no incluyas el archivo de texto en Git.
 
 ```
 cd deploy/local
@@ -71,3 +83,20 @@ Verificado con esta prueba: secretos y JWT, Kafka y RabbitMQ validando el token,
 
 Pendiente (codigo de otros servicios, no de este compose): `vote_processor`, `regional_rollup_service`, `bot_detector_service` y los dos dashboard workers se reinician en bucle porque no tienen cliente de token. Los dos primeros y `bot_detector_service` fallan por falta de JAAS de Kafka; los workers, porque RabbitMQ rechaza su login PLAIN sin JWT.
 Tambien hay que acordar los scopes de RabbitMQ: el ejemplo no da `configure` sobre `user_validation_queue`, y la prueba local lo anade en `secrets-init.sh`. Los clientes RabbitMQ usan el vhost `votacion` (`SPRING_RABBITMQ_VIRTUAL_HOST`).
+
+## Despliegue real en AWS (`deploy/aws/`)
+Un unico script de Bash + AWS CLI crea (o actualiza) las 6 instancias con los mismos
+composes de este directorio, su red y sus Security Groups, y las gobierna con SSM
+(sin abrir el puerto 22). Tambien genera los secretos de la tabla anterior.
+
+```bash
+export AWS_ACCESS_KEY_ID=... AWS_SECRET_ACCESS_KEY=... AWS_DEFAULT_REGION=us-east-1
+./deploy/aws/zerotrust-aws.sh deploy      # idempotente
+./deploy/aws/zerotrust-aws.sh stop-all    # apagar sin perder discos
+./deploy/aws/zerotrust-aws.sh start-all
+./deploy/aws/zerotrust-aws.sh park        # apagar y borrar la NAT (ahorro)
+./deploy/aws/zerotrust-aws.sh destroy --yes
+```
+
+Topologia, matriz de Security Groups, politica IAM y diferencias con este README:
+`deploy/aws/README.md`.

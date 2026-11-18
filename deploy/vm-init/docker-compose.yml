@@ -23,6 +23,8 @@ services:
       DB_URL: jdbc:postgresql://vm-brokers:5432/${POSTGRES_DB:-zerotrust}
       DB_USER: ${DB_USER:?defina DB_USER}
       DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD}
+      ELECTION_ID: ${ELECTION_ID:?defina ELECTION_ID}
+      VOTER_HMAC_KEY: ${VOTER_HMAC_KEY:?defina VOTER_HMAC_KEY}
       VOTERS_FILE: /config/votantes.json
     volumes:
       - ./secrets/truststore.p12:/certs/truststore.p12:ro

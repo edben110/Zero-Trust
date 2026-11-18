@@ -94,7 +94,7 @@ services:
       context: ../../Back/services/vote_processor
     image: zerotrust/vote-processor:${IMAGE_TAG:-1.0}
     environment:
-      <<: *entorno-companeros
+      <<: [*entorno-companeros, *db]
       CLIENT_ID: vote_processor
       CLIENT_SECRET: ${SECRET_VOTE_PROCESSOR:?defina SECRET_VOTE_PROCESSOR}
     volumes:
@@ -112,7 +112,7 @@ services:
       context: ../../Back/services/regional_rollup_service
     image: zerotrust/regional-rollup-service:${IMAGE_TAG:-1.0}
     environment:
-      <<: *entorno-companeros
+      <<: [*entorno-companeros, *db]
       CLIENT_ID: regional_rollup_service
       CLIENT_SECRET: ${SECRET_REGIONAL_ROLLUP_SERVICE:?defina SECRET_REGIONAL_ROLLUP_SERVICE}
     volumes:

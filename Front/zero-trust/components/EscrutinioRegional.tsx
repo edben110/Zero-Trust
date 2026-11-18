@@ -1,7 +1,7 @@
 "use client";
 
 import { config } from "@/lib/config";
-import { nombreRegion } from "@/lib/formato";
+import { formatearNumero, nombreRegion } from "@/lib/formato";
 import { useCatalogo } from "@/lib/useCatalogo";
 import { useResultados } from "@/lib/useResultados";
 import { Acta } from "./Acta";
@@ -19,6 +19,9 @@ export function EscrutinioRegional() {
     destinos: regiones.map(destino),
     regional: true,
   });
+  const totalRegional = regiones.reduce((suma, region) =>
+    suma + (porDestino[destino(region)]?.results ?? []).reduce(
+      (total, resultado) => total + resultado.voteCount, 0), 0);
 
   return (
     <section aria-labelledby="titulo-regiones">
@@ -28,6 +31,9 @@ export function EscrutinioRegional() {
         </h2>
         <EstadoConexion estado={catalogo.estado === "listo" ? conexion : "conectando"} />
       </header>
+      <p className="mt-4 text-lg font-medium" aria-live="polite">
+        Total de votos en escrutinio regional: {formatearNumero(totalRegional)}
+      </p>
 
       {catalogo.estado === "cargando" && <p className="py-10 text-center text-tinta-suave">Cargando las regiones…</p>}
 

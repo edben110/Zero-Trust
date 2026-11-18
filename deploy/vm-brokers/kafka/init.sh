@@ -33,6 +33,7 @@ topic security_alerts 1
 # Productores
 topic_acl voter_registration_service eligible_voters Write Describe
 topic_acl voting_api                 raw_votes       Write Describe
+topic_acl voting_api                 eligible_voters Write Describe   # altas en el padrón desde el panel de administración
 topic_acl bot_detector_service       security_alerts Write Describe
 
 # Consumidores

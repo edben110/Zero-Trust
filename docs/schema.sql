@@ -7,13 +7,56 @@
 
 -- Votantes registrados
 -- Poblada por voter_registration_service (Sebas) al arrancar el sistema.
+-- voter_id es el UUID derivado de la cedula (el mismo que devuelve POST /voter-id); la cedula no se guarda.
+-- No se almacenan datos personales como el nombre: solo region y fecha de inscripcion.
 CREATE TABLE IF NOT EXISTS registered_voters (
     id            BIGSERIAL    PRIMARY KEY,
     voter_id      VARCHAR(36)  NOT NULL UNIQUE,  -- UUID
-    full_name     VARCHAR(255) NOT NULL,
     region        VARCHAR(100) NOT NULL,
     registered_at TIMESTAMPTZ  NOT NULL
 );
+
+-- Voto unico por eleccion
+-- voting_api registra aqui el voterId (UUID derivado de la cedula con HMAC-SHA-256) en la misma transaccion
+-- que publica el voto. La cedula NUNCA se guarda: solo el UUID.
+-- La restriccion UNIQUE es la que impide el voto doble, incluso con solicitudes simultaneas.
+CREATE TABLE IF NOT EXISTS voter_election_usage (
+    election_id VARCHAR(64) NOT NULL,
+    voter_uuid  VARCHAR(36) NOT NULL,
+    used_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT uq_voter_election_usage UNIQUE (election_id, voter_uuid)
+);
+
+-- Epoch de la votación visible. Rotarlo permite otra jornada con el mismo
+-- padrón y candidatos sin mezclar los resultados anteriores.
+CREATE TABLE IF NOT EXISTS election_state (
+    id     INT PRIMARY KEY CHECK (id = 1),
+    run_id UUID NOT NULL
+);
+INSERT INTO election_state (id, run_id) VALUES (1, gen_random_uuid())
+ON CONFLICT (id) DO NOTHING;
+
+-- Dos selecciones incorrectas de región anulan el voto en la jornada activa.
+-- Solo se guarda el UUID pseudónimo del votante, nunca la cédula ni su nombre.
+CREATE TABLE IF NOT EXISTS voter_region_attempts (
+    run_id      UUID        NOT NULL,
+    voter_uuid  VARCHAR(36) NOT NULL,
+    failures    SMALLINT    NOT NULL CHECK (failures BETWEEN 1 AND 2),
+    PRIMARY KEY (run_id, voter_uuid)
+);
+
+-- Proyección transaccional de votos aceptados, fuente común de ambos escrutinios.
+-- Las filas de jornadas anteriores quedan separadas por run_id.
+CREATE TABLE IF NOT EXISTS accepted_votes (
+    run_id       UUID         NOT NULL,
+    vote_id      VARCHAR(36)  NOT NULL UNIQUE,
+    voter_uuid   VARCHAR(36)  NOT NULL,
+    candidate_id VARCHAR(36)  NOT NULL,
+    region       VARCHAR(100) NOT NULL,
+    voted_at     TIMESTAMPTZ  NOT NULL,
+    PRIMARY KEY (run_id, voter_uuid)
+);
+CREATE INDEX IF NOT EXISTS idx_accepted_votes_run_region ON accepted_votes (run_id, region);
 
 -- Auditoria de votos aceptados
 -- Cada voto que pasa validacion queda registrado aqui de forma inmutable.

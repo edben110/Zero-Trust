@@ -26,12 +26,11 @@ public final class PadronInicial {
             RegistroVotanteCrudo crudo = crudos.get(i);
             String posicion = "registro [" + i + "]";
             VoterId voterId = convertir(crudo.voterId(), VoterId::new, posicion, "voterId");
-            NombreCompleto nombre = convertir(crudo.fullName(), NombreCompleto::new, posicion, "fullName");
             Region region = convertir(crudo.region(), Region::new, posicion, "region");
             if (!vistos.add(voterId)) {
                 throw new PadronInvalidoException(posicion + ": voterId repetido");
             }
-            votantes.add(new VotanteRegistrado(voterId, nombre, region, registradoEn));
+            votantes.add(new VotanteRegistrado(voterId, region, registradoEn));
         }
         return new PadronInicial(votantes);
     }
