@@ -1,13 +1,25 @@
 // Modo demostración (NEXT_PUBLIC_DEMO=1): datos simulados, siempre acompañados del aviso "Datos simulados".
-import type { Catalogo, ResultadoVoto, ResultadosGlobales, SolicitudVoto } from "./contrato";
+import type { Catalogo, ResultadoConsulta, ResultadoVoto, ResultadosGlobales, SolicitudVoto } from "./contrato";
+import { normalizarCedula } from "./validacion";
 
 export const CODIGO_DEMO = "5d1e2f30-4a5b-4c6d-8e7f-9a0b1c2d3e4f";
+
+export const CEDULA_DEMO = "1020304051";
 
 const PADRON_DEMO = new Set([
   CODIGO_DEMO,
   "6e2f3041-5b6c-4d7e-9f80-a1b2c3d4e5f6",
   "7f304152-6c7d-4e8f-8091-b2c3d4e5f607",
 ]);
+
+// En la demostración el código de las cédulas de prueba es fijo; el servidor real lo calcula con HMAC.
+const CODIGOS_DEMO = new Map([
+  [CEDULA_DEMO, CODIGO_DEMO],
+  ["1020304052", "6e2f3041-5b6c-4d7e-9f80-a1b2c3d4e5f6"],
+  ["1020304053", "7f304152-6c7d-4e8f-8091-b2c3d4e5f607"],
+]);
+
+const YA_VOTARON = new Set<string>();
 
 export const catalogoDemo: Catalogo = {
   candidates: [
@@ -25,13 +37,27 @@ function esperar(ms: number): Promise<void> {
 
 export async function votarDemo(solicitud: SolicitudVoto): Promise<ResultadoVoto> {
   await esperar(700);
-  if (!PADRON_DEMO.has(solicitud.voterId.toLowerCase())) {
+  const voterId = solicitud.voterId.toLowerCase();
+  if (!PADRON_DEMO.has(voterId)) {
     return { tipo: "no-habilitado" };
   }
+  if (YA_VOTARON.has(voterId)) {
+    return { tipo: "ya-voto" };
+  }
+  YA_VOTARON.add(voterId);
   return {
     tipo: "aceptado",
     comprobante: { voteId: crypto.randomUUID(), receivedAt: new Date().toISOString() },
   };
+}
+
+export async function consultarDemo(cedula: string): Promise<ResultadoConsulta> {
+  await esperar(500);
+  const normalizada = normalizarCedula(cedula);
+  if (normalizada === null) {
+    return { tipo: "invalido" };
+  }
+  return { tipo: "encontrado", voterId: CODIGOS_DEMO.get(normalizada) ?? crypto.randomUUID() };
 }
 
 // Simula los conteos que publicarían los dashboard workers, creciendo cada pocos segundos.

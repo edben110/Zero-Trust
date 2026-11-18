@@ -41,6 +41,14 @@ export type ResultadoVoto =
   | { tipo: "aceptado"; comprobante: Comprobante }
   | { tipo: "invalido"; campos: string[] }
   | { tipo: "no-habilitado" }
+  | { tipo: "ya-voto" }
+  | { tipo: "no-disponible" }
+  | { tipo: "error" };
+
+// POST /voter-id: la cédula va en el cuerpo y nunca en la URL; la respuesta es el código para votar.
+export type ResultadoConsulta =
+  | { tipo: "encontrado"; voterId: string }
+  | { tipo: "invalido" }
   | { tipo: "no-disponible" }
   | { tipo: "error" };
 

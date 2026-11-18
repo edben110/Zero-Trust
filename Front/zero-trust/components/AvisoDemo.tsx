@@ -1,5 +1,5 @@
 import { config } from "@/lib/config";
-import { CODIGO_DEMO } from "@/lib/demo";
+import { CEDULA_DEMO, CODIGO_DEMO } from "@/lib/demo";
 
 export function AvisoDemo() {
   if (!config.demo) {
@@ -10,7 +10,8 @@ export function AvisoDemo() {
       <p className="mx-auto max-w-5xl px-4 py-2 text-sm">
         <strong className="font-semibold uppercase tracking-wider text-sello">Datos simulados.</strong>{" "}
         Esta versión funciona sin conexión con la plataforma. Para probar el tarjetón use el código{" "}
-        <span className="font-mono break-all">{CODIGO_DEMO}</span>.
+        <span className="font-mono break-all">{CODIGO_DEMO}</span>, que corresponde a la cédula{" "}
+        <span className="font-mono">{CEDULA_DEMO}</span>.
       </p>
     </div>
   );

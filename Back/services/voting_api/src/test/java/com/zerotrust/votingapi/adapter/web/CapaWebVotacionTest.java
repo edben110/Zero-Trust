@@ -1,37 +1,24 @@
 package com.zerotrust.votingapi.adapter.web;
 
-import com.zerotrust.votingapi.adapter.config.ResolutorIpOrigen;
 import com.zerotrust.votingapi.adapter.config.RepositorioCatalogo;
-import com.zerotrust.votingapi.domain.Candidato;
-import com.zerotrust.votingapi.domain.CandidateId;
-import com.zerotrust.votingapi.domain.Catalogo;
-import com.zerotrust.votingapi.domain.PublicacionNoDisponibleException;
-import com.zerotrust.votingapi.domain.Region;
-import com.zerotrust.votingapi.domain.SourceIp;
-import com.zerotrust.votingapi.domain.ValidacionNoDisponibleException;
-import com.zerotrust.votingapi.domain.VotoEmitido;
-import com.zerotrust.votingapi.exception.GlobalExceptionHandler;
-import com.zerotrust.votingapi.port.PublicadorVotos;
-import com.zerotrust.votingapi.port.ValidadorVotante;
-import com.zerotrust.votingapi.service.ServicioVotacion;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
+import org.mockito.Mock;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -40,11 +27,42 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.lenient;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+import com.zerotrust.votingapi.adapter.config.ResolutorIpOrigen;
+import com.zerotrust.votingapi.adapter.crypto.DerivadorVoterIdHmac;
+import com.zerotrust.votingapi.domain.CandidateId;
+import com.zerotrust.votingapi.domain.Candidato;
+import com.zerotrust.votingapi.domain.Catalogo;
+import com.zerotrust.votingapi.domain.ElectionId;
+import com.zerotrust.votingapi.domain.PublicacionNoDisponibleException;
+import com.zerotrust.votingapi.domain.Region;
+import com.zerotrust.votingapi.domain.SourceIp;
+import com.zerotrust.votingapi.domain.ValidacionNoDisponibleException;
+import com.zerotrust.votingapi.domain.VotoDuplicadoException;
+import com.zerotrust.votingapi.domain.VotoEmitido;
+import com.zerotrust.votingapi.exception.GlobalExceptionHandler;
+import com.zerotrust.votingapi.port.EjecutorTransaccional;
+import com.zerotrust.votingapi.port.PublicadorVotos;
+import com.zerotrust.votingapi.port.RegistroParticipacion;
+import com.zerotrust.votingapi.port.ValidadorVotante;
+import com.zerotrust.votingapi.service.ServicioIdentificacion;
+import com.zerotrust.votingapi.service.ServicioVotacion;
+
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 
 @ExtendWith(MockitoExtension.class)
 class CapaWebVotacionTest {
@@ -59,6 +77,46 @@ class CapaWebVotacionTest {
     private ValidadorVotante validador;
     @Mock
     private PublicadorVotos publicador;
+    @Mock
+    private RegistroParticipacion registro;
+
+    private static final ElectionId ELECCION = new ElectionId("elecciones-2026");
+    private static final String CEDULA = "0012345678";
+
+    private final ListAppender<ILoggingEvent> logs = new ListAppender<>();
+    private final Logger logger = (Logger) LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    @BeforeEach
+    void capturarLogs() {
+        logs.start();
+        logger.addAppender(logs);
+    }
+
+    @AfterEach
+    void soltarLogs() {
+        logger.detachAppender(logs);
+    }
+
+    private static byte[] clavePrueba() {
+        byte[] clave = new byte[32];
+        for (int i = 0; i < clave.length; i++) {
+            clave[i] = (byte) i;
+        }
+        return clave;
+    }
+
+    private static final class TransaccionDirecta implements EjecutorTransaccional {
+        @Override
+        public <T> T ejecutar(Supplier<T> accion) {
+            return accion.get();
+        }
+    }
+
+    private String todoLoRegistrado() {
+        StringBuilder texto = new StringBuilder();
+        logs.list.forEach(e -> texto.append(e.getFormattedMessage()).append(e.getThrowableProxy()));
+        return texto.toString();
+    }
 
     private MockMvc mvc(boolean confiarEnCabeceras) {
         Catalogo catalogo = new Catalogo(
@@ -68,11 +126,13 @@ class CapaWebVotacionTest {
                 List.of(new Region("norte"), new Region("sur")));
         RepositorioCatalogo repositorio = mock(RepositorioCatalogo.class);
         lenient().when(repositorio.actual()).thenReturn(catalogo);
-        ServicioVotacion servicio = new ServicioVotacion(validador, publicador,
-                Clock.fixed(Instant.parse("2026-11-14T15:00:00Z"), ZoneOffset.UTC), () -> VOTE_ID);
+        ServicioVotacion servicio = new ServicioVotacion(validador, publicador, registro, new TransaccionDirecta(),
+                ELECCION, Clock.fixed(Instant.parse("2026-11-14T15:00:00Z"), ZoneOffset.UTC), () -> VOTE_ID);
         VotoController votos = new VotoController(servicio, repositorio,
                 ResolutorIpOrigen.desde(String.valueOf(confiarEnCabeceras)));
-        return MockMvcBuilders.standaloneSetup(votos, new CatalogoController(repositorio))
+        ConsultaVoterIdController consulta = new ConsultaVoterIdController(
+                new ServicioIdentificacion(new DerivadorVoterIdHmac(clavePrueba()), ELECCION));
+        return MockMvcBuilders.standaloneSetup(votos, consulta, new CatalogoController(repositorio))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
@@ -142,6 +202,79 @@ class CapaWebVotacionTest {
                 .andExpect(content().json("{\"error\":\"voter_not_eligible\"}", true));
 
         verify(publicador, never()).publicar(any());
+    }
+
+    @Test
+    @DisplayName("Un voterId que ya votó en la elección responde 409 con el mensaje y no publica")
+    void votoDuplicado() throws Exception {
+        when(validador.estaHabilitado(any())).thenReturn(true);
+        doThrow(new VotoDuplicadoException()).when(registro).registrar(any(), any());
+
+        mvc(false).perform(post("/vote").contentType(MediaType.APPLICATION_JSON).content(CUERPO))
+                .andExpect(status().isConflict())
+                .andExpect(content().json("{\"error\":\"already_voted\","
+                        + "\"message\":\"Ya se registró un voto para este documento en esta elección\"}", true));
+
+        verify(publicador, never()).publicar(any());
+    }
+
+    @Test
+    @DisplayName("Si la base de datos falla responde 503 sin detalles y sin publicar")
+    void baseDeDatosCaida() throws Exception {
+        when(validador.estaHabilitado(any())).thenReturn(true);
+        doThrow(new DataAccessResourceFailureException("detalle interno")).when(registro).registrar(any(), any());
+
+        mvc(false).perform(post("/vote").contentType(MediaType.APPLICATION_JSON).content(CUERPO))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(content().json("{\"error\":\"validation_unavailable\"}", true));
+
+        verify(publicador, never()).publicar(any());
+        assertThat(todoLoRegistrado()).doesNotContain("detalle interno");
+    }
+
+    @Test
+    @DisplayName("POST /voter-id devuelve el UUID derivado de la cédula, sin caché, y no registra la cédula")
+    void consultaVoterId() throws Exception {
+        mvc(false).perform(post("/voter-id").contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"cedula\":\"" + CEDULA + "\"}"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Cache-Control", "no-store"))
+                .andExpect(content().json("{\"voterId\":\"fae9cb04-ba2b-87ef-882c-f39dd70dbaa1\"}", true));
+
+        verifyNoInteractions(validador, publicador, registro);
+        assertThat(todoLoRegistrado()).doesNotContain(CEDULA);
+    }
+
+    @Test
+    @DisplayName("POST /voter-id da el mismo UUID para dos escrituras equivalentes de la cédula")
+    void consultaEquivalentes() throws Exception {
+        for (String escritura : List.of("0.012.345.678", " 0012345678 ")) {
+            mvc(false).perform(post("/voter-id").contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"cedula\":\"" + escritura + "\"}"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.voterId").value("fae9cb04-ba2b-87ef-882c-f39dd70dbaa1"));
+        }
+    }
+
+    @Test
+    @DisplayName("POST /voter-id rechaza con 400 una cédula inválida, numérica o ausente sin revelarla")
+    void consultaInvalida() throws Exception {
+        for (String cuerpo : List.of("{\"cedula\":\"98765x4321\"}", "{\"cedula\":12345678}", "{}")) {
+            mvc(false).perform(post("/voter-id").contentType(MediaType.APPLICATION_JSON).content(cuerpo))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(content().json("{\"error\":\"invalid_request\",\"fields\":[\"cedula\"]}", true))
+                    .andExpect(content().string(not(containsString("98765"))));
+        }
+        mvc(false).perform(post("/voter-id").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+        assertThat(todoLoRegistrado()).doesNotContain("98765");
+    }
+
+    @Test
+    @DisplayName("GET /voter-id no existe: la cédula no puede ir en la URL")
+    void consultaPorGet() throws Exception {
+        mvc(false).perform(get("/voter-id").param("cedula", CEDULA))
+                .andExpect(status().isMethodNotAllowed());
     }
 
     @Test

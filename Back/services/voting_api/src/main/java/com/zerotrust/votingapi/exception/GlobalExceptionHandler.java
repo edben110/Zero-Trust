@@ -3,11 +3,14 @@ package com.zerotrust.votingapi.exception;
 import com.zerotrust.votingapi.domain.ServicioNoDisponibleException;
 import com.zerotrust.votingapi.domain.SolicitudVotoInvalidaException;
 import com.zerotrust.votingapi.domain.VotanteNoHabilitadoException;
+import com.zerotrust.votingapi.domain.VotoDuplicadoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.transaction.TransactionException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,6 +39,21 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> noHabilitado() {
         LOG.warn("Voto rechazado: votante no habilitado");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.de("voter_not_eligible"));
+    }
+
+    @ExceptionHandler(VotoDuplicadoException.class)
+    public ResponseEntity<ErrorResponse> votoDuplicado() {
+        LOG.warn("Voto rechazado: el votante ya votó en esta elección");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.con("already_voted",
+                "Ya se registró un voto para este documento en esta elección"));
+    }
+
+    // Base de datos caída o transacción fallida: no se registró nada y la persona puede reintentar.
+    // Se registra solo la clase de la excepción: el mensaje de JDBC puede incluir parámetros.
+    @ExceptionHandler({DataAccessException.class, TransactionException.class})
+    public ResponseEntity<ErrorResponse> baseDeDatosNoDisponible(Exception error) {
+        LOG.warn("Voto no procesado: base de datos no disponible ({})", error.getClass().getSimpleName());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ErrorResponse.de("validation_unavailable"));
     }
 
     @ExceptionHandler(ServicioNoDisponibleException.class)

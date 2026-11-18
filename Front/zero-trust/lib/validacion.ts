@@ -13,6 +13,19 @@ export function esUuid(valor: string): boolean {
   return UUID.test(valor.trim());
 }
 
+// Misma regla que voting_api: NFKC, sin espacios ni puntos, de 6 a 10 dígitos. Conserva los ceros iniciales.
+export function normalizarCedula(valor: string): string | null {
+  const limpia = valor.normalize("NFKC").replace(/[\s.]/gu, "");
+  return /^[0-9]{6,10}$/.test(limpia) ? limpia : null;
+}
+
+export function leerVoterId(valor: unknown): string | null {
+  if (!esObjeto(valor) || typeof valor.voterId !== "string" || !esUuid(valor.voterId)) {
+    return null;
+  }
+  return valor.voterId.toLowerCase();
+}
+
 function esObjeto(valor: unknown): valor is Record<string, unknown> {
   return typeof valor === "object" && valor !== null && !Array.isArray(valor);
 }

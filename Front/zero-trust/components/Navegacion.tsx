@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const ENLACES = [
+  { href: "/mi-codigo", texto: "Mi código de votante" },
   { href: "/", texto: "Tarjetón" },
   { href: "/resultados", texto: "Escrutinio nacional" },
   { href: "/resultados/regiones", texto: "Por región" },

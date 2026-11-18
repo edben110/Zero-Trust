@@ -16,7 +16,7 @@
 # Segmentacion con redes Docker (aproxima las reglas nftables, que NO se simulan aqui):
 #   net-auth     auth_server y todo lo que pide o valida tokens
 #   net-brokers  kafka y rabbitmq y todo lo que los usa
-#   net-db       postgres-db y solo los servicios que escriben en ella
+#   net-db       postgres-db y solo los servicios que la usan (voting_api, para el voto unico)
 #   net-public   lo que recibe trafico del navegador (voting_api, dashboards, front)
 # vm-core y vm-init no estan en net-public; postgres-db no es alcanzable desde voting_api ni los dashboards.
 #
@@ -267,6 +267,8 @@ services:
       <<: [*entorno-token, *db]
       CLIENT_ID: voter_registration_service
       CLIENT_SECRET: ${SECRET_VOTER_REGISTRATION_SERVICE:-Dev.VoterRegistration-01}
+      ELECTION_ID: ${ELECTION_ID:-elecciones-2026}
+      VOTER_HMAC_KEY: ${VOTER_HMAC_KEY:-ZGV2LW9ubHktaG1hYy1rZXktMzItYnl0ZXMtMDEyMzQ1Njc=}   # clave de DESARROLLO, la misma que voting_api
       VOTERS_FILE: /config/votantes.json
     volumes:
       - secrets:/secrets:ro
@@ -403,24 +405,34 @@ services:
     image: zerotrust/voting-api:1.0
     <<: *seguridad
     depends_on:
-      <<: *esperar-brokers
+      <<: [*esperar-brokers, *esperar-db]
     environment:
-      <<: *entorno-token
+      <<: [*entorno-token, *db]
       CLIENT_ID: voting_api
       CLIENT_SECRET: ${SECRET_VOTING_API:-Dev.VotingApi-03}
+      ELECTION_ID: ${ELECTION_ID:-elecciones-2026}
+      VOTER_HMAC_KEY: ${VOTER_HMAC_KEY:-ZGV2LW9ubHktaG1hYy1rZXktMzItYnl0ZXMtMDEyMzQ1Njc=}   # clave de DESARROLLO, la misma que voter_registration_service
       CATALOG_FILE: /config/catalogo.json
+      # Catalogo editable desde el panel de administracion (codigo de Edwar). Persiste en el volumen catalog-data.
+      CATALOG_STATE_FILE: /data/catalogo.json
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:-dev-only-admin-api-token-0123456789abcdef}   # DESARROLLO, minimo 32 caracteres
       CORS_ALLOWED_ORIGINS: http://localhost:${FRONT_PORT:-3001}
       TRUST_FORWARDED_HEADERS: "false"
       RPC_TIMEOUT_MS: "3000"
     volumes:
       - secrets:/secrets:ro
       - ../../Back/services/voting_api/config/catalogo.ejemplo.json:/config/catalogo.json:ro
+      - catalog-data:/data
     ports:
       - "8080:8080"
     networks:
-      - net-public
-      - net-auth
-      - net-brokers
+      net-public:
+        # Tomcat rechaza (400) un Host con guion bajo como "voting_api": el front usa este alias.
+        aliases:
+          - voting-api
+      net-auth:
+      net-brokers:
+      net-db:
     deploy:
       resources:
         limits:
@@ -491,6 +503,14 @@ services:
         NEXT_PUBLIC_WS_REGIONAL_URL: ws://localhost:8092/ws/results/websocket
     image: zerotrust/front:local
     restart: unless-stopped
+    depends_on:
+      - voting_api
+    environment:
+      # Panel de administracion (servidor de Next -> voting_api por la red interna). Valores de DESARROLLO.
+      ADMIN_API_URL: http://voting-api:8080
+      ADMIN_API_TOKEN: ${ADMIN_API_TOKEN:-dev-only-admin-api-token-0123456789abcdef}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-dev-admin-password}
+      ADMIN_SESSION_SECRET: ${ADMIN_SESSION_SECRET:-dev-only-admin-session-secret-0123456789}
     read_only: true
     tmpfs:
       - /tmp
@@ -516,6 +536,7 @@ networks:
   net-public:
 
 volumes:
+  catalog-data:
   secrets:
   kafka-data:
   rabbitmq-data:
