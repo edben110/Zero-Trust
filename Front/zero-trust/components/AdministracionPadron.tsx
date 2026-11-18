@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { nombreRegion } from "@/lib/formato";
-import { normalizarCedula } from "@/lib/validacion";
+import { normalizarCedula, soloDigitos } from "@/lib/validacion";
 
 const campo = "w-full border border-tinta bg-papel px-3 py-2 outline-offset-2 focus:outline focus:outline-sello";
 const boton = "border-2 border-tinta bg-tinta px-5 py-2 font-medium text-papel hover:bg-papel hover:text-tinta disabled:opacity-50";
@@ -77,11 +77,16 @@ export function AdministracionPadron({ regiones }: { regiones: string[] }) {
           <input
             className={`${campo} mt-2 font-mono`}
             inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={10}
             autoComplete="off"
             autoCorrect="off"
             spellCheck={false}
             value={cedula}
-            onChange={(e) => setCedula(e.target.value)}
+            onChange={(e) => {
+              setCedula(soloDigitos(e.target.value));
+              setAviso(null);
+            }}
             placeholder="1234567890"
             required
           />
