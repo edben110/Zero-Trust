@@ -1,6 +1,6 @@
 package com.zerotrust.authserver.adapter.web;
 
-import com.zerotrust.authserver.domain.PeticionMalFormadaException;
+import com.zerotrust.authserver.exception.PeticionMalFormadaException;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;

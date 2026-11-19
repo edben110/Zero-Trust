@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.authserver.domain.Audiencia;
 import com.zerotrust.authserver.domain.ClientId;
 import com.zerotrust.authserver.domain.ClienteRegistrado;
-import com.zerotrust.authserver.domain.ConfiguracionInvalidaException;
+import com.zerotrust.authserver.exception.ConfiguracionInvalidaException;
 import com.zerotrust.authserver.domain.HashSecreto;
 import com.zerotrust.authserver.domain.RegistroClientes;
 import com.zerotrust.authserver.domain.Scope;

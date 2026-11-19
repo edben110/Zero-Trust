@@ -1,5 +1,6 @@
 package com.zerotrust.votingapi.adapter.web;
 
+import com.zerotrust.votingapi.domain.ResultadoRegion;
 import com.zerotrust.votingapi.adapter.config.RepositorioCatalogo;
 import java.time.Clock;
 import java.time.Instant;
@@ -46,11 +47,11 @@ import com.zerotrust.votingapi.domain.CandidateId;
 import com.zerotrust.votingapi.domain.Candidato;
 import com.zerotrust.votingapi.domain.Catalogo;
 import com.zerotrust.votingapi.domain.ElectionId;
-import com.zerotrust.votingapi.domain.PublicacionNoDisponibleException;
+import com.zerotrust.votingapi.exception.PublicacionNoDisponibleException;
 import com.zerotrust.votingapi.domain.Region;
 import com.zerotrust.votingapi.domain.SourceIp;
-import com.zerotrust.votingapi.domain.ValidacionNoDisponibleException;
-import com.zerotrust.votingapi.domain.VotoDuplicadoException;
+import com.zerotrust.votingapi.exception.ValidacionNoDisponibleException;
+import com.zerotrust.votingapi.exception.VotoDuplicadoException;
 import com.zerotrust.votingapi.domain.VoterId;
 import com.zerotrust.votingapi.domain.VotoEmitido;
 import com.zerotrust.votingapi.exception.GlobalExceptionHandler;
@@ -121,7 +122,7 @@ class CapaWebVotacionTest {
     }
 
     private MockMvc mvc(boolean confiarEnCabeceras) {
-        return mvc(confiarEnCabeceras, (e, v, r) -> ControlRegionVotante.Resultado.CORRECTA);
+        return mvc(confiarEnCabeceras, (e, v, r) -> ResultadoRegion.CORRECTA);
     }
 
     private MockMvc mvc(boolean confiarEnCabeceras, ControlRegionVotante controlRegion) {
@@ -230,7 +231,7 @@ class CapaWebVotacionTest {
     void regionIncorrecta() throws Exception {
         when(validador.estaHabilitado(any())).thenReturn(true);
 
-        mvc(false, (e, v, r) -> ControlRegionVotante.Resultado.PRIMER_ERROR)
+        mvc(false, (e, v, r) -> ResultadoRegion.PRIMER_ERROR)
                 .perform(post("/vote").contentType(MediaType.APPLICATION_JSON).content(CUERPO))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(content().json("{\"error\":\"wrong_region\","
@@ -245,7 +246,7 @@ class CapaWebVotacionTest {
     void votoAnulado() throws Exception {
         when(validador.estaHabilitado(any())).thenReturn(true);
 
-        mvc(false, (e, v, r) -> ControlRegionVotante.Resultado.ANULADO)
+        mvc(false, (e, v, r) -> ResultadoRegion.ANULADO)
                 .perform(post("/vote").contentType(MediaType.APPLICATION_JSON).content(CUERPO))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("vote_invalidated"));

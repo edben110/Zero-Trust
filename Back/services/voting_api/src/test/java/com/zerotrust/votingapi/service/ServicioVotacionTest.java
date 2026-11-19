@@ -1,5 +1,6 @@
 package com.zerotrust.votingapi.service;
 
+import com.zerotrust.votingapi.domain.ResultadoRegion;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -45,17 +46,17 @@ import com.zerotrust.votingapi.domain.Cedula;
 import com.zerotrust.votingapi.domain.ComprobanteVoto;
 import com.zerotrust.votingapi.domain.ElectionId;
 import com.zerotrust.votingapi.domain.FraudKind;
-import com.zerotrust.votingapi.domain.PublicacionNoDisponibleException;
+import com.zerotrust.votingapi.exception.PublicacionNoDisponibleException;
 import com.zerotrust.votingapi.domain.Region;
-import com.zerotrust.votingapi.domain.RegionIncorrectaException;
+import com.zerotrust.votingapi.exception.RegionIncorrectaException;
 import com.zerotrust.votingapi.domain.SolicitudVoto;
 import com.zerotrust.votingapi.domain.SourceIp;
-import com.zerotrust.votingapi.domain.ValidacionNoDisponibleException;
-import com.zerotrust.votingapi.domain.VotanteNoHabilitadoException;
+import com.zerotrust.votingapi.exception.ValidacionNoDisponibleException;
+import com.zerotrust.votingapi.exception.VotanteNoHabilitadoException;
 import com.zerotrust.votingapi.domain.VoteId;
 import com.zerotrust.votingapi.domain.VoterId;
-import com.zerotrust.votingapi.domain.VotoAnuladoException;
-import com.zerotrust.votingapi.domain.VotoDuplicadoException;
+import com.zerotrust.votingapi.exception.VotoAnuladoException;
+import com.zerotrust.votingapi.exception.VotoDuplicadoException;
 import com.zerotrust.votingapi.domain.VotoEmitido;
 import com.zerotrust.votingapi.port.ControlRegionVotante;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
@@ -128,7 +129,7 @@ class ServicioVotacionTest {
         @BeforeEach
         void construir() {
             servicio = new ServicioVotacion(validador, publicador, registro, voto -> { },
-                    (e, v, r) -> ControlRegionVotante.Resultado.CORRECTA, incidentes, transaccion, ELECCION,
+                    (e, v, r) -> ResultadoRegion.CORRECTA, incidentes, transaccion, ELECCION,
                     Clock.fixed(AHORA, ZoneOffset.UTC), () -> VOTE_ID);
         }
 
@@ -241,7 +242,7 @@ class ServicioVotacionTest {
 
         private ServicioVotacion servicioDe(ElectionId eleccion) {
             return new ServicioVotacion(validador, publicador, almacen, voto -> { },
-                    (e, v, r) -> ControlRegionVotante.Resultado.CORRECTA, (tipo, ip) -> { }, almacen, eleccion,
+                    (e, v, r) -> ResultadoRegion.CORRECTA, (tipo, ip) -> { }, almacen, eleccion,
                     Clock.fixed(AHORA, ZoneOffset.UTC), UUID::randomUUID);
         }
 
@@ -366,7 +367,7 @@ class ServicioVotacionTest {
         void correcta() {
             transaccionEjecutaLaAccion();
             when(controlRegion.evaluar(ELECCION, new VoterId(VOTANTE), new Region("norte")))
-                    .thenReturn(ControlRegionVotante.Resultado.CORRECTA);
+                    .thenReturn(ResultadoRegion.CORRECTA);
 
             assertThat(servicio.votar(solicitud(VOTANTE), IP)).isNotNull();
 
@@ -378,7 +379,7 @@ class ServicioVotacionTest {
         @DisplayName("La primera región incorrecta responde con la advertencia y no registra ni publica")
         void primerError() {
             transaccionEjecutaLaAccion();
-            when(controlRegion.evaluar(any(), any(), any())).thenReturn(ControlRegionVotante.Resultado.PRIMER_ERROR);
+            when(controlRegion.evaluar(any(), any(), any())).thenReturn(ResultadoRegion.PRIMER_ERROR);
 
             assertThrows(RegionIncorrectaException.class, () -> servicio.votar(solicitud(VOTANTE), IP));
 
@@ -392,7 +393,7 @@ class ServicioVotacionTest {
         @DisplayName("La segunda región incorrecta anula el voto sin registrarlo ni publicarlo")
         void anulado() {
             transaccionEjecutaLaAccion();
-            when(controlRegion.evaluar(any(), any(), any())).thenReturn(ControlRegionVotante.Resultado.ANULADO);
+            when(controlRegion.evaluar(any(), any(), any())).thenReturn(ResultadoRegion.ANULADO);
 
             assertThrows(VotoAnuladoException.class, () -> servicio.votar(solicitud(VOTANTE), IP));
 

@@ -2,7 +2,7 @@ package com.zerotrust.authserver.config;
 
 import com.zerotrust.authserver.adapter.config.InterpreteArchivoClientes;
 import com.zerotrust.authserver.domain.ClientId;
-import com.zerotrust.authserver.domain.ConfiguracionInvalidaException;
+import com.zerotrust.authserver.exception.ConfiguracionInvalidaException;
 import com.zerotrust.authserver.domain.RegistroClientes;
 import com.zerotrust.authserver.port.FuenteVariables;
 import com.zerotrust.authserver.port.LectorArchivos;

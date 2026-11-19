@@ -1,5 +1,6 @@
 package com.zerotrust.voterregistration.domain;
 
+import com.zerotrust.voterregistration.exception.PadronInvalidoException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;

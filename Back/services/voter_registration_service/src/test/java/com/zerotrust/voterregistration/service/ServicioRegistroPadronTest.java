@@ -1,6 +1,6 @@
 package com.zerotrust.voterregistration.service;
 
-import com.zerotrust.voterregistration.domain.PadronInvalidoException;
+import com.zerotrust.voterregistration.exception.PadronInvalidoException;
 import com.zerotrust.voterregistration.domain.RegistroVotanteCrudo;
 import com.zerotrust.voterregistration.domain.VotanteRegistrado;
 import com.zerotrust.voterregistration.domain.VoterId;

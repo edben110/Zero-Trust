@@ -1,7 +1,7 @@
 package com.zerotrust.votingapi.adapter.web;
 
-import com.zerotrust.votingapi.domain.SolicitudVotoInvalidaException;
-import com.zerotrust.votingapi.domain.VotanteYaInscritoException;
+import com.zerotrust.votingapi.exception.SolicitudVotoInvalidaException;
+import com.zerotrust.votingapi.exception.VotanteYaInscritoException;
 import com.zerotrust.votingapi.exception.GlobalExceptionHandler;
 import com.zerotrust.votingapi.service.ServicioPadron;
 import org.junit.jupiter.api.DisplayName;

@@ -1,6 +1,8 @@
 package com.zerotrust.regionaldashboardworker.adapter.rabbit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,8 @@ import java.util.Map;
  */
 @Component
 public class RegionalResultsRabbitConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(RegionalResultsRabbitConsumer.class);
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ObjectMapper          mapper;
@@ -37,7 +41,7 @@ public class RegionalResultsRabbitConsumer {
                 messagingTemplate.convertAndSend("/topic/region/" + region, message);
             }
         } catch (Exception e) {
-            System.err.println("[regional-dashboard] Error procesando mensaje: " + e.getMessage());
+            log.warn("Resultado regional descartado: {}", e.getMessage());
         }
     }
 }

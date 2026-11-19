@@ -7,6 +7,8 @@ import com.zerotrust.voteprocessor.domain.model.VoteId;
 import com.zerotrust.voteprocessor.domain.model.VoterId;
 import com.zerotrust.voteprocessor.service.VoteProcessorService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,8 @@ import java.util.Map;
 
 @Component
 public class RawVoteKafkaConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(RawVoteKafkaConsumer.class);
 
     private final VoteProcessorService service;
     private final ObjectMapper         mapper;
@@ -44,7 +48,7 @@ public class RawVoteKafkaConsumer {
         } catch (Exception e) {
             // Voto malformado: se descarta con log. No se relanza para no bloquear la partición.
             // En producción se enviaría a un dead-letter topic.
-            System.err.println("[vote-processor] Voto descartado: " + e.getMessage());
+            log.warn("Voto descartado de partición {} offset {}: {}", record.partition(), record.offset(), e.getMessage());
         }
     }
 }

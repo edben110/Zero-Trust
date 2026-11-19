@@ -1,5 +1,6 @@
 package com.zerotrust.votingapi.service;
 
+import com.zerotrust.votingapi.domain.ResultadoRegion;
 import java.time.Clock;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -9,10 +10,10 @@ import com.zerotrust.votingapi.domain.ElectionId;
 import com.zerotrust.votingapi.domain.FraudKind;
 import com.zerotrust.votingapi.domain.SolicitudVoto;
 import com.zerotrust.votingapi.domain.SourceIp;
-import com.zerotrust.votingapi.domain.RegionIncorrectaException;
-import com.zerotrust.votingapi.domain.VotanteNoHabilitadoException;
-import com.zerotrust.votingapi.domain.VotoAnuladoException;
-import com.zerotrust.votingapi.domain.VotoDuplicadoException;
+import com.zerotrust.votingapi.exception.RegionIncorrectaException;
+import com.zerotrust.votingapi.exception.VotanteNoHabilitadoException;
+import com.zerotrust.votingapi.exception.VotoAnuladoException;
+import com.zerotrust.votingapi.exception.VotoDuplicadoException;
 import com.zerotrust.votingapi.domain.VoteId;
 import com.zerotrust.votingapi.domain.VotoEmitido;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
@@ -64,8 +65,8 @@ public class ServicioVotacion {
         ResultadoTransaccion resultado;
         try {
             resultado = transaccion.ejecutar(() -> {
-                ControlRegionVotante.Resultado region = controlRegion.evaluar(eleccion, solicitud.voterId(), solicitud.region());
-                if (region != ControlRegionVotante.Resultado.CORRECTA) {
+                ResultadoRegion region = controlRegion.evaluar(eleccion, solicitud.voterId(), solicitud.region());
+                if (region != ResultadoRegion.CORRECTA) {
                     return new ResultadoTransaccion(null, region);
                 }
                 registro.registrar(eleccion, solicitud.voterId());
@@ -80,8 +81,8 @@ public class ServicioVotacion {
             throw e;
         }
         // Fuera de la transacción: lanzarlas adentro revertiría el contador de errores.
-        if (resultado.region() == ControlRegionVotante.Resultado.PRIMER_ERROR) throw new RegionIncorrectaException();
-        if (resultado.region() == ControlRegionVotante.Resultado.ANULADO) {
+        if (resultado.region() == ResultadoRegion.PRIMER_ERROR) throw new RegionIncorrectaException();
+        if (resultado.region() == ResultadoRegion.ANULADO) {
             // Dos regiones distintas de la registrada: el voto queda anulado y se audita como fraude.
             incidentes.registrar(FraudKind.WRONG_REGION, sourceIp);
             throw new VotoAnuladoException();
@@ -89,5 +90,5 @@ public class ServicioVotacion {
         return resultado.comprobante();
     }
 
-    private record ResultadoTransaccion(ComprobanteVoto comprobante, ControlRegionVotante.Resultado region) { }
+    private record ResultadoTransaccion(ComprobanteVoto comprobante, ResultadoRegion region) { }
 }

@@ -1,13 +1,5 @@
 package com.zerotrust.votingapi.exception;
 
-import com.zerotrust.votingapi.domain.ServicioNoDisponibleException;
-import com.zerotrust.votingapi.domain.SolicitudVotoInvalidaException;
-import com.zerotrust.votingapi.domain.VotanteNoHabilitadoException;
-import com.zerotrust.votingapi.domain.VotanteFueraDelPadronException;
-import com.zerotrust.votingapi.domain.VotanteYaInscritoException;
-import com.zerotrust.votingapi.domain.VotoDuplicadoException;
-import com.zerotrust.votingapi.domain.RegionIncorrectaException;
-import com.zerotrust.votingapi.domain.VotoAnuladoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -91,6 +83,20 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> noDisponible(ServicioNoDisponibleException error) {
         LOG.warn("Voto no procesado: {}", error.getMessage());
         return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ErrorResponse.de("validation_unavailable"));
+    }
+
+    // Panel de seguridad: el BFF muestra "error" al administrador, por eso viaja el mensaje y no un código.
+    @ExceptionHandler(SolicitudSeguridadInvalidaException.class)
+    public ResponseEntity<ErrorResponse> solicitudSeguridadInvalida(SolicitudSeguridadInvalidaException error) {
+        return ResponseEntity.badRequest().body(ErrorResponse.de(error.getMessage()));
+    }
+
+    @ExceptionHandler(OperacionSeguridadNoDisponibleException.class)
+    public ResponseEntity<ErrorResponse> operacionSeguridadNoDisponible(OperacionSeguridadNoDisponibleException error) {
+        Throwable causa = error.getCause() == null ? null : error.getCause().getCause();
+        LOG.warn("Operación de seguridad no completada: {} ({})", error.getMessage(),
+                causa == null ? "sin causa" : causa.getClass().getSimpleName());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ErrorResponse.de(error.getMessage()));
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

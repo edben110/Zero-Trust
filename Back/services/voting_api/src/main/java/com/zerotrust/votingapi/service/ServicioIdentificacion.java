@@ -2,7 +2,7 @@ package com.zerotrust.votingapi.service;
 
 import com.zerotrust.votingapi.domain.Cedula;
 import com.zerotrust.votingapi.domain.ElectionId;
-import com.zerotrust.votingapi.domain.VotanteFueraDelPadronException;
+import com.zerotrust.votingapi.exception.VotanteFueraDelPadronException;
 import com.zerotrust.votingapi.domain.VoterId;
 import com.zerotrust.votingapi.port.DerivadorVoterId;
 import com.zerotrust.votingapi.port.ValidadorVotante;

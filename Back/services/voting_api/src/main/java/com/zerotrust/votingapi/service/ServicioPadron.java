@@ -4,7 +4,7 @@ import com.zerotrust.votingapi.domain.Catalogo;
 import com.zerotrust.votingapi.domain.Cedula;
 import com.zerotrust.votingapi.domain.ElectionId;
 import com.zerotrust.votingapi.domain.Region;
-import com.zerotrust.votingapi.domain.SolicitudVotoInvalidaException;
+import com.zerotrust.votingapi.exception.SolicitudVotoInvalidaException;
 import com.zerotrust.votingapi.domain.VotanteInscrito;
 import com.zerotrust.votingapi.port.DerivadorVoterId;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;

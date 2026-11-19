@@ -16,6 +16,7 @@ import java.util.Set;
  *  - Un votante solo puede votar una vez (duplicados ignorados silenciosamente).
  *  - Los contadores internos no son accesibles directamente desde fuera.
  *  - El estado solo cambia a través del método de negocio accept().
+ *  - Thread-safe: el consumidor de Kafka y el publicador programado usan la misma instancia.
  */
 public final class VoteAggregate {
 
@@ -31,7 +32,7 @@ public final class VoteAggregate {
      *
      * @return true si el voto fue contabilizado, false si era duplicado.
      */
-    public boolean accept(RawVoteEvent event) {
+    public synchronized boolean accept(RawVoteEvent event) {
         String voterId    = event.voterId().value();
         String candidateId = event.candidateId().value();
 
@@ -49,7 +50,7 @@ public final class VoteAggregate {
     /**
      * Proyecta el estado actual como snapshot inmutable para publicación.
      */
-    public GlobalResultSnapshot snapshot() {
+    public synchronized GlobalResultSnapshot snapshot() {
         List<CandidateResult> results = new ArrayList<>();
         counts.forEach((id, count) ->
                 results.add(new CandidateResult(new CandidateId(id), names.get(id), count[0]))
@@ -57,7 +58,7 @@ public final class VoteAggregate {
         return new GlobalResultSnapshot(Instant.now(), Collections.unmodifiableList(results));
     }
 
-    public int totalVotes() {
+    public synchronized int totalVotes() {
         return seenVoters.size();
     }
 }

@@ -1,5 +1,6 @@
 package com.zerotrust.authserver.domain;
 
+import com.zerotrust.authserver.exception.ScopeNoPermitidoException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 

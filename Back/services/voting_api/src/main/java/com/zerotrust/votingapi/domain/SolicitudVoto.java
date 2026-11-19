@@ -1,5 +1,6 @@
 package com.zerotrust.votingapi.domain;
 
+import com.zerotrust.votingapi.exception.SolicitudVotoInvalidaException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;

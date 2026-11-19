@@ -1,6 +1,6 @@
 package com.zerotrust.authserver.adapter.config;
 
-import com.zerotrust.authserver.domain.ConfiguracionInvalidaException;
+import com.zerotrust.authserver.exception.ConfiguracionInvalidaException;
 import com.zerotrust.authserver.port.LectorArchivos;
 
 import java.io.IOException;

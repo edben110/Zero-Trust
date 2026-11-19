@@ -3,7 +3,7 @@ package com.zerotrust.authserver.config;
 import com.zerotrust.authserver.adapter.config.InterpreteArchivoClientes;
 import com.zerotrust.authserver.adapter.crypto.LectorClaveFirma;
 import com.zerotrust.authserver.adapter.crypto.ValidadorKeystore;
-import com.zerotrust.authserver.domain.ConfiguracionInvalidaException;
+import com.zerotrust.authserver.exception.ConfiguracionInvalidaException;
 import com.zerotrust.authserver.domain.Emisor;
 import com.zerotrust.authserver.domain.IdClave;
 import com.zerotrust.authserver.domain.PuertoServidor;

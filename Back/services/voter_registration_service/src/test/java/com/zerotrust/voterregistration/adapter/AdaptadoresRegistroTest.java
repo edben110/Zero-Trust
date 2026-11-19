@@ -10,7 +10,7 @@ import com.zerotrust.voterregistration.adapter.persistence.VotanteJpaRepository;
 import com.zerotrust.voterregistration.adapter.persistence.VotanteRegistradoEntity;
 import com.zerotrust.voterregistration.domain.ElectionId;
 import com.zerotrust.voterregistration.domain.PadronInicial;
-import com.zerotrust.voterregistration.domain.PadronInvalidoException;
+import com.zerotrust.voterregistration.exception.PadronInvalidoException;
 import com.zerotrust.voterregistration.domain.Region;
 import com.zerotrust.voterregistration.domain.RegistroVotanteCrudo;
 import com.zerotrust.voterregistration.domain.VotanteRegistrado;

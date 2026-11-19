@@ -2,7 +2,7 @@ package com.zerotrust.votingapi.adapter.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.votingapi.domain.PublicacionNoDisponibleException;
+import com.zerotrust.votingapi.exception.PublicacionNoDisponibleException;
 import com.zerotrust.votingapi.domain.VotanteInscrito;
 import com.zerotrust.votingapi.port.PublicadorElegibles;
 import org.springframework.kafka.core.KafkaTemplate;
