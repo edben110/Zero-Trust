@@ -9,7 +9,6 @@ import jakarta.persistence.Table;
 
 import java.time.Instant;
 
-// Entidad JPA inmutable de vote_audit (docs/schema.sql): sin setters y con columnas no actualizables.
 @Entity
 @Table(name = "vote_audit")
 public class VotoAuditadoEntity {
@@ -37,7 +36,6 @@ public class VotoAuditadoEntity {
     private Instant votedAt;
 
     protected VotoAuditadoEntity() {
-        // exigido por JPA
     }
 
     public VotoAuditadoEntity(String voteId, String voterId, String candidateId, String region, String sourceIp,

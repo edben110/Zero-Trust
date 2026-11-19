@@ -3,7 +3,6 @@ package com.zerotrust.analyticsarchiver.domain;
 import java.time.Instant;
 import java.util.Objects;
 
-// Registro histórico e inmutable de un voto aceptado (vote_audit).
 public record VotoAuditado(VoteId voteId, VoterId voterId, CandidateId candidateId, Region region, SourceIp sourceIp,
                            Instant votadoEn) {
 

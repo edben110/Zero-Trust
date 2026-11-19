@@ -2,8 +2,7 @@ package com.zerotrust.analyticsarchiver.config;
 
 import org.springframework.util.backoff.FixedBackOff;
 
-// El DefaultErrorHandler de Spring Kafka descarta el mensaje tras 10 intentos; aquí se reintenta sin límite
-// para no confirmar el offset de un voto que todavía no está en vote_audit.
+// Sin límite: el DefaultErrorHandler descartaría el voto tras 10 intentos y confirmaría su offset.
 public final class PoliticaReintentos {
 
     private static final long INTERVALO_MS = 5_000L;
