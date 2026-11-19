@@ -21,8 +21,7 @@ public class RabbitConfig {
     @Bean
     public Queue regionalDashboardQueue(
             @Value("${dashboard.region-binding:#}") String regionPattern) {
-        // Cola exclusiva por instancia del worker.
-        // Con regionPattern "#" escucha todas las regiones (comportamiento por defecto).
+        // Cola exclusiva por instancia: cada worker recibe su propia copia de los resultados.
         return new AnonymousQueue();
     }
 
@@ -31,9 +30,6 @@ public class RabbitConfig {
             Queue regionalDashboardQueue,
             TopicExchange liveResultsRegionalExchange,
             @Value("${dashboard.region-binding:#}") String pattern) {
-        // La routing key sigue el contrato: results.<region>
-        // Con pattern "results.#" este worker recibe todas las regiones.
-        // Para un worker dedicado a una sola región: "results.norte"
         return BindingBuilder
                 .bind(regionalDashboardQueue)
                 .to(liveResultsRegionalExchange)

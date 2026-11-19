@@ -9,13 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-/**
- * Escucha el Topic Exchange live_results_regional y reenvía cada snapshot
- * a los clientes WebSocket suscritos a /topic/region/<nombre-de-región>.
- *
- * Extrae el campo "region" del payload para construir el destino dinámico,
- * de modo que cada cliente puede suscribirse solo a su región de interés.
- */
+// El campo region del payload decide el destino: cada cliente se suscribe solo a su región.
 @Component
 public class RegionalResultsRabbitConsumer {
 
