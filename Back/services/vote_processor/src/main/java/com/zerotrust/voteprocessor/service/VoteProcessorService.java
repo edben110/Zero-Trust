@@ -1,9 +1,9 @@
 package com.zerotrust.voteprocessor.service;
 
-import com.zerotrust.voteprocessor.domain.model.GlobalResultSnapshot;
-import com.zerotrust.voteprocessor.domain.model.RawVoteEvent;
-import com.zerotrust.voteprocessor.domain.port.ConteoVotos;
-import com.zerotrust.voteprocessor.domain.port.GlobalResultPublisher;
+import com.zerotrust.voteprocessor.domain.GlobalResultSnapshot;
+import com.zerotrust.voteprocessor.domain.RawVoteEvent;
+import com.zerotrust.voteprocessor.port.ConteoVotos;
+import com.zerotrust.voteprocessor.port.GlobalResultPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
