@@ -9,7 +9,6 @@ import jakarta.persistence.Table;
 
 import java.time.Instant;
 
-// Entidad JPA inmutable de registered_voters (docs/schema.sql): sin setters, se crea con el constructor completo.
 @Entity
 @Table(name = "registered_voters")
 public class VotanteRegistradoEntity {
@@ -28,7 +27,6 @@ public class VotanteRegistradoEntity {
     private Instant registeredAt;
 
     protected VotanteRegistradoEntity() {
-        // exigido por JPA
     }
 
     public VotanteRegistradoEntity(String voterId, String region, Instant registeredAt) {

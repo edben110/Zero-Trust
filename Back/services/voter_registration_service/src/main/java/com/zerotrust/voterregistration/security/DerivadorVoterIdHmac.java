@@ -12,11 +12,8 @@ import java.security.GeneralSecurityException;
 import java.util.Base64;
 import java.util.UUID;
 
-// VoterId = UUID versión 8 (uso personalizado, RFC 9562) formado con los primeros 128 bits de
-// HMAC-SHA-256(clave, "zerotrust-voter-v1" 0x00 electionId 0x00 cédula), con los bits de versión y variante.
-// Sin la clave no se puede calcular el UUID de una cédula ni recuperar la cédula a partir del UUID.
-// La clave debe mantenerse igual durante toda la elección y no puede salir del servidor.
-// Copia idéntica del algoritmo de voting_api: ambos deben dar el mismo UUID para la misma cédula y elección.
+// UUID v8 (RFC 9562) con los primeros 128 bits de HMAC-SHA-256(clave, "zerotrust-voter-v1" 0x00 elección 0x00 cédula).
+// Sin la clave no se calcula ni se invierte; debe ser la misma que en voting_api y no cambiar durante la elección.
 public final class DerivadorVoterIdHmac implements DerivadorVoterId {
 
     static final String ALGORITMO = "HmacSHA256";
