@@ -1,7 +1,4 @@
-package com.zerotrust.botdetector.domain.model;
-
-import com.zerotrust.botdetector.domain.state.IpRiskState;
-import com.zerotrust.botdetector.domain.state.NormalState;
+package com.zerotrust.botdetector.domain.state;
 
 import java.time.Instant;
 
@@ -60,20 +57,20 @@ public final class IpTrafficContext {
         this.windowStart         = now;
     }
 
-    // ── Métodos de negocio usados por los estados ────────────────────────────
+    // ── Solo para los estados del paquete: nadie fuera puede forzar una transición ──
 
-    public void incrementVoteCount() {
+    void incrementVoteCount() {
         voteCount++;
     }
 
-    public void transitionTo(IpRiskState newState) {
+    void transitionTo(IpRiskState newState) {
         if (newState == null) {
             throw new IllegalArgumentException("newState no puede ser nulo");
         }
         this.currentState = newState;
     }
 
-    public void requestAlert() {
+    void requestAlert() {
         this.alertRequested = true;
     }
 

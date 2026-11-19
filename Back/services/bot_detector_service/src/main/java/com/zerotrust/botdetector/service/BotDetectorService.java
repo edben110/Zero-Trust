@@ -3,7 +3,7 @@ package com.zerotrust.botdetector.service;
 import com.zerotrust.botdetector.exception.ProyeccionNoDisponibleException;
 import com.zerotrust.botdetector.domain.model.AlertOrigin;
 import com.zerotrust.botdetector.domain.model.FraudKind;
-import com.zerotrust.botdetector.domain.model.IpTrafficContext;
+import com.zerotrust.botdetector.domain.state.IpTrafficContext;
 import com.zerotrust.botdetector.domain.model.SecurityAlert;
 import com.zerotrust.botdetector.domain.port.FraudIncidentRepository;
 import com.zerotrust.botdetector.domain.port.RiskStateRepository;

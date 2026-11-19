@@ -1,13 +1,11 @@
 package com.zerotrust.botdetector.domain.state;
 
-import com.zerotrust.botdetector.domain.model.IpTrafficContext;
-
 /**
  * Estado de sospecha. La IP ya superó el umbral normal.
  * Transiciona a BLOQUEADA si supera el umbral crítico.
  * Genera una alerta en cada voto adicional recibido en este estado.
  */
-public final class SuspiciousState implements IpRiskState {
+final class SuspiciousState implements IpRiskState {
 
     @Override
     public void onVoteReceived(IpTrafficContext context) {

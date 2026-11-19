@@ -1,7 +1,5 @@
 package com.zerotrust.botdetector.domain.state;
 
-import com.zerotrust.botdetector.domain.model.IpTrafficContext;
-
 /**
  * Contrato del patrón State para el ciclo de riesgo de una IP.
  *
@@ -9,7 +7,7 @@ import com.zerotrust.botdetector.domain.model.IpTrafficContext;
  * anomalías, eliminando la necesidad de bloques if-else o switch en el
  * contexto que los usa.
  */
-public interface IpRiskState {
+interface IpRiskState {
 
     /**
      * Evalúa un nuevo voto registrado desde esta IP.
