@@ -1,4 +1,4 @@
-package com.zerotrust.uservalidation.config;
+package com.zerotrust.uservalidation.security;
 
 import com.rabbitmq.client.impl.CredentialsProvider;
 import com.rabbitmq.client.impl.CredentialsRefreshService;

@@ -1,4 +1,4 @@
-package com.zerotrust.uservalidation.adapter.memoria;
+package com.zerotrust.uservalidation.repository.memoria;
 
 import com.zerotrust.uservalidation.domain.PadronElectoral;
 import com.zerotrust.uservalidation.domain.VoterId;

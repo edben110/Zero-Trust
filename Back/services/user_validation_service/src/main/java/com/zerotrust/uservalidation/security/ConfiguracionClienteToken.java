@@ -1,4 +1,4 @@
-package com.zerotrust.uservalidation.config;
+package com.zerotrust.uservalidation.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

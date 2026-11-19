@@ -1,4 +1,4 @@
-package com.zerotrust.uservalidation.config;
+package com.zerotrust.uservalidation.security;
 
 import java.util.Set;
 import java.util.function.Function;

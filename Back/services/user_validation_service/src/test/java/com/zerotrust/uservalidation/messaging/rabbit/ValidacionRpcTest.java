@@ -1,4 +1,4 @@
-package com.zerotrust.uservalidation.adapter.rabbit;
+package com.zerotrust.uservalidation.messaging.rabbit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.uservalidation.domain.VoterId;

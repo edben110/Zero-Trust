@@ -1,4 +1,4 @@
-package com.zerotrust.uservalidation.adapter.kafka;
+package com.zerotrust.uservalidation.messaging.kafka;
 
 import com.zerotrust.uservalidation.domain.VoterId;
 import com.zerotrust.uservalidation.service.ServicioPadronElectoral;

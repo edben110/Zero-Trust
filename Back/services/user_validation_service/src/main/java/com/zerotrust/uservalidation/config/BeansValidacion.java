@@ -1,11 +1,11 @@
 package com.zerotrust.uservalidation.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.uservalidation.adapter.kafka.ConsumidorEligibleVoters;
-import com.zerotrust.uservalidation.adapter.kafka.LectorRegistroElegible;
-import com.zerotrust.uservalidation.adapter.memoria.PadronEnMemoria;
-import com.zerotrust.uservalidation.adapter.rabbit.LectorPeticionValidacion;
-import com.zerotrust.uservalidation.adapter.rabbit.ListenerValidacionRpc;
+import com.zerotrust.uservalidation.messaging.kafka.ConsumidorEligibleVoters;
+import com.zerotrust.uservalidation.messaging.kafka.LectorRegistroElegible;
+import com.zerotrust.uservalidation.repository.memoria.PadronEnMemoria;
+import com.zerotrust.uservalidation.messaging.rabbit.LectorPeticionValidacion;
+import com.zerotrust.uservalidation.messaging.rabbit.ListenerValidacionRpc;
 import com.zerotrust.uservalidation.domain.PadronElectoral;
 import com.zerotrust.uservalidation.port.PadronVotantes;
 import com.zerotrust.uservalidation.service.ServicioPadronElectoral;

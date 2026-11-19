@@ -1,4 +1,4 @@
-package com.zerotrust.uservalidation.config;
+package com.zerotrust.uservalidation.security;
 
 import org.springframework.boot.autoconfigure.kafka.DefaultKafkaConsumerFactoryCustomizer;
 import org.springframework.boot.autoconfigure.kafka.DefaultKafkaProducerFactoryCustomizer;

@@ -1,4 +1,4 @@
-package com.zerotrust.uservalidation.config;
+package com.zerotrust.uservalidation.security;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
