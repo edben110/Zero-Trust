@@ -1,9 +1,5 @@
 package com.zerotrust.regionalrollup.domain;
 
-import com.zerotrust.regionalrollup.domain.model.RawVoteEvent;
-import com.zerotrust.regionalrollup.domain.model.RegionalCandidateResult;
-import com.zerotrust.regionalrollup.domain.model.RegionalResultSnapshot;
-import com.zerotrust.regionalrollup.domain.model.RegionalVoteAccumulator;
 import com.zerotrust.regionalrollup.domain.strategy.SimpleCountStrategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,10 +64,17 @@ class RegionalVoteAccumulatorTest {
 
     @Test
     void duplicadoEnOtraRegionNoIncrementaElEscrutinio() {
+        // Arrange
         String voterId = UUID.randomUUID().toString();
         String candidato = UUID.randomUUID().toString();
-        assertTrue(accumulator.accept(event("norte", voterId, candidato)));
-        assertFalse(accumulator.accept(event("sur", voterId, candidato)));
+
+        // Act
+        boolean primero = accumulator.accept(event("norte", voterId, candidato));
+        boolean segundo = accumulator.accept(event("sur", voterId, candidato));
+
+        // Assert
+        assertTrue(primero);
+        assertFalse(segundo);
         assertEquals(1L, accumulator.snapshotFor("norte").results().get(0).voteCount());
         assertFalse(accumulator.activeRegions().contains("sur"));
     }

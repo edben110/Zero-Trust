@@ -1,11 +1,5 @@
 package com.zerotrust.voteprocessor.domain;
 
-import com.zerotrust.voteprocessor.domain.model.CandidateId;
-import com.zerotrust.voteprocessor.domain.model.GlobalResultSnapshot;
-import com.zerotrust.voteprocessor.domain.model.RawVoteEvent;
-import com.zerotrust.voteprocessor.domain.model.VoteAggregate;
-import com.zerotrust.voteprocessor.domain.model.VoteId;
-import com.zerotrust.voteprocessor.domain.model.VoterId;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -13,10 +7,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Pruebas de dominio puro. Sin Spring, sin brokers, sin BD.
- * Patrón AAA: Arrange → Act → Assert.
- */
 class VoteAggregateTest {
 
     private RawVoteEvent buildEvent(String voterId, String candidateId) {
@@ -97,16 +87,19 @@ class VoteAggregateTest {
 
     @Test
     void voteIdNuloLanzaExcepcion() {
+        // Act + Assert
         assertThrows(IllegalArgumentException.class, () -> new VoteId(null));
     }
 
     @Test
     void voteIdVacioLanzaExcepcion() {
+        // Act + Assert
         assertThrows(IllegalArgumentException.class, () -> new VoteId("  "));
     }
 
     @Test
     void voteIdMalformadoLanzaExcepcion() {
+        // Act + Assert
         assertThrows(Exception.class, () -> new VoteId("no-es-uuid"));
     }
 }

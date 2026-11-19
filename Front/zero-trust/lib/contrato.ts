@@ -1,5 +1,3 @@
-// Tipos de docs/contratos.md: GET /catalog, POST /vote y los mensajes de los dashboard workers.
-
 export type Candidato = {
   candidateId: string;
   name: string;

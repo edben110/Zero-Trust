@@ -1,9 +1,8 @@
 package com.zerotrust.authserver.config;
 
-import com.zerotrust.authserver.adapter.config.InterpreteArchivoClientes;
-import com.zerotrust.authserver.adapter.crypto.LectorClaveFirma;
-import com.zerotrust.authserver.adapter.crypto.ValidadorKeystore;
-import com.zerotrust.authserver.domain.ConfiguracionInvalidaException;
+import com.zerotrust.authserver.security.LectorClaveFirma;
+import com.zerotrust.authserver.security.ValidadorKeystore;
+import com.zerotrust.authserver.exception.ConfiguracionInvalidaException;
 import com.zerotrust.authserver.domain.Emisor;
 import com.zerotrust.authserver.domain.IdClave;
 import com.zerotrust.authserver.domain.PuertoServidor;
@@ -19,7 +18,7 @@ import java.time.Clock;
 import java.util.Optional;
 import java.util.function.Function;
 
-// Está en config/ y no en service/ porque compone clases concretas de adapter (constitución §4).
+// Está en config/ y no en service/ porque compone clases concretas de varias capas (constitución §4).
 public class CargadorConfiguracion {
 
     private final FuenteVariables variables;

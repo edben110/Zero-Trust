@@ -1,6 +1,6 @@
 package com.zerotrust.voterregistration.config;
 
-import com.zerotrust.voterregistration.domain.PadronInvalidoException;
+import com.zerotrust.voterregistration.exception.PadronInvalidoException;
 import com.zerotrust.voterregistration.service.ResultadoRegistro;
 import com.zerotrust.voterregistration.service.ServicioRegistroPadron;
 import org.junit.jupiter.api.DisplayName;

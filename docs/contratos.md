@@ -150,6 +150,8 @@ spring.kafka.ssl.trust-store-type=PKCS12
 - Sin usuario ni contraseña fijos. amqp-client codifica las credenciales en Basic como pide RFC 6749.
 - En los servicios de Sebas lo hace `ConfiguracionRabbitOAuth` con un `ConnectionFactoryCustomizer` de Spring Boot 3.2.5, que se aplica después de que Boot configure la conexión.
 
+**Código copiado a propósito**: el cliente de token no es una librería compartida porque cada Dockerfile compila un solo servicio con su propio `pom.xml`; una librería obligaría a cambiar el contexto de build de todos los Dockerfiles. Por eso estas clases de `config/` están copiadas (solo cambia el `package`) en voting_api, user_validation_service, voter_registration_service y analytics_archiver: `ContextoTls`, `PropiedadesKafkaOAuth`, `VariablesClienteToken`, `ConfiguracionClienteToken` y `ConfiguracionKafkaOAuth`; `ConfiguracionRabbitOAuth` está en voting_api y user_validation_service. Un cambio en una copia se aplica a mano en las demás.
+
 **PostgreSQL**: `DB_URL`, `DB_USER`, `DB_PASSWORD`, sin valores por defecto; `spring.jpa.hibernate.ddl-auto=validate` contra `docs/schema.sql`.
 
 ## Catálogo

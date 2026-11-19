@@ -5,7 +5,6 @@ import com.zerotrust.votingapi.domain.VoterId;
 
 public interface RegistroParticipacion {
 
-    // Registra que el VoterId votó en la elección. Lanza VotoDuplicadoException si ya estaba registrado.
-    // Debe ejecutarse dentro de la transacción de EjecutorTransaccional.
+    // Lanza VotoDuplicadoException si ya votó; debe correr dentro de EjecutorTransaccional.
     void registrar(ElectionId eleccion, VoterId voterId);
 }

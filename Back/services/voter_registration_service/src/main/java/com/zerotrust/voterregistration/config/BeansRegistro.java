@@ -1,12 +1,10 @@
 package com.zerotrust.voterregistration.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.voterregistration.adapter.archivo.FuentePadronArchivo;
-import com.zerotrust.voterregistration.adapter.archivo.LectorArchivoVotantes;
-import com.zerotrust.voterregistration.adapter.kafka.PublicadorElegiblesKafka;
-import com.zerotrust.voterregistration.adapter.persistence.RepositorioPadronJpa;
-import com.zerotrust.voterregistration.adapter.persistence.VotanteJpaRepository;
-import com.zerotrust.voterregistration.adapter.crypto.DerivadorVoterIdHmac;
+import com.zerotrust.voterregistration.messaging.kafka.PublicadorElegiblesKafka;
+import com.zerotrust.voterregistration.repository.RepositorioPadronJpa;
+import com.zerotrust.voterregistration.repository.VotanteJpaRepository;
+import com.zerotrust.voterregistration.security.DerivadorVoterIdHmac;
 import com.zerotrust.voterregistration.domain.ElectionId;
 import com.zerotrust.voterregistration.port.DerivadorVoterId;
 import com.zerotrust.voterregistration.port.FuentePadron;

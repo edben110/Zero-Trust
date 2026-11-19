@@ -1,13 +1,9 @@
 package com.zerotrust.votingapi.domain;
 
+import com.zerotrust.votingapi.exception.SolicitudSeguridadInvalidaException;
 import java.util.regex.Pattern;
 
-/**
- * Value Object para una IP observada en una prueba de seguridad.
- *
- * No resuelve nombres DNS (evita SSRF y bloqueos): solo acepta literales IPv4
- * o IPv6. La validación es Fail-Fast y el valor queda inmutable.
- */
+// No resuelve DNS (evita SSRF y bloqueos): solo acepta literales IPv4 o IPv6.
 public record DireccionIp(String valor) {
 
     private static final Pattern IPV4 = Pattern.compile(
@@ -16,14 +12,14 @@ public record DireccionIp(String valor) {
 
     public DireccionIp {
         if (valor == null || valor.isBlank()) {
-            throw new IllegalArgumentException("La IP es obligatoria.");
+            throw new SolicitudSeguridadInvalidaException("La IP es obligatoria.");
         }
         String normalizada = valor.strip();
         if (normalizada.length() > LARGO_MAXIMO) {
-            throw new IllegalArgumentException("La IP supera 45 caracteres.");
+            throw new SolicitudSeguridadInvalidaException("La IP supera 45 caracteres.");
         }
         if (!IPV4.matcher(normalizada).matches() && !esIpv6(normalizada)) {
-            throw new IllegalArgumentException("La IP no es un literal IPv4 o IPv6 válido.");
+            throw new SolicitudSeguridadInvalidaException("La IP no es un literal IPv4 o IPv6 válido.");
         }
         valor = normalizada;
     }

@@ -1,16 +1,16 @@
 package com.zerotrust.votingapi.service;
 
-import com.zerotrust.votingapi.adapter.crypto.DerivadorVoterIdHmac;
+import com.zerotrust.votingapi.security.DerivadorVoterIdHmac;
 import com.zerotrust.votingapi.domain.Candidato;
 import com.zerotrust.votingapi.domain.CandidateId;
 import com.zerotrust.votingapi.domain.Catalogo;
 import com.zerotrust.votingapi.domain.Cedula;
 import com.zerotrust.votingapi.domain.ElectionId;
-import com.zerotrust.votingapi.domain.PublicacionNoDisponibleException;
+import com.zerotrust.votingapi.exception.PublicacionNoDisponibleException;
 import com.zerotrust.votingapi.domain.Region;
-import com.zerotrust.votingapi.domain.SolicitudVotoInvalidaException;
+import com.zerotrust.votingapi.exception.SolicitudVotoInvalidaException;
 import com.zerotrust.votingapi.domain.VotanteInscrito;
-import com.zerotrust.votingapi.domain.VotanteYaInscritoException;
+import com.zerotrust.votingapi.exception.VotanteYaInscritoException;
 import com.zerotrust.votingapi.domain.VoterId;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
 import com.zerotrust.votingapi.port.PublicadorElegibles;

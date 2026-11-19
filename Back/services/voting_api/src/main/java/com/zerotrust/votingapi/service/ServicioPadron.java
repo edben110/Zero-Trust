@@ -4,7 +4,7 @@ import com.zerotrust.votingapi.domain.Catalogo;
 import com.zerotrust.votingapi.domain.Cedula;
 import com.zerotrust.votingapi.domain.ElectionId;
 import com.zerotrust.votingapi.domain.Region;
-import com.zerotrust.votingapi.domain.SolicitudVotoInvalidaException;
+import com.zerotrust.votingapi.exception.SolicitudVotoInvalidaException;
 import com.zerotrust.votingapi.domain.VotanteInscrito;
 import com.zerotrust.votingapi.port.DerivadorVoterId;
 import com.zerotrust.votingapi.port.EjecutorTransaccional;
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-// Alta de votantes en el padrón desde el panel de administración.
 // La cédula se convierte en el UUID de la elección en curso y no se guarda ni se publica.
 public class ServicioPadron {
 
