@@ -1,4 +1,4 @@
-package com.zerotrust.analyticsarchiver.adapter.kafka;
+package com.zerotrust.analyticsarchiver.messaging.kafka;
 
 import com.zerotrust.analyticsarchiver.service.ServicioArchivoVotos;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

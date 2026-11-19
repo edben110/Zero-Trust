@@ -1,4 +1,4 @@
-package com.zerotrust.analyticsarchiver.config;
+package com.zerotrust.analyticsarchiver.security;
 
 import java.util.Set;
 import java.util.function.Function;

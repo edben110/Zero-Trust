@@ -1,4 +1,4 @@
-package com.zerotrust.analyticsarchiver.config;
+package com.zerotrust.analyticsarchiver.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.zerotrust.analyticsarchiver.adapter.kafka;
+package com.zerotrust.analyticsarchiver.messaging.kafka;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

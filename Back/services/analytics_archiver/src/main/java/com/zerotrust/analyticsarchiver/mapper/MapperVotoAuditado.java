@@ -1,4 +1,4 @@
-package com.zerotrust.analyticsarchiver.adapter.persistence;
+package com.zerotrust.analyticsarchiver.mapper;
 
 import com.zerotrust.analyticsarchiver.domain.CandidateId;
 import com.zerotrust.analyticsarchiver.domain.Region;
@@ -6,6 +6,7 @@ import com.zerotrust.analyticsarchiver.domain.SourceIp;
 import com.zerotrust.analyticsarchiver.domain.VoteId;
 import com.zerotrust.analyticsarchiver.domain.VoterId;
 import com.zerotrust.analyticsarchiver.domain.VotoAuditado;
+import com.zerotrust.analyticsarchiver.repository.entity.VotoAuditadoEntity;
 
 public final class MapperVotoAuditado {
 

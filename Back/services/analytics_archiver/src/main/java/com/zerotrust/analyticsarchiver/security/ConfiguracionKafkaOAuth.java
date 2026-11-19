@@ -1,4 +1,4 @@
-package com.zerotrust.analyticsarchiver.config;
+package com.zerotrust.analyticsarchiver.security;
 
 import org.springframework.boot.autoconfigure.kafka.DefaultKafkaConsumerFactoryCustomizer;
 import org.springframework.boot.autoconfigure.kafka.DefaultKafkaProducerFactoryCustomizer;

@@ -1,6 +1,7 @@
-package com.zerotrust.analyticsarchiver.adapter.persistence;
+package com.zerotrust.analyticsarchiver.repository;
 
 import com.zerotrust.analyticsarchiver.domain.VotoAuditado;
+import com.zerotrust.analyticsarchiver.mapper.MapperVotoAuditado;
 import com.zerotrust.analyticsarchiver.port.RepositorioAuditoria;
 import org.springframework.transaction.annotation.Transactional;
 

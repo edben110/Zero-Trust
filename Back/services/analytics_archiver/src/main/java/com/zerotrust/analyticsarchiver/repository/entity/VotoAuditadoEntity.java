@@ -1,4 +1,4 @@
-package com.zerotrust.analyticsarchiver.adapter.persistence;
+package com.zerotrust.analyticsarchiver.repository.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -54,23 +54,23 @@ public class VotoAuditadoEntity {
         return voteId;
     }
 
-    String getVoterId() {
+    public String getVoterId() {
         return voterId;
     }
 
-    String getCandidateId() {
+    public String getCandidateId() {
         return candidateId;
     }
 
-    String getRegion() {
+    public String getRegion() {
         return region;
     }
 
-    String getSourceIp() {
+    public String getSourceIp() {
         return sourceIp;
     }
 
-    Instant getVotedAt() {
+    public Instant getVotedAt() {
         return votedAt;
     }
 }
