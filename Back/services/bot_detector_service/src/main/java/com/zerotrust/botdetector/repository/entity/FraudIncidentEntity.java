@@ -1,7 +1,7 @@
-package com.zerotrust.botdetector.adapter.persistence;
+package com.zerotrust.botdetector.repository.entity;
 
-import com.zerotrust.botdetector.domain.model.AlertOrigin;
-import com.zerotrust.botdetector.domain.model.FraudKind;
+import com.zerotrust.botdetector.domain.AlertOrigin;
+import com.zerotrust.botdetector.domain.FraudKind;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

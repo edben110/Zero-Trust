@@ -1,4 +1,4 @@
-package com.zerotrust.botdetector.adapter.persistence;
+package com.zerotrust.botdetector.repository;
 
 import com.zerotrust.botdetector.exception.ProyeccionNoDisponibleException;
 import org.junit.jupiter.api.DisplayName;

@@ -1,7 +1,7 @@
-package com.zerotrust.botdetector.adapter.persistence;
+package com.zerotrust.botdetector.repository;
 
 import com.zerotrust.botdetector.exception.ProyeccionNoDisponibleException;
-import com.zerotrust.botdetector.domain.port.RiskStateRepository;
+import com.zerotrust.botdetector.port.RiskStateRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;

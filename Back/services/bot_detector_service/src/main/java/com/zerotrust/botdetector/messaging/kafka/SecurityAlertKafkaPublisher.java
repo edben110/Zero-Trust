@@ -1,9 +1,9 @@
-package com.zerotrust.botdetector.adapter.kafka;
+package com.zerotrust.botdetector.messaging.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.botdetector.domain.model.SecurityAlert;
-import com.zerotrust.botdetector.domain.port.SecurityAlertPublisher;
+import com.zerotrust.botdetector.domain.SecurityAlert;
+import com.zerotrust.botdetector.port.SecurityAlertPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

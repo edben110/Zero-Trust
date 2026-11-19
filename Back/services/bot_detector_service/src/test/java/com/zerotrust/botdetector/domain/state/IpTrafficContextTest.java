@@ -1,6 +1,5 @@
-package com.zerotrust.botdetector.domain;
+package com.zerotrust.botdetector.domain.state;
 
-import com.zerotrust.botdetector.domain.state.IpTrafficContext;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

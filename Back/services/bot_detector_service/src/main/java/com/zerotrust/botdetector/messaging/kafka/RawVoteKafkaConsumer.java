@@ -1,4 +1,4 @@
-package com.zerotrust.botdetector.adapter.kafka;
+package com.zerotrust.botdetector.messaging.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.botdetector.service.BotDetectorService;

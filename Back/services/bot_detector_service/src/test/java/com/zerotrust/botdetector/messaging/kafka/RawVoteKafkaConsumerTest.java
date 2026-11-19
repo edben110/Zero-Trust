@@ -1,9 +1,9 @@
-package com.zerotrust.botdetector.adapter.kafka;
+package com.zerotrust.botdetector.messaging.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.botdetector.domain.model.SecurityAlert;
-import com.zerotrust.botdetector.domain.port.FraudIncidentRepository;
-import com.zerotrust.botdetector.domain.port.RiskStateRepository;
+import com.zerotrust.botdetector.domain.SecurityAlert;
+import com.zerotrust.botdetector.port.FraudIncidentRepository;
+import com.zerotrust.botdetector.port.RiskStateRepository;
 import com.zerotrust.botdetector.service.BotDetectorService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.DisplayName;

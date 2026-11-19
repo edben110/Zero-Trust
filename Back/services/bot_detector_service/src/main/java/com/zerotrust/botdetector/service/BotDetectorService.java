@@ -1,13 +1,13 @@
 package com.zerotrust.botdetector.service;
 
 import com.zerotrust.botdetector.exception.ProyeccionNoDisponibleException;
-import com.zerotrust.botdetector.domain.model.AlertOrigin;
-import com.zerotrust.botdetector.domain.model.FraudKind;
+import com.zerotrust.botdetector.domain.AlertOrigin;
+import com.zerotrust.botdetector.domain.FraudKind;
 import com.zerotrust.botdetector.domain.state.IpTrafficContext;
-import com.zerotrust.botdetector.domain.model.SecurityAlert;
-import com.zerotrust.botdetector.domain.port.FraudIncidentRepository;
-import com.zerotrust.botdetector.domain.port.RiskStateRepository;
-import com.zerotrust.botdetector.domain.port.SecurityAlertPublisher;
+import com.zerotrust.botdetector.domain.SecurityAlert;
+import com.zerotrust.botdetector.port.FraudIncidentRepository;
+import com.zerotrust.botdetector.port.RiskStateRepository;
+import com.zerotrust.botdetector.port.SecurityAlertPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

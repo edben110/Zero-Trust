@@ -1,12 +1,12 @@
 package com.zerotrust.botdetector.service;
 
 import com.zerotrust.botdetector.exception.ProyeccionNoDisponibleException;
-import com.zerotrust.botdetector.domain.model.AlertOrigin;
-import com.zerotrust.botdetector.domain.model.FraudKind;
-import com.zerotrust.botdetector.domain.model.SecurityAlert;
-import com.zerotrust.botdetector.domain.port.FraudIncidentRepository;
-import com.zerotrust.botdetector.domain.port.RiskStateRepository;
-import com.zerotrust.botdetector.domain.port.SecurityAlertPublisher;
+import com.zerotrust.botdetector.domain.AlertOrigin;
+import com.zerotrust.botdetector.domain.FraudKind;
+import com.zerotrust.botdetector.domain.SecurityAlert;
+import com.zerotrust.botdetector.port.FraudIncidentRepository;
+import com.zerotrust.botdetector.port.RiskStateRepository;
+import com.zerotrust.botdetector.port.SecurityAlertPublisher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

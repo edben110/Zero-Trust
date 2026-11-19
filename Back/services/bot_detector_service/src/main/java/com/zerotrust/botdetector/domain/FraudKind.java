@@ -1,4 +1,4 @@
-package com.zerotrust.botdetector.domain.model;
+package com.zerotrust.botdetector.domain;
 
 /**
  * Origen del incidente registrado en fraud_incidents.

@@ -1,6 +1,6 @@
-package com.zerotrust.botdetector.domain.port;
+package com.zerotrust.botdetector.port;
 
-import com.zerotrust.botdetector.domain.model.SecurityAlert;
+import com.zerotrust.botdetector.domain.SecurityAlert;
 
 /**
  * Puerto de salida: persiste incidentes de fraude en PostgreSQL.

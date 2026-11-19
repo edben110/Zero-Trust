@@ -1,8 +1,8 @@
-package com.zerotrust.botdetector.adapter.kafka;
+package com.zerotrust.botdetector.messaging.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.botdetector.domain.model.AlertOrigin;
-import com.zerotrust.botdetector.domain.model.SecurityAlert;
+import com.zerotrust.botdetector.domain.AlertOrigin;
+import com.zerotrust.botdetector.domain.SecurityAlert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

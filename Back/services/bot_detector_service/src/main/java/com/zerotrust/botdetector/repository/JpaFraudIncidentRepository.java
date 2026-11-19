@@ -1,7 +1,8 @@
-package com.zerotrust.botdetector.adapter.persistence;
+package com.zerotrust.botdetector.repository;
 
-import com.zerotrust.botdetector.domain.model.SecurityAlert;
-import com.zerotrust.botdetector.domain.port.FraudIncidentRepository;
+import com.zerotrust.botdetector.domain.SecurityAlert;
+import com.zerotrust.botdetector.port.FraudIncidentRepository;
+import com.zerotrust.botdetector.repository.entity.FraudIncidentEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 

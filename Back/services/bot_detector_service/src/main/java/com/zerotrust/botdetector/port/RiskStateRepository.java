@@ -1,4 +1,4 @@
-package com.zerotrust.botdetector.domain.port;
+package com.zerotrust.botdetector.port;
 
 import java.time.Instant;
 

@@ -1,7 +1,7 @@
-package com.zerotrust.botdetector.adapter.kafka;
+package com.zerotrust.botdetector.messaging.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.botdetector.domain.model.AlertOrigin;
+import com.zerotrust.botdetector.domain.AlertOrigin;
 import com.zerotrust.botdetector.service.BotDetectorService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;

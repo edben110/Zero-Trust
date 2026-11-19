@@ -1,4 +1,4 @@
-package com.zerotrust.botdetector.config;
+package com.zerotrust.botdetector.security;
 
 import org.springframework.boot.autoconfigure.kafka.DefaultKafkaConsumerFactoryCustomizer;
 import org.springframework.boot.autoconfigure.kafka.DefaultKafkaProducerFactoryCustomizer;
