@@ -29,11 +29,15 @@ group_acl() {
 topic eligible_voters 1 cleanup.policy=compact
 topic raw_votes 3
 topic security_alerts 1
+topic security_drills 1   # pruebas controladas de detección (no contaminan raw_votes)
+topic fraud_events 1      # voto duplicado / región incorrecta detectados por voting_api
 
 # Productores
 topic_acl voter_registration_service eligible_voters Write Describe
 topic_acl voting_api                 raw_votes       Write Describe
 topic_acl voting_api                 eligible_voters Write Describe   # altas en el padrón desde el panel de administración
+topic_acl voting_api                 security_drills Write Describe   # lanza pruebas desde el panel
+topic_acl voting_api                 fraud_events    Write Describe   # reporta incidentes electorales
 topic_acl bot_detector_service       security_alerts Write Describe
 
 # Consumidores
@@ -48,6 +52,12 @@ group_acl regional_rollup_service regional-rollup-group
 
 topic_acl bot_detector_service    raw_votes Read Describe
 group_acl bot_detector_service    bot-detector-group
+
+topic_acl bot_detector_service    security_drills Read Describe
+group_acl bot_detector_service    bot-detector-drills
+
+topic_acl bot_detector_service    fraud_events Read Describe
+group_acl bot_detector_service    bot-detector-fraud
 
 topic_acl analytics_archiver      raw_votes Read Describe
 group_acl analytics_archiver      analytics-archiver

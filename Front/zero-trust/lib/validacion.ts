@@ -19,6 +19,13 @@ export function normalizarCedula(valor: string): string | null {
   return /^[0-9]{6,10}$/.test(limpia) ? limpia : null;
 }
 
+// Filtro de escritura: la cédula solo admite dígitos. Descarta letras, signos y
+// espacios (también al pegar) y limita a 10 para que el campo nunca quede inválido
+// por caracteres que el servidor rechazaría.
+export function soloDigitos(valor: string): string {
+  return valor.normalize("NFKC").replace(/[^0-9]/g, "").slice(0, 10);
+}
+
 export function leerVoterId(valor: unknown): string | null {
   if (!esObjeto(valor) || typeof valor.voterId !== "string" || !esUuid(valor.voterId)) {
     return null;

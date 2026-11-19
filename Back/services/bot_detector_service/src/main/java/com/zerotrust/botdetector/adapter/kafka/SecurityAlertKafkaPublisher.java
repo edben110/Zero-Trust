@@ -33,6 +33,8 @@ public class SecurityAlertKafkaPublisher implements SecurityAlertPublisher {
                     "riskLevel",     alert.riskLevel(),
                     "voteCount",     alert.voteCount(),
                     "windowSeconds", alert.windowSeconds(),
+                    "origin",        alert.origin().name(),
+                    "kind",          alert.kind().name(),
                     "detectedAt",    alert.detectedAt().toString()
             );
             String json = mapper.writeValueAsString(payload);

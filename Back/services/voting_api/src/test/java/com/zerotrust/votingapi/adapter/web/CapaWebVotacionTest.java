@@ -133,8 +133,8 @@ class CapaWebVotacionTest {
         RepositorioCatalogo repositorio = mock(RepositorioCatalogo.class);
         lenient().when(repositorio.actual()).thenReturn(catalogo);
         ServicioVotacion servicio = new ServicioVotacion(validador, publicador, registro, voto -> { }, controlRegion,
-                new TransaccionDirecta(), ELECCION, Clock.fixed(Instant.parse("2026-11-14T15:00:00Z"), ZoneOffset.UTC),
-                () -> VOTE_ID);
+                (tipo, ip) -> { }, new TransaccionDirecta(), ELECCION,
+                Clock.fixed(Instant.parse("2026-11-14T15:00:00Z"), ZoneOffset.UTC), () -> VOTE_ID);
         VotoController votos = new VotoController(servicio, repositorio,
                 ResolutorIpOrigen.desde(String.valueOf(confiarEnCabeceras)));
         ConsultaVoterIdController consulta = new ConsultaVoterIdController(
