@@ -1,5 +1,6 @@
 package com.zerotrust.votingapi.domain;
 
+import com.zerotrust.votingapi.exception.SolicitudSeguridadInvalidaException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

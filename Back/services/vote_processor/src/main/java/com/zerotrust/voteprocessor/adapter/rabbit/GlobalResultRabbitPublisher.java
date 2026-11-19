@@ -2,7 +2,7 @@ package com.zerotrust.voteprocessor.adapter.rabbit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.voteprocessor.domain.exception.PublicacionFallida;
+import com.zerotrust.voteprocessor.exception.PublicacionFallidaException;
 import com.zerotrust.voteprocessor.domain.model.GlobalResultSnapshot;
 import com.zerotrust.voteprocessor.domain.port.GlobalResultPublisher;
 import org.slf4j.Logger;
@@ -61,7 +61,7 @@ public class GlobalResultRabbitPublisher implements GlobalResultPublisher {
                 esperar(intento);
             }
         }
-        throw new PublicacionFallida("No se pudo publicar el resultado global en " + exchange, ultimoError);
+        throw new PublicacionFallidaException("No se pudo publicar el resultado global en " + exchange, ultimoError);
     }
 
     private String serializar(GlobalResultSnapshot snapshot) {
@@ -78,7 +78,7 @@ public class GlobalResultRabbitPublisher implements GlobalResultPublisher {
                     "results",   results
             ));
         } catch (JsonProcessingException e) {
-            throw new PublicacionFallida("No se pudo serializar el resultado global", e);
+            throw new PublicacionFallidaException("No se pudo serializar el resultado global", e);
         }
     }
 
@@ -90,7 +90,7 @@ public class GlobalResultRabbitPublisher implements GlobalResultPublisher {
             Thread.sleep(pausaMs);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new PublicacionFallida("Publicación del resultado global interrumpida", e);
+            throw new PublicacionFallidaException("Publicación del resultado global interrumpida", e);
         }
     }
 }

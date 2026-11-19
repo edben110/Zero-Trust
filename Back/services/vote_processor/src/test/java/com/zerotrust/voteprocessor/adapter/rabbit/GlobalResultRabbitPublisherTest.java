@@ -1,7 +1,7 @@
 package com.zerotrust.voteprocessor.adapter.rabbit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.voteprocessor.domain.exception.PublicacionFallida;
+import com.zerotrust.voteprocessor.exception.PublicacionFallidaException;
 import com.zerotrust.voteprocessor.domain.model.CandidateId;
 import com.zerotrust.voteprocessor.domain.model.CandidateResult;
 import com.zerotrust.voteprocessor.domain.model.GlobalResultSnapshot;
@@ -79,13 +79,13 @@ class GlobalResultRabbitPublisherTest {
     }
 
     @Test
-    @DisplayName("Debe lanzar PublicacionFallida tras agotar los intentos")
+    @DisplayName("Debe lanzar PublicacionFallidaException tras agotar los intentos")
     void lanzaTrasAgotarIntentos() {
         // Arrange
         doThrow(caido()).when(rabbit).convertAndSend(eq(EXCHANGE), eq(""), anyString());
 
         // Act + Assert
-        assertThrows(PublicacionFallida.class, () -> publicador.publish(snapshot));
+        assertThrows(PublicacionFallidaException.class, () -> publicador.publish(snapshot));
         verify(rabbit, times(3)).convertAndSend(eq(EXCHANGE), eq(""), anyString());
     }
 }

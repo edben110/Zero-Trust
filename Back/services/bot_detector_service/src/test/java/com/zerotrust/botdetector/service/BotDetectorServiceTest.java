@@ -1,6 +1,6 @@
 package com.zerotrust.botdetector.service;
 
-import com.zerotrust.botdetector.domain.exception.ProyeccionNoDisponible;
+import com.zerotrust.botdetector.exception.ProyeccionNoDisponibleException;
 import com.zerotrust.botdetector.domain.model.AlertOrigin;
 import com.zerotrust.botdetector.domain.model.FraudKind;
 import com.zerotrust.botdetector.domain.model.SecurityAlert;
@@ -197,7 +197,7 @@ class BotDetectorServiceTest {
     void publicaLaAlertaAunqueLaProyeccionFalle() {
         // Arrange
         BotDetectorService svc = buildService();
-        doThrow(new ProyeccionNoDisponible("BD caída", new RuntimeException()))
+        doThrow(new ProyeccionNoDisponibleException("BD caída", new RuntimeException()))
                 .when(riskStates).actualizar(anyString(), anyString(), anyInt(), anyInt(), any());
 
         // Act

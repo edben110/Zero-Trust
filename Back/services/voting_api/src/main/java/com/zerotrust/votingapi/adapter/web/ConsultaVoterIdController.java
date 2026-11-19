@@ -1,7 +1,7 @@
 package com.zerotrust.votingapi.adapter.web;
 
 import com.zerotrust.votingapi.domain.Cedula;
-import com.zerotrust.votingapi.domain.SolicitudVotoInvalidaException;
+import com.zerotrust.votingapi.exception.SolicitudVotoInvalidaException;
 import com.zerotrust.votingapi.service.ServicioIdentificacion;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;

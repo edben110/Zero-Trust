@@ -1,6 +1,6 @@
 package com.zerotrust.botdetector.service;
 
-import com.zerotrust.botdetector.domain.exception.ProyeccionNoDisponible;
+import com.zerotrust.botdetector.exception.ProyeccionNoDisponibleException;
 import com.zerotrust.botdetector.domain.model.AlertOrigin;
 import com.zerotrust.botdetector.domain.model.FraudKind;
 import com.zerotrust.botdetector.domain.model.IpTrafficContext;
@@ -96,7 +96,7 @@ public class BotDetectorService {
     private void proyectar(String ip, IpTrafficContext context, Instant ahora) {
         try {
             riskStates.actualizar(ip, context.riskLevel(), context.voteCount(), context.windowSeconds(), ahora);
-        } catch (ProyeccionNoDisponible e) {
+        } catch (ProyeccionNoDisponibleException e) {
             log.warn("Estado de la IP {} sin proyectar en ip_risk_state: {}", ip, e.getMessage());
         }
     }

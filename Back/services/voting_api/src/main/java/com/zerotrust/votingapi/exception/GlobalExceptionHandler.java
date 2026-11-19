@@ -1,15 +1,5 @@
 package com.zerotrust.votingapi.exception;
 
-import com.zerotrust.votingapi.domain.OperacionSeguridadNoDisponibleException;
-import com.zerotrust.votingapi.domain.ServicioNoDisponibleException;
-import com.zerotrust.votingapi.domain.SolicitudSeguridadInvalidaException;
-import com.zerotrust.votingapi.domain.SolicitudVotoInvalidaException;
-import com.zerotrust.votingapi.domain.VotanteNoHabilitadoException;
-import com.zerotrust.votingapi.domain.VotanteFueraDelPadronException;
-import com.zerotrust.votingapi.domain.VotanteYaInscritoException;
-import com.zerotrust.votingapi.domain.VotoDuplicadoException;
-import com.zerotrust.votingapi.domain.RegionIncorrectaException;
-import com.zerotrust.votingapi.domain.VotoAnuladoException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;

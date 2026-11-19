@@ -1,6 +1,6 @@
 package com.zerotrust.authserver.adapter.web;
 
-import com.zerotrust.authserver.domain.PeticionMalFormadaException;
+import com.zerotrust.authserver.exception.PeticionMalFormadaException;
 import com.zerotrust.authserver.domain.SecretoCliente;
 import com.zerotrust.authserver.service.PeticionToken;
 

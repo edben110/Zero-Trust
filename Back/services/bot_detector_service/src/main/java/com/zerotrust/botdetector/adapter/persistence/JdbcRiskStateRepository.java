@@ -1,6 +1,6 @@
 package com.zerotrust.botdetector.adapter.persistence;
 
-import com.zerotrust.botdetector.domain.exception.ProyeccionNoDisponible;
+import com.zerotrust.botdetector.exception.ProyeccionNoDisponibleException;
 import com.zerotrust.botdetector.domain.port.RiskStateRepository;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -40,7 +40,7 @@ public class JdbcRiskStateRepository implements RiskStateRepository {
             jdbc.update(UPSERT, ip, riskLevel, voteCount, windowSeconds,
                     Timestamp.from(seenAt), Timestamp.from(seenAt));
         } catch (DataAccessException e) {
-            throw new ProyeccionNoDisponible("No se pudo actualizar ip_risk_state", e);
+            throw new ProyeccionNoDisponibleException("No se pudo actualizar ip_risk_state", e);
         }
     }
 }

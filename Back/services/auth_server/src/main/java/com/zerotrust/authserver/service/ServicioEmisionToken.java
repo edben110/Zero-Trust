@@ -2,12 +2,12 @@ package com.zerotrust.authserver.service;
 
 import com.zerotrust.authserver.domain.ClaimsToken;
 import com.zerotrust.authserver.domain.ClientId;
-import com.zerotrust.authserver.domain.ClienteInvalidoException;
+import com.zerotrust.authserver.exception.ClienteInvalidoException;
 import com.zerotrust.authserver.domain.ClienteRegistrado;
 import com.zerotrust.authserver.domain.Emisor;
-import com.zerotrust.authserver.domain.GrantNoSoportadoException;
+import com.zerotrust.authserver.exception.GrantNoSoportadoException;
 import com.zerotrust.authserver.domain.RegistroClientes;
-import com.zerotrust.authserver.domain.ScopeNoPermitidoException;
+import com.zerotrust.authserver.exception.ScopeNoPermitidoException;
 import com.zerotrust.authserver.domain.ScopesConcedidos;
 import com.zerotrust.authserver.domain.SolicitudScopes;
 import com.zerotrust.authserver.domain.TokenEmitido;

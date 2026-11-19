@@ -1,4 +1,6 @@
-package com.zerotrust.authserver.domain;
+package com.zerotrust.authserver.exception;
+
+import com.zerotrust.authserver.domain.CodigoErrorOAuth;
 
 public class GrantNoSoportadoException extends ErrorOAuthException {
 

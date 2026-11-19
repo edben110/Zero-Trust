@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.voterregistration.domain.Cedula;
 import com.zerotrust.voterregistration.domain.ElectionId;
-import com.zerotrust.voterregistration.domain.PadronInvalidoException;
+import com.zerotrust.voterregistration.exception.PadronInvalidoException;
 import com.zerotrust.voterregistration.domain.RegistroVotanteCrudo;
 import com.zerotrust.voterregistration.port.DerivadorVoterId;
 

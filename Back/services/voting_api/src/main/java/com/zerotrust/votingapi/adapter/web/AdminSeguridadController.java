@@ -3,7 +3,7 @@ package com.zerotrust.votingapi.adapter.web;
 import com.zerotrust.votingapi.domain.DireccionIp;
 import com.zerotrust.votingapi.domain.PruebaSeguridad;
 import com.zerotrust.votingapi.domain.ResultadoPurga;
-import com.zerotrust.votingapi.domain.SolicitudSeguridadInvalidaException;
+import com.zerotrust.votingapi.exception.SolicitudSeguridadInvalidaException;
 import com.zerotrust.votingapi.service.ServicioSeguridadAdmin;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.CacheControl;

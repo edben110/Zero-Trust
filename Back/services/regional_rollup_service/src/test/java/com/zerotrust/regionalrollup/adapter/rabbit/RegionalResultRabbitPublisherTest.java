@@ -1,7 +1,7 @@
 package com.zerotrust.regionalrollup.adapter.rabbit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.regionalrollup.domain.exception.PublicacionFallida;
+import com.zerotrust.regionalrollup.exception.PublicacionFallidaException;
 import com.zerotrust.regionalrollup.domain.model.RegionalCandidateResult;
 import com.zerotrust.regionalrollup.domain.model.RegionalResultSnapshot;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,13 +78,13 @@ class RegionalResultRabbitPublisherTest {
     }
 
     @Test
-    @DisplayName("Debe lanzar PublicacionFallida tras agotar los intentos")
+    @DisplayName("Debe lanzar PublicacionFallidaException tras agotar los intentos")
     void lanzaTrasAgotarIntentos() {
         // Arrange
         doThrow(caido()).when(rabbit).convertAndSend(eq(EXCHANGE), eq(CLAVE), anyString());
 
         // Act + Assert
-        assertThrows(PublicacionFallida.class, () -> publicador.publish(snapshot));
+        assertThrows(PublicacionFallidaException.class, () -> publicador.publish(snapshot));
         verify(rabbit, times(3)).convertAndSend(eq(EXCHANGE), eq(CLAVE), anyString());
     }
 }

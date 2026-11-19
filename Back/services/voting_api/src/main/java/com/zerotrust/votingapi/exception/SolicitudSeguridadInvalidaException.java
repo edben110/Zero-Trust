@@ -1,4 +1,4 @@
-package com.zerotrust.votingapi.domain;
+package com.zerotrust.votingapi.exception;
 
 /**
  * Datos inválidos en una operación del panel de seguridad. El mensaje se muestra tal cual al administrador.

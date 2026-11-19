@@ -1,5 +1,7 @@
 package com.zerotrust.votingapi.domain;
 
+import com.zerotrust.votingapi.exception.SolicitudSeguridadInvalidaException;
+
 /**
  * Prueba controlada del detector: N votos simulados desde una IP.
  */

@@ -2,7 +2,7 @@ package com.zerotrust.votingapi.adapter.persistence;
 
 import com.zerotrust.votingapi.domain.ElectionId;
 import com.zerotrust.votingapi.domain.VoterId;
-import com.zerotrust.votingapi.domain.VotoDuplicadoException;
+import com.zerotrust.votingapi.exception.VotoDuplicadoException;
 import com.zerotrust.votingapi.port.RegistroParticipacion;
 import org.springframework.jdbc.core.JdbcTemplate;
 

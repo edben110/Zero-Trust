@@ -1,7 +1,7 @@
 package com.zerotrust.votingapi.adapter.persistence;
 
 import com.zerotrust.votingapi.domain.VotanteInscrito;
-import com.zerotrust.votingapi.domain.VotanteYaInscritoException;
+import com.zerotrust.votingapi.exception.VotanteYaInscritoException;
 import com.zerotrust.votingapi.port.RepositorioPadron;
 import org.springframework.jdbc.core.JdbcTemplate;
 

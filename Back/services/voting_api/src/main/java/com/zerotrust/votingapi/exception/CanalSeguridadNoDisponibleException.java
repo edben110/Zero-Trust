@@ -1,4 +1,4 @@
-package com.zerotrust.votingapi.domain;
+package com.zerotrust.votingapi.exception;
 
 /**
  * Un adaptador del panel de seguridad (Kafka o PostgreSQL) no respondió.

@@ -1,4 +1,4 @@
-package com.zerotrust.voterregistration.domain;
+package com.zerotrust.voterregistration.exception;
 
 public class PadronInvalidoException extends RuntimeException {
 

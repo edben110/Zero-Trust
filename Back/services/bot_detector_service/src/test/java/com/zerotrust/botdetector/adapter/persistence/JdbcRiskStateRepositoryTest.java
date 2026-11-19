@@ -1,6 +1,6 @@
 package com.zerotrust.botdetector.adapter.persistence;
 
-import com.zerotrust.botdetector.domain.exception.ProyeccionNoDisponible;
+import com.zerotrust.botdetector.exception.ProyeccionNoDisponibleException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,13 +44,13 @@ class JdbcRiskStateRepositoryTest {
     }
 
     @Test
-    @DisplayName("Debe traducir el fallo de la base de datos a ProyeccionNoDisponible")
+    @DisplayName("Debe traducir el fallo de la base de datos a ProyeccionNoDisponibleException")
     void traduceElFalloDeLaBaseDeDatos() {
         // Arrange
         when(jdbc.update(anyString(), any(Object[].class))).thenThrow(new DataAccessResourceFailureException("sin conexión"));
 
         // Act + Assert
-        assertThrows(ProyeccionNoDisponible.class,
+        assertThrows(ProyeccionNoDisponibleException.class,
                 () -> repositorio.actualizar("1.1.1.1", "NORMAL", 1, 60, AHORA));
     }
 }

@@ -1,6 +1,6 @@
 package com.zerotrust.votingapi.adapter.persistence;
 
-import com.zerotrust.votingapi.domain.CanalSeguridadNoDisponibleException;
+import com.zerotrust.votingapi.exception.CanalSeguridadNoDisponibleException;
 import com.zerotrust.votingapi.domain.EstadoIp;
 import com.zerotrust.votingapi.domain.IncidenteSeguridad;
 import com.zerotrust.votingapi.domain.ResultadoPurga;

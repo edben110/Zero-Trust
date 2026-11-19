@@ -1,5 +1,6 @@
 package com.zerotrust.votingapi.domain;
 
+import com.zerotrust.votingapi.exception.SolicitudSeguridadInvalidaException;
 import java.util.regex.Pattern;
 
 /**

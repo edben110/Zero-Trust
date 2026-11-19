@@ -1,6 +1,6 @@
 package com.zerotrust.authserver.adapter.crypto;
 
-import com.zerotrust.authserver.domain.ConfiguracionInvalidaException;
+import com.zerotrust.authserver.exception.ConfiguracionInvalidaException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

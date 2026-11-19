@@ -2,7 +2,7 @@ package com.zerotrust.regionalrollup.adapter.rabbit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.regionalrollup.domain.exception.PublicacionFallida;
+import com.zerotrust.regionalrollup.exception.PublicacionFallidaException;
 import com.zerotrust.regionalrollup.domain.model.RegionalResultSnapshot;
 import com.zerotrust.regionalrollup.domain.port.RegionalResultPublisher;
 import org.slf4j.Logger;
@@ -62,7 +62,7 @@ public class RegionalResultRabbitPublisher implements RegionalResultPublisher {
                 esperar(intento);
             }
         }
-        throw new PublicacionFallida("No se pudo publicar el resultado regional en " + routingKey, ultimoError);
+        throw new PublicacionFallidaException("No se pudo publicar el resultado regional en " + routingKey, ultimoError);
     }
 
     private String serializar(RegionalResultSnapshot snapshot) {
@@ -80,7 +80,7 @@ public class RegionalResultRabbitPublisher implements RegionalResultPublisher {
                     "results",   results
             ));
         } catch (JsonProcessingException e) {
-            throw new PublicacionFallida("No se pudo serializar el resultado regional", e);
+            throw new PublicacionFallidaException("No se pudo serializar el resultado regional", e);
         }
     }
 
@@ -92,7 +92,7 @@ public class RegionalResultRabbitPublisher implements RegionalResultPublisher {
             Thread.sleep(pausaMs);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new PublicacionFallida("Publicación del resultado regional interrumpida", e);
+            throw new PublicacionFallidaException("Publicación del resultado regional interrumpida", e);
         }
     }
 }

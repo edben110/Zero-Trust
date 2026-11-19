@@ -1,4 +1,4 @@
-package com.zerotrust.votingapi.domain;
+package com.zerotrust.votingapi.exception;
 
 public class VotoDuplicadoException extends RuntimeException {
 

@@ -2,7 +2,7 @@ package com.zerotrust.votingapi.adapter.rabbit;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.votingapi.domain.ValidacionNoDisponibleException;
+import com.zerotrust.votingapi.exception.ValidacionNoDisponibleException;
 import com.zerotrust.votingapi.domain.VoterId;
 import com.zerotrust.votingapi.port.ValidadorVotante;
 import org.springframework.amqp.AmqpException;

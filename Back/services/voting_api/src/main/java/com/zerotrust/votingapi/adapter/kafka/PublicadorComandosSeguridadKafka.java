@@ -3,7 +3,7 @@ package com.zerotrust.votingapi.adapter.kafka;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.votingapi.domain.AccionSeguridad;
-import com.zerotrust.votingapi.domain.CanalSeguridadNoDisponibleException;
+import com.zerotrust.votingapi.exception.CanalSeguridadNoDisponibleException;
 import com.zerotrust.votingapi.domain.DireccionIp;
 import com.zerotrust.votingapi.port.PublicadorComandosSeguridad;
 import org.springframework.kafka.core.KafkaTemplate;

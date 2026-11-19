@@ -1,4 +1,4 @@
-package com.zerotrust.votingapi.domain;
+package com.zerotrust.votingapi.exception;
 
 public abstract class ServicioNoDisponibleException extends RuntimeException {
 

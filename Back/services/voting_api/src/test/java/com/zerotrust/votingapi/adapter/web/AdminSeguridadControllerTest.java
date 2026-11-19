@@ -3,7 +3,7 @@ package com.zerotrust.votingapi.adapter.web;
 import com.zerotrust.votingapi.domain.DireccionIp;
 import com.zerotrust.votingapi.domain.EstadoIp;
 import com.zerotrust.votingapi.domain.IncidenteSeguridad;
-import com.zerotrust.votingapi.domain.OperacionSeguridadNoDisponibleException;
+import com.zerotrust.votingapi.exception.OperacionSeguridadNoDisponibleException;
 import com.zerotrust.votingapi.domain.PanelSeguridad;
 import com.zerotrust.votingapi.domain.PruebaSeguridad;
 import com.zerotrust.votingapi.domain.ResultadoPurga;

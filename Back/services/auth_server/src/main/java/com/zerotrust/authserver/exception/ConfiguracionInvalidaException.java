@@ -1,4 +1,4 @@
-package com.zerotrust.authserver.domain;
+package com.zerotrust.authserver.exception;
 
 // Nunca encadena la causa original: su mensaje es lo único que llega al log de arranque.
 public class ConfiguracionInvalidaException extends RuntimeException {

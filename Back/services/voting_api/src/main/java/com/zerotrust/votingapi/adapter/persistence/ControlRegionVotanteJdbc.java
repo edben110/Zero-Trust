@@ -2,9 +2,9 @@ package com.zerotrust.votingapi.adapter.persistence;
 
 import com.zerotrust.votingapi.domain.ElectionId;
 import com.zerotrust.votingapi.domain.Region;
-import com.zerotrust.votingapi.domain.VotanteNoHabilitadoException;
+import com.zerotrust.votingapi.exception.VotanteNoHabilitadoException;
 import com.zerotrust.votingapi.domain.VoterId;
-import com.zerotrust.votingapi.domain.VotoDuplicadoException;
+import com.zerotrust.votingapi.exception.VotoDuplicadoException;
 import com.zerotrust.votingapi.port.ControlRegionVotante;
 import java.util.List;
 import java.util.UUID;

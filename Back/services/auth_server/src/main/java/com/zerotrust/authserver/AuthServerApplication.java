@@ -4,7 +4,7 @@ import com.zerotrust.authserver.adapter.config.FuenteVariablesEntorno;
 import com.zerotrust.authserver.adapter.config.LectorArchivosSistema;
 import com.zerotrust.authserver.config.CargadorConfiguracion;
 import com.zerotrust.authserver.config.ConfiguracionAuthServer;
-import com.zerotrust.authserver.domain.ConfiguracionInvalidaException;
+import com.zerotrust.authserver.exception.ConfiguracionInvalidaException;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

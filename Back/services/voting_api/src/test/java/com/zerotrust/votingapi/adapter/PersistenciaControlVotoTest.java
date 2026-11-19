@@ -4,7 +4,7 @@ import com.zerotrust.votingapi.adapter.persistence.EjecutorTransaccionalSpring;
 import com.zerotrust.votingapi.adapter.persistence.RegistroParticipacionJdbc;
 import com.zerotrust.votingapi.domain.ElectionId;
 import com.zerotrust.votingapi.domain.VoterId;
-import com.zerotrust.votingapi.domain.VotoDuplicadoException;
+import com.zerotrust.votingapi.exception.VotoDuplicadoException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
