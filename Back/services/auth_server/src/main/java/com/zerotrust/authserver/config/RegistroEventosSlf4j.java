@@ -1,4 +1,4 @@
-package com.zerotrust.authserver.adapter.log;
+package com.zerotrust.authserver.config;
 
 import com.zerotrust.authserver.domain.ClientId;
 import com.zerotrust.authserver.port.RegistroEventos;

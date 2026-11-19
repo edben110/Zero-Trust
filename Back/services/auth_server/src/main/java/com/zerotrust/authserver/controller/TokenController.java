@@ -1,8 +1,9 @@
-package com.zerotrust.authserver.adapter.web;
+package com.zerotrust.authserver.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.authserver.domain.ClientId;
 import com.zerotrust.authserver.domain.TokenEmitido;
+import com.zerotrust.authserver.dto.response.RespuestaToken;
 import com.zerotrust.authserver.port.RegistroEventos;
 import com.zerotrust.authserver.service.PeticionToken;
 import com.zerotrust.authserver.service.ServicioEmisionToken;

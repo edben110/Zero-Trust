@@ -1,4 +1,4 @@
-package com.zerotrust.authserver.adapter.web;
+package com.zerotrust.authserver.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.authserver.service.ServicioJwks;

@@ -1,4 +1,4 @@
-package com.zerotrust.authserver.adapter.crypto;
+package com.zerotrust.authserver.security;
 
 import com.zerotrust.authserver.domain.HashSecreto;
 import com.zerotrust.authserver.domain.SecretoCliente;

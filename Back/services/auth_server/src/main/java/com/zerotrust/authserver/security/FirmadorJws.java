@@ -1,4 +1,4 @@
-package com.zerotrust.authserver.adapter.crypto;
+package com.zerotrust.authserver.security;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

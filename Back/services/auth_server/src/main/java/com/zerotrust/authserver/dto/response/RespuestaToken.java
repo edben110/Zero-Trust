@@ -1,4 +1,4 @@
-package com.zerotrust.authserver.adapter.web;
+package com.zerotrust.authserver.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

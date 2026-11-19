@@ -1,10 +1,9 @@
 package com.zerotrust.authserver.config;
 
-import com.zerotrust.authserver.adapter.crypto.FirmadorJws;
-import com.zerotrust.authserver.adapter.crypto.PublicadorJwksNimbus;
-import com.zerotrust.authserver.adapter.crypto.VerificadorBcrypt;
-import com.zerotrust.authserver.adapter.log.RegistroEventosSlf4j;
-import com.zerotrust.authserver.adapter.web.InterpretePeticionToken;
+import com.zerotrust.authserver.security.FirmadorJws;
+import com.zerotrust.authserver.security.PublicadorJwksNimbus;
+import com.zerotrust.authserver.security.VerificadorBcrypt;
+import com.zerotrust.authserver.controller.InterpretePeticionToken;
 import com.zerotrust.authserver.domain.RegistroClientes;
 import com.zerotrust.authserver.port.FirmadorTokens;
 import com.zerotrust.authserver.port.PublicadorClaves;

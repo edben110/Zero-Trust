@@ -1,4 +1,4 @@
-package com.zerotrust.authserver.adapter.web;
+package com.zerotrust.authserver.controller;
 
 import com.zerotrust.authserver.exception.PeticionMalFormadaException;
 import com.zerotrust.authserver.service.PeticionToken;

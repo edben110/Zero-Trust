@@ -1,4 +1,4 @@
-package com.zerotrust.authserver.adapter.config;
+package com.zerotrust.authserver.config;
 
 import com.zerotrust.authserver.port.FuenteVariables;
 

@@ -1,4 +1,4 @@
-package com.zerotrust.authserver.adapter.crypto;
+package com.zerotrust.authserver.security;
 
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.JWKSet;

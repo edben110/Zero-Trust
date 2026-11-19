@@ -1,4 +1,4 @@
-package com.zerotrust.authserver.adapter.web;
+package com.zerotrust.authserver.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
