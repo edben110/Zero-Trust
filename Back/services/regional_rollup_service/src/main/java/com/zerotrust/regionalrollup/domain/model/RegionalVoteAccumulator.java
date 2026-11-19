@@ -66,6 +66,15 @@ public final class RegionalVoteAccumulator {
     }
 
     /**
+     * Copia inmutable del conteo: región → candidateId → votos.
+     */
+    public synchronized Map<String, Map<String, Long>> conteoPorRegion() {
+        Map<String, Map<String, Long>> copia = new HashMap<>();
+        counts.forEach((region, votos) -> copia.put(region, Map.copyOf(votos)));
+        return Map.copyOf(copia);
+    }
+
+    /**
      * Regiones con al menos un voto registrado.
      */
     public synchronized Set<String> activeRegions() {
