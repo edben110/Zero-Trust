@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.botdetector.domain.model.AlertOrigin;
 import com.zerotrust.botdetector.service.BotDetectorService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,8 @@ import java.util.Map;
  */
 @Component
 public class DrillKafkaConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(DrillKafkaConsumer.class);
 
     private static final int MAX_VOTOS_POR_MENSAJE = 50;
 
@@ -54,7 +58,7 @@ public class DrillKafkaConsumer {
                 service.evaluate(ip, AlertOrigin.DRILL);
             }
         } catch (Exception e) {
-            System.err.println("[bot-detector] Error procesando prueba de seguridad: " + e.getMessage());
+            log.warn("Prueba de seguridad descartada (offset {}): {}", record.offset(), e.getMessage());
         }
     }
 

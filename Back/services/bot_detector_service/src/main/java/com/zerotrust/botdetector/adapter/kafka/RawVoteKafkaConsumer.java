@@ -3,6 +3,8 @@ package com.zerotrust.botdetector.adapter.kafka;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.botdetector.service.BotDetectorService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +12,8 @@ import java.util.Map;
 
 @Component
 public class RawVoteKafkaConsumer {
+
+    private static final Logger log = LoggerFactory.getLogger(RawVoteKafkaConsumer.class);
 
     private final BotDetectorService service;
     private final ObjectMapper        mapper;
@@ -30,7 +34,7 @@ public class RawVoteKafkaConsumer {
                 service.evaluate(sourceIp);
             }
         } catch (Exception e) {
-            System.err.println("[bot-detector] Error procesando voto: " + e.getMessage());
+            log.warn("Voto descartado de partición {} offset {}: {}", record.partition(), record.offset(), e.getMessage());
         }
     }
 }
