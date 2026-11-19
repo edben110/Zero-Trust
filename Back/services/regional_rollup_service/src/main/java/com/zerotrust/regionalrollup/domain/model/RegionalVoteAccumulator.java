@@ -16,8 +16,9 @@ import java.util.Set;
  * a una estrategia intercambiable (patrón Strategy).
  *
  * Invariantes:
-     *  - Un votante solo se cuenta una vez en toda la elección, aunque llegue con otra región.
+ *  - Un votante solo se cuenta una vez en toda la elección, aunque llegue con otra región.
  *  - Los conteos internos no son accesibles directamente desde fuera.
+ *  - Thread-safe: el consumidor de Kafka y el publicador programado usan la misma instancia.
  */
 public final class RegionalVoteAccumulator {
 
@@ -37,7 +38,7 @@ public final class RegionalVoteAccumulator {
      *
      * @return true si fue contabilizado.
      */
-    public boolean accept(RawVoteEvent event) {
+    public synchronized boolean accept(RawVoteEvent event) {
         String region     = event.region();
         String voterId    = event.voterId();
         String candidateId = event.candidateId();
@@ -55,7 +56,7 @@ public final class RegionalVoteAccumulator {
     /**
      * Proyecta el snapshot de una región específica usando la estrategia activa.
      */
-    public RegionalResultSnapshot snapshotFor(String region) {
+    public synchronized RegionalResultSnapshot snapshotFor(String region) {
         Map<String, Long> regionCounts = counts.getOrDefault(region, Collections.emptyMap());
         return new RegionalResultSnapshot(
                 region,
@@ -67,7 +68,7 @@ public final class RegionalVoteAccumulator {
     /**
      * Regiones con al menos un voto registrado.
      */
-    public Set<String> activeRegions() {
-        return Collections.unmodifiableSet(counts.keySet());
+    public synchronized Set<String> activeRegions() {
+        return Set.copyOf(counts.keySet());
     }
 }
