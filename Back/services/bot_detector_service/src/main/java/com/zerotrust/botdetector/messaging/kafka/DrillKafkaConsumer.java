@@ -12,14 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-/**
- * Consume las pruebas controladas que lanza el panel de administración.
- *
- * No se inyectan votos en raw_votes para no contaminar el escrutinio ni la
- * auditoría electoral. El detector recibe la IP y ejecuta exactamente el mismo
- * patrón State que usa con el tráfico real; por eso el incidente queda con
- * origin=DRILL y es distinguible de un ataque real.
- */
+// No escribe en raw_votes para no contaminar el escrutinio; el incidente queda con origin=DRILL.
 @Component
 public class DrillKafkaConsumer {
 

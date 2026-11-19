@@ -10,10 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.Instant;
 
-/**
- * Adaptador JDBC de la proyección de estado. Usa UPSERT para no crecer con una
- * fila por voto: solo interesa el estado vigente de cada IP.
- */
+// UPSERT: una fila por IP con el estado vigente, no una por voto.
 @Component
 public class JdbcRiskStateRepository implements RiskStateRepository {
 

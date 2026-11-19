@@ -2,10 +2,6 @@ package com.zerotrust.botdetector.domain;
 
 import java.time.Instant;
 
-/**
- * Contrato de red inmutable para una alerta de seguridad.
- * Payload para el topic security_alerts de Kafka y registro en PostgreSQL.
- */
 public record SecurityAlert(
         String      ip,
         String      riskLevel,
@@ -39,7 +35,7 @@ public record SecurityAlert(
         }
     }
 
-    /** Alerta del patrón State: conserva el contrato anterior sin el campo kind. */
+    // Compatibilidad con las alertas del patrón State, que no traen kind.
     public SecurityAlert(String ip, String riskLevel, int voteCount, int windowSeconds,
                          AlertOrigin origin, Instant detectedAt) {
         this(ip, riskLevel, voteCount, windowSeconds, origin, FraudKind.IP_PATTERN, detectedAt);

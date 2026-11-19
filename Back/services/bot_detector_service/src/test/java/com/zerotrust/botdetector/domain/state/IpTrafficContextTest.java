@@ -6,10 +6,6 @@ import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Pruebas de dominio puro. Sin Spring, sin Kafka, sin BD.
- * Verifica las transiciones de estado del patrón State y la ventana de tiempo.
- */
 class IpTrafficContextTest {
 
     private static final Instant T0 = Instant.parse("2026-11-18T12:00:00Z");

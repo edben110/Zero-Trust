@@ -32,9 +32,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-/**
- * Cuando el estado de la IP genera alerta, el servicio la publica y la persiste exactamente una vez.
- */
 @ExtendWith(MockitoExtension.class)
 class ServicioDeteccionBotsTest {
 

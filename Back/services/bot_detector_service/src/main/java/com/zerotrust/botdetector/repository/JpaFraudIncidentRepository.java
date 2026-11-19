@@ -6,10 +6,6 @@ import com.zerotrust.botdetector.repository.entity.FraudIncidentEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Adaptador de persistencia: implementa el puerto del dominio usando JPA.
- * El dominio solo conoce FraudIncidentRepository (la interfaz), nunca esta clase.
- */
 @Component
 public class JpaFraudIncidentRepository implements FraudIncidentRepository {
 

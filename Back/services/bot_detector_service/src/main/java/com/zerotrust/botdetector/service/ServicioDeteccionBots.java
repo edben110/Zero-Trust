@@ -14,10 +14,6 @@ import org.springframework.stereotype.Service;
 import java.time.Clock;
 import java.time.Instant;
 
-/**
- * Evalúa cada voto con el patrón State de su IP. Si el estado pide alerta, la publica y la persiste.
- * La regla vive en IpTrafficContext y en los estados; esta clase solo coordina.
- */
 @Service
 public class ServicioDeteccionBots {
 
@@ -38,7 +34,6 @@ public class ServicioDeteccionBots {
         this.clock = clock;
     }
 
-    /** Voto real consumido de raw_votes. */
     public void evaluate(String ip) {
         evaluate(ip, AlertOrigin.LIVE);
     }
@@ -57,8 +52,7 @@ public class ServicioDeteccionBots {
         proyectar(ip, context, ahora);
     }
 
-    // La proyección solo alimenta el panel: una caída de PostgreSQL no debe frenar la alerta
-    // ni relanzar el voto en el consumidor, que lo contaría dos veces en IpTrafficContext.
+    // Si falla la proyección no se relanza: el consumidor reentregaría el voto y se contaría dos veces.
     private void proyectar(String ip, IpTrafficContext context, Instant ahora) {
         try {
             riskStates.actualizar(ip, context.riskLevel(), context.voteCount(), context.windowSeconds(), ahora);

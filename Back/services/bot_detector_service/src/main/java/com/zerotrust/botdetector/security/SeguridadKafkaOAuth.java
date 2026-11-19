@@ -8,7 +8,6 @@ import org.springframework.core.env.Environment;
 
 import java.util.Map;
 
-/** Token JWT del detector para consumir raw_votes y producir security_alerts. */
 @Configuration
 public class SeguridadKafkaOAuth {
 

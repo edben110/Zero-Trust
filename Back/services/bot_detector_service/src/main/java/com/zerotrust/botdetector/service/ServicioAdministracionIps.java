@@ -5,9 +5,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 
-/**
- * Intervenciones del panel de administración sobre el estado de las IPs.
- */
 @Service
 public class ServicioAdministracionIps {
 
@@ -23,9 +20,7 @@ public class ServicioAdministracionIps {
         this.clock = clock;
     }
 
-    /**
-     * Descarta el contexto en memoria y deja la IP en NORMAL. Aplica incluso a una IP BLOQUEADA (estado terminal).
-     */
+    // Aplica incluso a una IP BLOQUEADA, que es terminal.
     public void reset(String ip) {
         if (ip == null || ip.isBlank()) {
             throw new IllegalArgumentException("ip no puede ser nula ni vacía");
@@ -34,9 +29,7 @@ public class ServicioAdministracionIps {
         riskStates.actualizar(ip, NIVEL_INICIAL, 0, contextos.ventanaSegundos(), clock.instant());
     }
 
-    /**
-     * Purga administrativa: olvida todos los contextos en memoria. La fila de ip_risk_state la elimina el panel.
-     */
+    // La fila de ip_risk_state la borra el panel en PostgreSQL.
     public void resetAll() {
         contextos.olvidarTodos();
     }

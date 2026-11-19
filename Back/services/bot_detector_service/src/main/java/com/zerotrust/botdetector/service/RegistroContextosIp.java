@@ -8,10 +8,7 @@ import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-/**
- * Contextos de tráfico por IP (patrón State) que comparten los servicios del detector.
- * Vive en memoria del proceso: un reinicio deja todas las IPs en NORMAL.
- */
+// En memoria del proceso: un reinicio deja todas las IPs en NORMAL.
 @Component
 public class RegistroContextosIp {
 
@@ -21,7 +18,6 @@ public class RegistroContextosIp {
     private final int blockedThreshold;
     private final int windowSeconds;
 
-    // IP → su contexto de tráfico (acceso concurrente seguro)
     private final ConcurrentMap<String, IpTrafficContext> contextos = new ConcurrentHashMap<>();
 
     public RegistroContextosIp(@Value("${detector.suspicious-threshold:5}") int suspiciousThreshold,
@@ -32,7 +28,6 @@ public class RegistroContextosIp {
         this.windowSeconds = windowSeconds;
     }
 
-    /** Devuelve el contexto de la IP y lo crea, con la ventana empezando ahora, si no existe. */
     public IpTrafficContext contextoDe(String ip, Instant ahora) {
         return contextos.computeIfAbsent(ip,
                 addr -> new IpTrafficContext(addr, suspiciousThreshold, blockedThreshold, windowSeconds, ahora));

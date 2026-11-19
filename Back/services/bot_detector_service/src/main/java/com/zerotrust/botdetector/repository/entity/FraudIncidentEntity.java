@@ -13,14 +13,7 @@ import jakarta.persistence.Table;
 
 import java.time.Instant;
 
-/**
- * Entidad JPA de auditoría para incidentes de fraude.
- * Vive en la capa de adaptadores; el dominio nunca la ve directamente.
- *
- * La tabla es append-only durante la jornada: no se proporcionan métodos de
- * actualización. La única excepción es la purga administrativa explícita del
- * panel, que vacía el histórico completo (nunca edita un incidente suelto).
- */
+// Append-only: solo la purga explícita del panel vacía la tabla.
 @Entity
 @Table(name = "fraud_incidents")
 public class FraudIncidentEntity {
@@ -52,7 +45,6 @@ public class FraudIncidentEntity {
     @Column(nullable = false)
     private Instant detectedAt;
 
-    // Constructor JPA sin args
     protected FraudIncidentEntity() {}
 
     public FraudIncidentEntity(String ip, String riskLevel, int voteCount,
@@ -66,7 +58,6 @@ public class FraudIncidentEntity {
         this.detectedAt    = detectedAt;
     }
 
-    // Accesores de solo lectura
     public Long        getId()            { return id; }
     public String      getIp()            { return ip; }
     public String      getRiskLevel()     { return riskLevel; }

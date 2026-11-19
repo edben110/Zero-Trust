@@ -11,13 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
-/**
- * Consume los incidentes de fraude electoral que detecta voting_api:
- * voto duplicado y voto anulado por región incorrecta.
- *
- * Se mantiene como evento separado de raw_votes porque estos votos no se
- * aceptaron: el escrutinio no cambia, solo se registra el incidente.
- */
+// Evento aparte de raw_votes: estos votos no se aceptaron y el escrutinio no cambia.
 @Component
 public class FraudEventKafkaConsumer {
 

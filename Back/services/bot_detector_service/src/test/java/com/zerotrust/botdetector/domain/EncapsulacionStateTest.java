@@ -16,10 +16,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-/**
- * Desde fuera del paquete state nadie puede forzar una transición ni pedir una alerta:
- * el único camino es registerVote, que aplica las reglas de cada estado.
- */
+// Prueba desde fuera del paquete state: solo registerVote puede cambiar el estado.
 class EncapsulacionStateTest {
 
     @Test

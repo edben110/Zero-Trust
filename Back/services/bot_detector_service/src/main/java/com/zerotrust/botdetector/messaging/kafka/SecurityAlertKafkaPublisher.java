@@ -15,13 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Publica alertas en security_alerts esperando la confirmación de Kafka.
- *
- * Tras agotar los intentos registra el fallo en ERROR y no relanza: se ejecuta
- * dentro del consumidor de raw_votes y un error haría que el voto se volviera a
- * entregar y se contara dos veces en IpTrafficContext.
- */
+// Tras agotar los intentos no relanza: corre en el consumidor de raw_votes y el voto se contaría dos veces.
 @Component
 public class SecurityAlertKafkaPublisher implements SecurityAlertPublisher {
 

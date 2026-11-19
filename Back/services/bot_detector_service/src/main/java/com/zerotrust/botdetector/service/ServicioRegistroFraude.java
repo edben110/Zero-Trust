@@ -10,11 +10,7 @@ import org.springframework.stereotype.Service;
 import java.time.Clock;
 import java.time.Instant;
 
-/**
- * Registra los incidentes de fraude electoral que detecta voting_api (voto duplicado o región incorrecta).
- *
- * No altera el patrón State de la IP: un doble clic humano no debe bloquear una dirección.
- */
+// No altera el estado de la IP: un doble clic humano no debe bloquear una dirección.
 @Service
 public class ServicioRegistroFraude {
 
