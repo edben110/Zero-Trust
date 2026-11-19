@@ -1,4 +1,4 @@
-package com.zerotrust.globaldashboardworker.adapter.rabbit;
+package com.zerotrust.globaldashboardworker.messaging.rabbit;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

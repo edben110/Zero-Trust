@@ -1,6 +1,5 @@
-package com.zerotrust.globaldashboardworker.adapter;
+package com.zerotrust.globaldashboardworker.messaging.rabbit;
 
-import com.zerotrust.globaldashboardworker.adapter.rabbit.GlobalResultsRabbitConsumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

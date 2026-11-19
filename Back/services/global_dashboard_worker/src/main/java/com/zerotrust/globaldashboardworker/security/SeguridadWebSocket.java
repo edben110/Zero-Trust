@@ -1,4 +1,4 @@
-package com.zerotrust.globaldashboardworker.config;
+package com.zerotrust.globaldashboardworker.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

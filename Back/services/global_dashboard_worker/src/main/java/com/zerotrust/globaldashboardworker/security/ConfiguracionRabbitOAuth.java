@@ -1,4 +1,4 @@
-package com.zerotrust.globaldashboardworker.config;
+package com.zerotrust.globaldashboardworker.security;
 
 import com.rabbitmq.client.impl.CredentialsProvider;
 import com.rabbitmq.client.impl.CredentialsRefreshService;
