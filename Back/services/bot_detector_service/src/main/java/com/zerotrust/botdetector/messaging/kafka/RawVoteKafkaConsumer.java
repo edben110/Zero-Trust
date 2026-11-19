@@ -1,7 +1,7 @@
 package com.zerotrust.botdetector.messaging.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.botdetector.service.BotDetectorService;
+import com.zerotrust.botdetector.service.ServicioDeteccionBots;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +15,10 @@ public class RawVoteKafkaConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(RawVoteKafkaConsumer.class);
 
-    private final BotDetectorService service;
+    private final ServicioDeteccionBots service;
     private final ObjectMapper        mapper;
 
-    public RawVoteKafkaConsumer(BotDetectorService service, ObjectMapper mapper) {
+    public RawVoteKafkaConsumer(ServicioDeteccionBots service, ObjectMapper mapper) {
         this.service = service;
         this.mapper  = mapper;
     }

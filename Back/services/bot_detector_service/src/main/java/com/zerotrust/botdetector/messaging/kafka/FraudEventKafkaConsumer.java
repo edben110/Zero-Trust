@@ -2,7 +2,7 @@ package com.zerotrust.botdetector.messaging.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.botdetector.domain.FraudKind;
-import com.zerotrust.botdetector.service.BotDetectorService;
+import com.zerotrust.botdetector.service.ServicioRegistroFraude;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +23,10 @@ public class FraudEventKafkaConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(FraudEventKafkaConsumer.class);
 
-    private final BotDetectorService service;
+    private final ServicioRegistroFraude service;
     private final ObjectMapper       mapper;
 
-    public FraudEventKafkaConsumer(BotDetectorService service, ObjectMapper mapper) {
+    public FraudEventKafkaConsumer(ServicioRegistroFraude service, ObjectMapper mapper) {
         this.service = service;
         this.mapper  = mapper;
     }

@@ -1,12 +1,12 @@
 package com.zerotrust.botdetector.service;
 
-import com.zerotrust.botdetector.exception.ProyeccionNoDisponibleException;
 import com.zerotrust.botdetector.domain.AlertOrigin;
-import com.zerotrust.botdetector.domain.FraudKind;
 import com.zerotrust.botdetector.domain.SecurityAlert;
+import com.zerotrust.botdetector.exception.ProyeccionNoDisponibleException;
 import com.zerotrust.botdetector.port.FraudIncidentRepository;
 import com.zerotrust.botdetector.port.RiskStateRepository;
 import com.zerotrust.botdetector.port.SecurityAlertPublisher;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,37 +25,44 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
- * Prueba de orquestación. Verifica que cuando el estado de la IP genera alerta,
- * el servicio llama exactamente una vez al publisher Y al repositorio.
+ * Cuando el estado de la IP genera alerta, el servicio la publica y la persiste exactamente una vez.
  */
 @ExtendWith(MockitoExtension.class)
-class BotDetectorServiceTest {
+class ServicioDeteccionBotsTest {
 
     private static final Instant AHORA = Instant.parse("2026-11-18T12:00:00Z");
     private static final Clock RELOJ = Clock.fixed(AHORA, ZoneOffset.UTC);
 
     @Mock
-    private SecurityAlertPublisher  alertPublisher;
+    private SecurityAlertPublisher alertPublisher;
 
     @Mock
     private FraudIncidentRepository repository;
 
     @Mock
-    private RiskStateRepository     riskStates;
+    private RiskStateRepository riskStates;
 
     // Umbrales pequeños para provocar alertas rápido en los tests.
-    private BotDetectorService buildService() {
-        return new BotDetectorService(alertPublisher, repository, riskStates, 2, 4, 60, RELOJ);
+    private final RegistroContextosIp registro = new RegistroContextosIp(2, 4, 60);
+
+    private ServicioDeteccionBots svc;
+
+    @BeforeEach
+    void preparar() {
+        svc = new ServicioDeteccionBots(alertPublisher, repository, riskStates, registro, RELOJ);
     }
 
     @Test
+    @DisplayName("No debe alertar bajo el umbral, pero sí proyectar cada voto")
     void noPublicaAlertaBajoUmbral() {
-        // Arrange
-        BotDetectorService svc = buildService();
-
         // Act: 2 votos, umbral sospechosa = 2, todavía no se supera
         svc.evaluate("1.1.1.1");
         svc.evaluate("1.1.1.1");
@@ -68,29 +75,27 @@ class BotDetectorServiceTest {
     }
 
     @Test
+    @DisplayName("Debe publicar y persistir la alerta al superar el umbral")
     void publicaAlertaYPersisteCuandoSuperaUmbral() {
         // Arrange
-        BotDetectorService svc = buildService();
         svc.evaluate("2.2.2.2");
         svc.evaluate("2.2.2.2");
 
         // Act: 3er voto supera umbral sospechosa (2)
         svc.evaluate("2.2.2.2");
 
-        // Assert: alerta publicada Y persistida exactamente una vez
+        // Assert
         ArgumentCaptor<SecurityAlert> alerta = ArgumentCaptor.forClass(SecurityAlert.class);
         verify(alertPublisher, times(1)).publish(alerta.capture());
-        verify(repository,     times(1)).save(any(SecurityAlert.class));
+        verify(repository, times(1)).save(any(SecurityAlert.class));
         assertEquals("SOSPECHOSA", alerta.getValue().riskLevel());
         assertEquals(AlertOrigin.LIVE, alerta.getValue().origin());
         verify(riskStates).actualizar("2.2.2.2", "SOSPECHOSA", 3, 60, AHORA);
     }
 
     @Test
+    @DisplayName("Una prueba del panel debe registrarse con origen DRILL")
     void unaPruebaDelPanelSeRegistraConOrigenDrill() {
-        // Arrange
-        BotDetectorService svc = buildService();
-
         // Act: simulación controlada de 3 votos desde la misma IP
         svc.evaluate("203.0.113.10", AlertOrigin.DRILL);
         svc.evaluate("203.0.113.10", AlertOrigin.DRILL);
@@ -105,79 +110,23 @@ class BotDetectorServiceTest {
     }
 
     @Test
+    @DisplayName("IPs diferentes no deben interferir entre ellas")
     void ipsDiferentesNoSeInterfierenEntreEllas() {
-        // Arrange
-        BotDetectorService svc = buildService();
-
         // Act: IP-A supera umbral, IP-B no
         svc.evaluate("3.3.3.3");
         svc.evaluate("3.3.3.3");
-        svc.evaluate("3.3.3.3"); // supera umbral
+        svc.evaluate("3.3.3.3");
+        svc.evaluate("4.4.4.4");
 
-        svc.evaluate("4.4.4.4"); // solo 1 voto
-
-        // Assert: solo IP-A generó alerta
+        // Assert
         verify(alertPublisher, times(1)).publish(any());
-        assertEquals("NORMAL", svc.riskLevelOf("4.4.4.4"));
-    }
-
-    @Test
-    void resetDevuelveLaIpBloqueadaANormal() {
-        // Arrange: 5 votos con umbral bloqueada 4 → BLOQUEADA
-        BotDetectorService svc = buildService();
-        for (int i = 0; i < 5; i++) svc.evaluate("5.5.5.5");
-        assertEquals("BLOQUEADA", svc.riskLevelOf("5.5.5.5"));
-
-        // Act
-        svc.reset("5.5.5.5");
-
-        // Assert
-        assertEquals("NORMAL", svc.riskLevelOf("5.5.5.5"));
-        assertEquals(0, svc.voteCountOf("5.5.5.5"));
-        verify(riskStates).actualizar("5.5.5.5", "NORMAL", 0, 60, AHORA);
-    }
-
-    @Test
-    void registraUnIncidenteDeFraudeSinAlterarElEstadoDeLaIp() {
-        // Arrange
-        BotDetectorService svc = buildService();
-        ArgumentCaptor<SecurityAlert> alerta = ArgumentCaptor.forClass(SecurityAlert.class);
-
-        // Act: voto duplicado reportado por voting_api
-        svc.recordFraud(FraudKind.DUPLICATE_VOTE, "6.6.6.6");
-
-        // Assert: se publica y persiste con su tipo, pero la IP sigue NORMAL
-        verify(alertPublisher).publish(alerta.capture());
-        verify(repository).save(alerta.getValue());
-        assertEquals(FraudKind.DUPLICATE_VOTE, alerta.getValue().kind());
-        assertEquals("NORMAL", alerta.getValue().riskLevel());
-        assertEquals(AlertOrigin.LIVE, alerta.getValue().origin());
-        assertEquals("NORMAL", svc.riskLevelOf("6.6.6.6"));
-        verify(riskStates, never()).actualizar(eq("6.6.6.6"), anyString(), anyInt(), anyInt(), any());
-    }
-
-    @Test
-    void resetAllOlvidaTodosLosContextosEnMemoria() {
-        // Arrange
-        BotDetectorService svc = buildService();
-        svc.evaluate("7.7.7.7");
-        svc.evaluate("7.7.7.7");
-        svc.evaluate("7.7.7.7");
-        assertEquals(3, svc.voteCountOf("7.7.7.7"));
-
-        // Act
-        svc.resetAll();
-
-        // Assert
-        assertEquals("NORMAL", svc.riskLevelOf("7.7.7.7"));
-        assertEquals(0, svc.voteCountOf("7.7.7.7"));
+        assertEquals("NORMAL", registro.nivelRiesgo("4.4.4.4"));
     }
 
     @Test
     @DisplayName("Debe publicar y guardar la alerta antes de proyectar el estado de la IP")
     void publicaLaAlertaAntesDeProyectar() {
         // Arrange
-        BotDetectorService svc = buildService();
         svc.evaluate("8.8.8.8");
         svc.evaluate("8.8.8.8");
         clearInvocations(riskStates);
@@ -196,7 +145,6 @@ class BotDetectorServiceTest {
     @DisplayName("Debe publicar la alerta aunque la proyección del estado en PostgreSQL falle")
     void publicaLaAlertaAunqueLaProyeccionFalle() {
         // Arrange
-        BotDetectorService svc = buildService();
         doThrow(new ProyeccionNoDisponibleException("BD caída", new RuntimeException()))
                 .when(riskStates).actualizar(anyString(), anyString(), anyInt(), anyInt(), any());
 
@@ -210,6 +158,6 @@ class BotDetectorServiceTest {
         // Assert
         verify(alertPublisher, times(1)).publish(any(SecurityAlert.class));
         verify(repository, times(1)).save(any(SecurityAlert.class));
-        assertEquals("SOSPECHOSA", svc.riskLevelOf("9.9.9.9"));
+        assertEquals("SOSPECHOSA", registro.nivelRiesgo("9.9.9.9"));
     }
 }

@@ -2,7 +2,8 @@ package com.zerotrust.botdetector.messaging.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.botdetector.domain.AlertOrigin;
-import com.zerotrust.botdetector.service.BotDetectorService;
+import com.zerotrust.botdetector.service.ServicioAdministracionIps;
+import com.zerotrust.botdetector.service.ServicioDeteccionBots;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +27,14 @@ public class DrillKafkaConsumer {
 
     private static final int MAX_VOTOS_POR_MENSAJE = 50;
 
-    private final BotDetectorService service;
+    private final ServicioDeteccionBots deteccion;
+    private final ServicioAdministracionIps administracion;
     private final ObjectMapper       mapper;
 
-    public DrillKafkaConsumer(BotDetectorService service, ObjectMapper mapper) {
-        this.service = service;
+    public DrillKafkaConsumer(ServicioDeteccionBots deteccion, ServicioAdministracionIps administracion,
+                              ObjectMapper mapper) {
+        this.deteccion = deteccion;
+        this.administracion = administracion;
         this.mapper  = mapper;
     }
 
@@ -42,7 +46,7 @@ public class DrillKafkaConsumer {
             Map<String, Object> payload = mapper.readValue(record.value(), Map.class);
             String action = payload.get("action") instanceof String valor ? valor : "EVALUATE";
             if ("RESET_ALL".equalsIgnoreCase(action)) {
-                service.resetAll();
+                administracion.resetAll();
                 return;
             }
             String ip = payload.get("ip") instanceof String valor ? valor.strip() : null;
@@ -50,12 +54,12 @@ public class DrillKafkaConsumer {
                 return;
             }
             if ("RESET".equalsIgnoreCase(action)) {
-                service.reset(ip);
+                administracion.reset(ip);
                 return;
             }
             int votos = interpretarVotos(payload.get("votes"));
             for (int i = 0; i < votos; i++) {
-                service.evaluate(ip, AlertOrigin.DRILL);
+                deteccion.evaluate(ip, AlertOrigin.DRILL);
             }
         } catch (Exception e) {
             log.warn("Prueba de seguridad descartada (offset {}): {}", record.offset(), e.getMessage());
