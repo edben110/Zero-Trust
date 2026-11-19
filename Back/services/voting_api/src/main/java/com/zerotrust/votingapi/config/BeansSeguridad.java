@@ -1,8 +1,8 @@
 package com.zerotrust.votingapi.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.votingapi.adapter.kafka.PublicadorComandosSeguridadKafka;
-import com.zerotrust.votingapi.adapter.persistence.ConsultaSeguridadJdbc;
+import com.zerotrust.votingapi.messaging.kafka.PublicadorComandosSeguridadKafka;
+import com.zerotrust.votingapi.repository.ConsultaSeguridadJdbc;
 import com.zerotrust.votingapi.domain.UmbralesSeguridad;
 import com.zerotrust.votingapi.port.ConsultaSeguridad;
 import com.zerotrust.votingapi.port.PublicadorComandosSeguridad;
