@@ -15,10 +15,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Publica el snapshot regional en el Topic Exchange live_results_regional.
- * Routing key = results.<region> según el contrato.
- */
 @Component
 public class RegionalResultRabbitPublisher implements RegionalResultPublisher {
 

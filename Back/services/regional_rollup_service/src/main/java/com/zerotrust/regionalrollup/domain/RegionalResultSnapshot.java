@@ -3,10 +3,6 @@ package com.zerotrust.regionalrollup.domain;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Snapshot del conteo por región.
- * Payload para live_results_regional (topic exchange, routing key = results.<region>).
- */
 public record RegionalResultSnapshot(
         String region,
         Instant timestamp,

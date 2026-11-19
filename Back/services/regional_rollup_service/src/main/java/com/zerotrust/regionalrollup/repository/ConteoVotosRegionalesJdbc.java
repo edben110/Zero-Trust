@@ -8,9 +8,7 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Conteo regional leído de PostgreSQL, fuente de verdad del escrutinio.
- */
+// PostgreSQL es la fuente de verdad del escrutinio.
 public class ConteoVotosRegionalesJdbc implements ConteoVotosRegionales {
 
     // Incluye regiones de jornadas anteriores para enviarles un snapshot vacío tras el reinicio.

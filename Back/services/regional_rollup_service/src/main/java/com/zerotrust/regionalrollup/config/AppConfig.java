@@ -20,8 +20,6 @@ public class AppConfig {
 
     @Bean
     public RegionalConsolidationStrategy consolidationStrategy() {
-        // Estrategia activa. Para cambiar la lógica de consolidación, basta con
-        // inyectar una implementación distinta de RegionalConsolidationStrategy aquí.
         return new SimpleCountStrategy();
     }
 

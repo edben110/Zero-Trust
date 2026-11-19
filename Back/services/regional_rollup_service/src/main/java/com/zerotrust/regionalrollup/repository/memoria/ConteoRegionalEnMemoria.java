@@ -6,9 +6,7 @@ import com.zerotrust.regionalrollup.port.ConteoVotosRegionales;
 
 import java.util.Map;
 
-/**
- * Conteo regional en memoria del proceso, útil sin PostgreSQL; se pierde al reiniciar.
- */
+// Se pierde al reiniciar; sirve para probar sin PostgreSQL.
 public class ConteoRegionalEnMemoria implements ConteoVotosRegionales {
 
     private final RegionalVoteAccumulator acumulador;
