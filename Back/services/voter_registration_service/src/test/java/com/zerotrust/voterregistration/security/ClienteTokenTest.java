@@ -1,4 +1,4 @@
-package com.zerotrust.voterregistration.config;
+package com.zerotrust.voterregistration.security;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;

@@ -1,4 +1,4 @@
-package com.zerotrust.voterregistration.config;
+package com.zerotrust.voterregistration.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

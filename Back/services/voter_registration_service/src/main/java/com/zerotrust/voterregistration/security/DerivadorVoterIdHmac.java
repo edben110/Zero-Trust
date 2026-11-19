@@ -1,4 +1,4 @@
-package com.zerotrust.voterregistration.adapter.crypto;
+package com.zerotrust.voterregistration.security;
 
 import com.zerotrust.voterregistration.domain.Cedula;
 import com.zerotrust.voterregistration.domain.ElectionId;

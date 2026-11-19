@@ -1,4 +1,4 @@
-package com.zerotrust.voterregistration.adapter.archivo;
+package com.zerotrust.voterregistration.config;
 
 import com.zerotrust.voterregistration.exception.PadronInvalidoException;
 import com.zerotrust.voterregistration.domain.RegistroVotanteCrudo;

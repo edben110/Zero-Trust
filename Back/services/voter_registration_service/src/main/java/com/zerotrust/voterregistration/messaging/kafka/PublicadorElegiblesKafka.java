@@ -1,4 +1,4 @@
-package com.zerotrust.voterregistration.adapter.kafka;
+package com.zerotrust.voterregistration.messaging.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

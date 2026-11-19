@@ -1,4 +1,4 @@
-package com.zerotrust.voterregistration.config;
+package com.zerotrust.voterregistration.security;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;

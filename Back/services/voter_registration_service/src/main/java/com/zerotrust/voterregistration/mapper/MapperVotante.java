@@ -1,8 +1,9 @@
-package com.zerotrust.voterregistration.adapter.persistence;
+package com.zerotrust.voterregistration.mapper;
 
 import com.zerotrust.voterregistration.domain.Region;
 import com.zerotrust.voterregistration.domain.VotanteRegistrado;
 import com.zerotrust.voterregistration.domain.VoterId;
+import com.zerotrust.voterregistration.repository.entity.VotanteRegistradoEntity;
 
 public final class MapperVotante {
 

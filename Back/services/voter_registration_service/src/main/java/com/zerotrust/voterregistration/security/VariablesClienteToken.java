@@ -1,4 +1,4 @@
-package com.zerotrust.voterregistration.config;
+package com.zerotrust.voterregistration.security;
 
 import java.util.Set;
 import java.util.function.Function;

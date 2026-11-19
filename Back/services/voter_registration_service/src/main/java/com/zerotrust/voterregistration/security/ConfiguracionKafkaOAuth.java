@@ -1,4 +1,4 @@
-package com.zerotrust.voterregistration.config;
+package com.zerotrust.voterregistration.security;
 
 import org.springframework.boot.autoconfigure.kafka.DefaultKafkaConsumerFactoryCustomizer;
 import org.springframework.boot.autoconfigure.kafka.DefaultKafkaProducerFactoryCustomizer;

@@ -1,5 +1,6 @@
-package com.zerotrust.voterregistration.adapter.persistence;
+package com.zerotrust.voterregistration.repository;
 
+import com.zerotrust.voterregistration.repository.entity.VotanteRegistradoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

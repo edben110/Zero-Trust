@@ -1,4 +1,4 @@
-package com.zerotrust.voterregistration.adapter.persistence;
+package com.zerotrust.voterregistration.repository.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,11 +41,11 @@ public class VotanteRegistradoEntity {
         return voterId;
     }
 
-    String getRegion() {
+    public String getRegion() {
         return region;
     }
 
-    Instant getRegisteredAt() {
+    public Instant getRegisteredAt() {
         return registeredAt;
     }
 }

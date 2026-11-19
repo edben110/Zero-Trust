@@ -1,7 +1,9 @@
-package com.zerotrust.voterregistration.adapter.persistence;
+package com.zerotrust.voterregistration.repository;
 
 import com.zerotrust.voterregistration.domain.VotanteRegistrado;
+import com.zerotrust.voterregistration.mapper.MapperVotante;
 import com.zerotrust.voterregistration.port.RepositorioPadron;
+import com.zerotrust.voterregistration.repository.entity.VotanteRegistradoEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;

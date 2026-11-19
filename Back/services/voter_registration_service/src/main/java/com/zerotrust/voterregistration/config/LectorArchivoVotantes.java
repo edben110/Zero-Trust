@@ -1,4 +1,4 @@
-package com.zerotrust.voterregistration.adapter.archivo;
+package com.zerotrust.voterregistration.config;
 
 import java.io.IOException;
 import java.util.ArrayList;
