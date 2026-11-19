@@ -1,7 +1,6 @@
 package com.zerotrust.votingapi.dto.request;
 
-// cedula es Object a propósito: solo se acepta si llega como texto JSON. Un número JSON perdería los ceros
-// iniciales (01234567 pasaría a 1234567), así que se rechaza en vez de convertirlo.
+// cedula es Object a propósito: un número JSON perdería los ceros iniciales, así que solo se acepta texto.
 public record ConsultaVoterIdRequest(Object cedula) {
 
     public String cedulaTexto() {

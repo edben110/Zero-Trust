@@ -3,12 +3,7 @@ package com.zerotrust.votingapi.domain;
 import com.zerotrust.votingapi.exception.SolicitudSeguridadInvalidaException;
 import java.util.regex.Pattern;
 
-/**
- * Value Object para una IP observada en una prueba de seguridad.
- *
- * No resuelve nombres DNS (evita SSRF y bloqueos): solo acepta literales IPv4
- * o IPv6. La validación es Fail-Fast y el valor queda inmutable.
- */
+// No resuelve DNS (evita SSRF y bloqueos): solo acepta literales IPv4 o IPv6.
 public record DireccionIp(String valor) {
 
     private static final Pattern IPV4 = Pattern.compile(

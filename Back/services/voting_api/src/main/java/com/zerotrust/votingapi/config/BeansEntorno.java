@@ -10,9 +10,7 @@ import org.springframework.core.env.Environment;
 
 import java.nio.file.Path;
 
-/**
- * Beans que dependen de variables de entorno obligatorias. Fail-fast: si falta alguna, el servicio no arranca.
- */
+// Fail-fast: si falta una variable obligatoria, el servicio no arranca.
 @Configuration
 public class BeansEntorno {
 

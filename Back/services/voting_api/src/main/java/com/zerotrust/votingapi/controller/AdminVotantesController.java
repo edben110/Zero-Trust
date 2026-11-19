@@ -16,8 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Map;
 
-// Alta de votantes en el padrón. Solo la llama el servidor del front (panel de administración) con el token
-// compartido, igual que AdminCandidatosController. No usa CORS. La respuesta no incluye la cédula ni el UUID.
+// Solo la llama el BFF con el token compartido; no usa CORS y la respuesta no incluye la cédula ni el UUID.
 @RestController
 @RequestMapping("/internal/admin/voters")
 public class AdminVotantesController {

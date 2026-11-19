@@ -15,9 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
-/**
- * Adaptadores de PostgreSQL de la votación y el padrón.
- */
 @Configuration
 public class BeansPersistencia {
 

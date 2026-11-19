@@ -4,9 +4,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Totales de fraud_incidents y número de IPs por nivel de riesgo vigente.
- */
 public record ResumenSeguridad(long incidentes, long reales, long simulacros, long duplicados,
                                long regionIncorrecta, long ipsConIncidentes, Map<String, Long> riesgoActual) {
 

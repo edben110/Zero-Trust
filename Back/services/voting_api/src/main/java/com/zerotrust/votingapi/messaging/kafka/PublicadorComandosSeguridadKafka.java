@@ -15,9 +15,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Publica los comandos del panel en security_drills con el formato de docs/contratos.md.
- */
 public class PublicadorComandosSeguridadKafka implements PublicadorComandosSeguridad {
 
     private static final String CLAVE_ADMIN = "admin";

@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-// Alta de votantes en el padrón desde el panel de administración.
 // La cédula se convierte en el UUID de la elección en curso y no se guarda ni se publica.
 public class ServicioPadron {
 

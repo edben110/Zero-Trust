@@ -17,9 +17,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.Duration;
 
-/**
- * Adaptadores de Kafka y RabbitMQ de la votación y el padrón.
- */
 @Configuration
 public class BeansMensajeria {
 
@@ -43,8 +40,7 @@ public class BeansMensajeria {
         return new PublicadorElegiblesKafka(plantilla, topic, json, Duration.ofMillis(esperaMs));
     }
 
-    // Voto duplicado y región incorrecta se publican como incidentes de fraude.
-    // bot_detector_service los persiste en fraud_incidents (único escritor de la tabla).
+    // bot_detector_service es el único escritor de fraud_incidents; aquí solo se publica el incidente.
     @Bean
     RegistroIncidentesFraude registroIncidentesFraude(KafkaTemplate<String, String> plantilla, ObjectMapper json,
                                                       @Value("${seguridad.fraud-topic:fraud_events}") String topic) {

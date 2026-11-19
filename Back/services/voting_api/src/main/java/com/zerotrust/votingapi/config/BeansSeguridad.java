@@ -15,9 +15,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.Duration;
 
-/**
- * Beans del panel de seguridad (pruebas controladas, reinicios y purga del detector).
- */
 @Configuration
 public class BeansSeguridad {
 

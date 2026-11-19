@@ -11,14 +11,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-/**
- * Publica el incidente en fraud_events. bot_detector_service lo consume y lo
- * guarda en fraud_incidents, de modo que el panel tenga un único origen de
- * verdad y no se escriba la tabla desde dos servicios.
- *
- * Se envía sin esperar confirmación: la respuesta al votante (voto duplicado o
- * anulado) no puede depender de que Kafka esté disponible.
- */
+// Sin esperar confirmación: la respuesta al votante no puede depender de que Kafka esté disponible.
 public class PublicadorIncidentesFraudeKafka implements RegistroIncidentesFraude {
 
     private static final Logger LOG = LoggerFactory.getLogger(PublicadorIncidentesFraudeKafka.class);

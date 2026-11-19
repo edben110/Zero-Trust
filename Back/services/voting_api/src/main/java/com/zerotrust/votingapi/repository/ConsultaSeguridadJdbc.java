@@ -19,9 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/**
- * Lee y purga las tablas que escribe bot_detector_service.
- */
 public class ConsultaSeguridadJdbc implements ConsultaSeguridad {
 
     static final String RESUMEN = """

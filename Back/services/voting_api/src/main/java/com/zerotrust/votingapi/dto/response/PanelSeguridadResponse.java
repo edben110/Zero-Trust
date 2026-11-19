@@ -3,9 +3,6 @@ package com.zerotrust.votingapi.dto.response;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Cuerpo de GET /internal/admin/security/incidents con los nombres que espera el panel.
- */
 public record PanelSeguridadResponse(Umbrales thresholds, Resumen summary, List<Estado> ips, List<Incidente> incidents) {
 
     public record Umbrales(int suspicious, int blocked, int windowSeconds) {

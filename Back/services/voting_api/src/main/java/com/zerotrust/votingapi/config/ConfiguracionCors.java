@@ -15,8 +15,7 @@ public class ConfiguracionCors {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registro) {
-                // Las rutas administrativas solo son accesibles desde el BFF con token,
-                // nunca se habilitan mediante CORS para navegadores.
+                // Las rutas administrativas nunca se abren por CORS: solo las usa el BFF con token.
                 registro.addMapping("/vote")
                         .allowedOrigins(cors.origenes().toArray(String[]::new))
                         .allowedMethods("POST")

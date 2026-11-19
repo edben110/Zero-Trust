@@ -25,12 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
-/**
- * Funciones de seguridad del panel de administración (ver docs/contratos.md).
- *
- * Solo lo invoca el BFF autenticado con el token compartido. No usa CORS.
- * Los errores 400 y 503 los traduce GlobalExceptionHandler a {"error": "<mensaje para el panel>"}.
- */
+// Solo lo invoca el BFF con el token compartido; no usa CORS.
 @RestController
 @RequestMapping("/internal/admin/security")
 public final class AdminSeguridadController {

@@ -12,13 +12,9 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-/**
- * Carga y guarda el estado del votante en la jornada; las reglas viven en VotanteEnJornada.
- */
 public final class ControlRegionVotanteJdbc implements ControlRegionVotante {
 
-    // FOR SHARE serializa la jornada con el reset; FOR UPDATE serializa
-    // todos los intentos concurrentes del mismo votante.
+    // FOR SHARE serializa la jornada con el reset; FOR UPDATE serializa los intentos concurrentes del votante.
     static final String JORNADA_ACTIVA = "SELECT run_id FROM election_state WHERE id=1 FOR SHARE";
     static final String REGION_VOTANTE = "SELECT region FROM registered_voters WHERE voter_id=? FOR UPDATE";
     static final String YA_VOTO =

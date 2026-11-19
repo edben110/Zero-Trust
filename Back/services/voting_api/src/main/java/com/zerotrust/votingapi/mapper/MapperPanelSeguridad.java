@@ -13,9 +13,6 @@ import com.zerotrust.votingapi.dto.response.PanelSeguridadResponse.Umbrales;
 
 import java.time.Instant;
 
-/**
- * Convierte el panel de seguridad del dominio al cuerpo JSON que espera el BFF.
- */
 public final class MapperPanelSeguridad {
 
     private MapperPanelSeguridad() {

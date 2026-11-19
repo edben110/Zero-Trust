@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/** Pruebas de dominio puro del Value Object usado por las pruebas de seguridad. */
 class DireccionIpTest {
 
     @Test

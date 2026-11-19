@@ -20,9 +20,6 @@ import org.springframework.context.annotation.Configuration;
 import java.time.Clock;
 import java.util.UUID;
 
-/**
- * Casos de uso de la votación y el padrón.
- */
 @Configuration
 public class BeansVotacion {
 
