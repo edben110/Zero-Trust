@@ -97,16 +97,19 @@ class VoteAggregateTest {
 
     @Test
     void voteIdNuloLanzaExcepcion() {
+        // Act + Assert
         assertThrows(IllegalArgumentException.class, () -> new VoteId(null));
     }
 
     @Test
     void voteIdVacioLanzaExcepcion() {
+        // Act + Assert
         assertThrows(IllegalArgumentException.class, () -> new VoteId("  "));
     }
 
     @Test
     void voteIdMalformadoLanzaExcepcion() {
+        // Act + Assert
         assertThrows(Exception.class, () -> new VoteId("no-es-uuid"));
     }
 }
