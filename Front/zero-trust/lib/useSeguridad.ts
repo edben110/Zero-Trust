@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { leerDatos, type Aviso, type DatosSeguridad } from "./seguridad";
 
-// Estado del panel de seguridad: sondeo cada 3 s y acciones contra el BFF.
 export function useSeguridad() {
   const [datos, setDatos] = useState<DatosSeguridad | null>(null);
   const [aviso, setAviso] = useState<Aviso | null>(null);
@@ -29,8 +28,7 @@ export function useSeguridad() {
   }, [descargar]);
 
   useEffect(() => {
-    // La lectura inicial y el sondeo son asíncronos: el estado solo cambia
-    // cuando llega la respuesta, nunca durante el render del efecto.
+    // Asíncrono: el estado solo cambia cuando llega la respuesta, nunca durante el efecto.
     let cancelado = false;
     const refrescar = async () => {
       const leidos = await descargar();
@@ -56,8 +54,7 @@ export function useSeguridad() {
         return;
       }
       setAviso({ texto: exito, error: false });
-      // El consumidor de Kafka aplica el patrón State de forma asíncrona:
-      // se da un margen corto antes de releer el estado proyectado.
+      // El detector aplica la prueba de forma asíncrona: se da un margen antes de releer el estado.
       await new Promise((listo) => window.setTimeout(listo, 800));
       await cargar();
     } catch {
@@ -67,8 +64,7 @@ export function useSeguridad() {
     }
   }
 
-  // El sondeo cada 3 s ya refresca la vista; esto fuerza la lectura y
-  // deja constancia visible de que sí se consultó el servidor.
+  // El sondeo ya refresca la vista; esto fuerza la lectura y deja constancia de que se consultó.
   async function actualizar() {
     setOcupado(true);
     setAviso(null);

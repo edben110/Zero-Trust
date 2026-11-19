@@ -23,7 +23,7 @@ function mensajeDeError(estado: number, datos: unknown): string {
   return typeof cuerpo.error === "string" ? cuerpo.error : "No se pudo inscribir al votante.";
 }
 
-// Alta de votantes en el padrón. La cédula no se guarda: el servidor solo guarda el código derivado de ella.
+// La cédula no se guarda: el servidor solo conserva el código derivado de ella.
 export function AdministracionPadron({ regiones }: { regiones: string[] }) {
   const [cedula, setCedula] = useState("");
   const [region, setRegion] = useState("");

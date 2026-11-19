@@ -11,7 +11,6 @@ type Suscripcion = {
   alCambiarEstado: (estado: EstadoConexion) => void;
 };
 
-// Conecta por WebSocket nativo al endpoint STOMP de un dashboard worker (/ws/results/websocket) y reconecta solo.
 export function suscribir({ url, destinos, alRecibir, alCambiarEstado }: Suscripcion): () => void {
   if (url === "") {
     alCambiarEstado("sin-conexion");

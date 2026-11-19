@@ -61,7 +61,6 @@ export async function consultarDemo(cedula: string): Promise<ResultadoConsulta> 
   return voterId === undefined ? { tipo: "no-registrado" } : { tipo: "encontrado", voterId };
 }
 
-// Simula los conteos que publicarían los dashboard workers, creciendo cada pocos segundos.
 export function simularResultados(semilla: number, alActualizar: (resultados: ResultadosGlobales) => void): () => void {
   const conteos = catalogoDemo.candidates.map((_, indice) => ((semilla * 37 + indice * 53) % 90) + 10);
   const emitir = () =>

@@ -1,5 +1,3 @@
-// Modelo del panel de seguridad (GET /admin/api/security/incidents) y formato para mostrarlo.
-
 export type Umbrales = { suspicious: number; blocked: number; windowSeconds: number };
 export type Resumen = {
   incidents: number;
@@ -59,8 +57,7 @@ export function fecha(valor: string | null) {
   return Number.isNaN(instante.getTime()) ? "—" : instante.toLocaleString("es-CO");
 }
 
-// Validación defensiva: el panel no debe romperse si el servicio responde
-// parcialmente. Lo que no cumpla la forma se descarta, no se inventa.
+// Validación defensiva: lo que no cumpla la forma se descarta, no se inventa, y el panel no se rompe.
 export function leerDatos(cuerpo: unknown): DatosSeguridad | null {
   if (typeof cuerpo !== "object" || cuerpo === null) return null;
   const datos = cuerpo as Record<string, unknown>;

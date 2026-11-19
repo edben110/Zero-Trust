@@ -6,9 +6,7 @@ const COOKIE = "zt_admin";
 const VIDA = 60 * 60;
 let fallos = 0;
 let ventana = 0;
-// El panel se ejecuta como una sola instancia de Next.js en vm-app. Cada login
-// reemplaza esta sesión, invalidando inmediatamente la cookie del dispositivo
-// anterior; no confiar solo en la expiración firmada de la cookie.
+// Una sola instancia en vm-app: cada login reemplaza la sesión e invalida la cookie anterior, sin esperar a que expire.
 let sesionActiva: string | null = null;
 
 function configuracion() {

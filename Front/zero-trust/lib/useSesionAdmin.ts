@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
-// Sesión del panel de administración contra /admin/api/session.
 export function useSesionAdmin(setAviso: (texto: string) => void) {
   const router = useRouter();
   const [autenticado, setAutenticado] = useState(false);

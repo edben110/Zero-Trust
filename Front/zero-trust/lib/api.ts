@@ -64,8 +64,7 @@ export async function enviarVoto(solicitud: SolicitudVoto): Promise<ResultadoVot
   return { tipo: "error" };
 }
 
-// La cédula se envía por POST en el cuerpo y no se guarda en el navegador. cache "no-store": la respuesta
-// tampoco debe quedar en la caché del navegador.
+// La cédula va por POST en el cuerpo y no se guarda; no-store evita que la respuesta quede en caché.
 export async function consultarCodigo(cedula: string): Promise<ResultadoConsulta> {
   if (config.demo) {
     return consultarDemo(cedula);

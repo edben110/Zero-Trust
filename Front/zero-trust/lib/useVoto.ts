@@ -8,7 +8,6 @@ import { esUuid } from "./validacion";
 
 export type ErroresVoto = Partial<Record<"voterId" | "region" | "candidateId", string>>;
 
-// Estado del tarjetón: selección, validación local y envío del voto.
 export function useVoto(catalogo: Catalogo, alAceptar: (c: Comprobante) => void) {
   const [voterId, setVoterId] = useState("");
   const [region, setRegion] = useState("");

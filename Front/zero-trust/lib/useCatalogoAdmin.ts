@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import type { Candidato, Catalogo } from "./contrato";
 import { leerCatalogo } from "./validacion";
 
-// Catálogo del panel: sondeo cada 2 s mientras hay sesión, alta, edición y borrado de candidatos.
 export function useCatalogoAdmin(autenticado: boolean, perderSesion: () => void, setAviso: (texto: string) => void) {
   const [catalogo, setCatalogo] = useState<Catalogo | null>(null);
   const [nombre, setNombre] = useState("");

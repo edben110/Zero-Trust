@@ -6,7 +6,6 @@ const MENSAJES_CAMPO: Record<string, string> = {
   region: "La región seleccionada no está en el tarjetón.",
 };
 
-// Texto que ve el votante para cada respuesta de POST /vote que no es un voto aceptado.
 export function mensajeDeRechazo(resultado: Exclude<ResultadoVoto, { tipo: "aceptado" }>): string {
   switch (resultado.tipo) {
     case "invalido":
