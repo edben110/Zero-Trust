@@ -1,5 +1,6 @@
 package com.zerotrust.botdetector.service;
 
+import com.zerotrust.botdetector.domain.exception.ProyeccionNoDisponible;
 import com.zerotrust.botdetector.domain.model.AlertOrigin;
 import com.zerotrust.botdetector.domain.model.FraudKind;
 import com.zerotrust.botdetector.domain.model.IpTrafficContext;
@@ -7,6 +8,8 @@ import com.zerotrust.botdetector.domain.model.SecurityAlert;
 import com.zerotrust.botdetector.domain.port.FraudIncidentRepository;
 import com.zerotrust.botdetector.domain.port.RiskStateRepository;
 import com.zerotrust.botdetector.domain.port.SecurityAlertPublisher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +28,8 @@ import java.util.concurrent.ConcurrentMap;
  */
 @Service
 public class BotDetectorService {
+
+    private static final Logger log = LoggerFactory.getLogger(BotDetectorService.class);
 
     private final SecurityAlertPublisher  alertPublisher;
     private final FraudIncidentRepository repository;
@@ -70,10 +75,6 @@ public class BotDetectorService {
 
         boolean alertNeeded = context.registerVote(ahora);
 
-        // Proyección operativa: el panel puede ver el estado vigente de cada IP.
-        riskStates.actualizar(ip, context.riskLevel(), context.voteCount(),
-                context.windowSeconds(), ahora);
-
         if (alertNeeded) {
             SecurityAlert alert = new SecurityAlert(
                     ip,
@@ -85,6 +86,18 @@ public class BotDetectorService {
             );
             alertPublisher.publish(alert);
             repository.save(alert);
+        }
+
+        proyectar(ip, context, ahora);
+    }
+
+    // La proyección solo alimenta el panel: una caída de PostgreSQL no debe frenar la alerta
+    // ni relanzar el voto en el consumidor, que lo contaría dos veces en IpTrafficContext.
+    private void proyectar(String ip, IpTrafficContext context, Instant ahora) {
+        try {
+            riskStates.actualizar(ip, context.riskLevel(), context.voteCount(), context.windowSeconds(), ahora);
+        } catch (ProyeccionNoDisponible e) {
+            log.warn("Estado de la IP {} sin proyectar en ip_risk_state: {}", ip, e.getMessage());
         }
     }
 

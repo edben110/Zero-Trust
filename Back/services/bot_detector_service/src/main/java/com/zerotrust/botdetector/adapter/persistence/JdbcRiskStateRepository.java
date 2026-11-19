@@ -1,6 +1,8 @@
 package com.zerotrust.botdetector.adapter.persistence;
 
+import com.zerotrust.botdetector.domain.exception.ProyeccionNoDisponible;
 import com.zerotrust.botdetector.domain.port.RiskStateRepository;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +17,7 @@ import java.time.Instant;
 @Component
 public class JdbcRiskStateRepository implements RiskStateRepository {
 
-    private static final String UPSERT = """
+    static final String UPSERT = """
             INSERT INTO ip_risk_state (ip, risk_level, vote_count, window_seconds, first_seen, last_seen)
             VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT (ip) DO UPDATE SET
@@ -34,7 +36,11 @@ public class JdbcRiskStateRepository implements RiskStateRepository {
     @Override
     @Transactional
     public void actualizar(String ip, String riskLevel, int voteCount, int windowSeconds, Instant seenAt) {
-        jdbc.update(UPSERT, ip, riskLevel, voteCount, windowSeconds,
-                Timestamp.from(seenAt), Timestamp.from(seenAt));
+        try {
+            jdbc.update(UPSERT, ip, riskLevel, voteCount, windowSeconds,
+                    Timestamp.from(seenAt), Timestamp.from(seenAt));
+        } catch (DataAccessException e) {
+            throw new ProyeccionNoDisponible("No se pudo actualizar ip_risk_state", e);
+        }
     }
 }

@@ -1,14 +1,17 @@
 package com.zerotrust.botdetector.service;
 
+import com.zerotrust.botdetector.domain.exception.ProyeccionNoDisponible;
 import com.zerotrust.botdetector.domain.model.AlertOrigin;
 import com.zerotrust.botdetector.domain.model.FraudKind;
 import com.zerotrust.botdetector.domain.model.SecurityAlert;
 import com.zerotrust.botdetector.domain.port.FraudIncidentRepository;
 import com.zerotrust.botdetector.domain.port.RiskStateRepository;
 import com.zerotrust.botdetector.domain.port.SecurityAlertPublisher;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -16,6 +19,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -167,5 +171,45 @@ class BotDetectorServiceTest {
         // Assert
         assertEquals("NORMAL", svc.riskLevelOf("7.7.7.7"));
         assertEquals(0, svc.voteCountOf("7.7.7.7"));
+    }
+
+    @Test
+    @DisplayName("Debe publicar y guardar la alerta antes de proyectar el estado de la IP")
+    void publicaLaAlertaAntesDeProyectar() {
+        // Arrange
+        BotDetectorService svc = buildService();
+        svc.evaluate("8.8.8.8");
+        svc.evaluate("8.8.8.8");
+        clearInvocations(riskStates);
+
+        // Act
+        svc.evaluate("8.8.8.8");
+
+        // Assert
+        InOrder orden = inOrder(alertPublisher, repository, riskStates);
+        orden.verify(alertPublisher).publish(any(SecurityAlert.class));
+        orden.verify(repository).save(any(SecurityAlert.class));
+        orden.verify(riskStates).actualizar("8.8.8.8", "SOSPECHOSA", 3, 60, AHORA);
+    }
+
+    @Test
+    @DisplayName("Debe publicar la alerta aunque la proyección del estado en PostgreSQL falle")
+    void publicaLaAlertaAunqueLaProyeccionFalle() {
+        // Arrange
+        BotDetectorService svc = buildService();
+        doThrow(new ProyeccionNoDisponible("BD caída", new RuntimeException()))
+                .when(riskStates).actualizar(anyString(), anyString(), anyInt(), anyInt(), any());
+
+        // Act
+        assertDoesNotThrow(() -> {
+            svc.evaluate("9.9.9.9");
+            svc.evaluate("9.9.9.9");
+            svc.evaluate("9.9.9.9");
+        });
+
+        // Assert
+        verify(alertPublisher, times(1)).publish(any(SecurityAlert.class));
+        verify(repository, times(1)).save(any(SecurityAlert.class));
+        assertEquals("SOSPECHOSA", svc.riskLevelOf("9.9.9.9"));
     }
 }
