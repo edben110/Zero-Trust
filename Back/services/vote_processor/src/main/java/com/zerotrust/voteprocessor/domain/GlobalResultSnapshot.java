@@ -3,10 +3,6 @@ package com.zerotrust.voteprocessor.domain;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Snapshot del conteo global en un instante dado.
- * Payload para live_results_global (fanout exchange).
- */
 public record GlobalResultSnapshot(Instant timestamp, List<CandidateResult> results) {
 
     public GlobalResultSnapshot {
@@ -16,7 +12,6 @@ public record GlobalResultSnapshot(Instant timestamp, List<CandidateResult> resu
         if (results == null) {
             throw new IllegalArgumentException("results no puede ser nulo");
         }
-        // Copia defensiva para garantizar inmutabilidad
         results = List.copyOf(results);
     }
 }

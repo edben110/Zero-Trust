@@ -16,7 +16,6 @@ import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.util.Map;
 
-/** JWT propio del servicio para consumir Kafka y publicar en RabbitMQ. */
 @Configuration
 public class SeguridadBrokersOAuth {
 

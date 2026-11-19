@@ -7,10 +7,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Pruebas de dominio puro. Sin Spring, sin brokers, sin BD.
- * Patrón AAA: Arrange → Act → Assert.
- */
 class VoteAggregateTest {
 
     private RawVoteEvent buildEvent(String voterId, String candidateId) {

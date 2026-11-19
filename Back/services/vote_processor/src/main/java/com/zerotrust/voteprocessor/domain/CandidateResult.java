@@ -1,8 +1,5 @@
 package com.zerotrust.voteprocessor.domain;
 
-/**
- * Par candidato→conteo dentro de un resultado global o regional.
- */
 public record CandidateResult(CandidateId candidateId, String candidateName, long voteCount) {
 
     public CandidateResult {

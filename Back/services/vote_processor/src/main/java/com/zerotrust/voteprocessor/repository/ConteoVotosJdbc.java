@@ -8,9 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.List;
 
-/**
- * Conteo global leído de PostgreSQL, fuente de verdad del escrutinio.
- */
+// PostgreSQL es la fuente de verdad del escrutinio.
 public class ConteoVotosJdbc implements ConteoVotos {
 
     static final String CONTEO_JORNADA_ACTIVA = "SELECT v.candidate_id, COUNT(*) AS total "

@@ -15,10 +15,6 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Adaptador de salida: serializa el snapshot global y lo publica en el
- * Fanout Exchange live_results_global de RabbitMQ.
- */
 @Component
 public class GlobalResultRabbitPublisher implements GlobalResultPublisher {
 

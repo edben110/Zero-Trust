@@ -9,9 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
-/**
- * Orquesta la recepción de votos y la publicación periódica del snapshot global.
- */
 @Service
 public class VoteProcessorService {
 

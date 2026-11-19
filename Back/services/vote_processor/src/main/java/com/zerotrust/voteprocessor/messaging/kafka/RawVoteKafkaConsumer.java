@@ -46,8 +46,7 @@ public class RawVoteKafkaConsumer {
 
             service.processVote(event);
         } catch (Exception e) {
-            // Voto malformado: se descarta con log. No se relanza para no bloquear la partición.
-            // En producción se enviaría a un dead-letter topic.
+            // Voto malformado: no se relanza para no bloquear la partición.
             log.warn("Voto descartado de partición {} offset {}: {}", record.partition(), record.offset(), e.getMessage());
         }
     }

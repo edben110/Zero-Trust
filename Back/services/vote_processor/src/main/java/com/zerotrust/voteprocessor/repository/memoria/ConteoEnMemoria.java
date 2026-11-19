@@ -7,9 +7,7 @@ import com.zerotrust.voteprocessor.port.ConteoVotos;
 
 import java.util.List;
 
-/**
- * Conteo en memoria del proceso, útil sin PostgreSQL; se pierde al reiniciar.
- */
+// Se pierde al reiniciar; sirve para probar sin PostgreSQL.
 public class ConteoEnMemoria implements ConteoVotos {
 
     private final VoteAggregate agregado;
