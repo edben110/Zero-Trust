@@ -1,4 +1,4 @@
-package com.zerotrust.regionaldashboardworker.adapter.rabbit;
+package com.zerotrust.regionaldashboardworker.messaging.rabbit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.zerotrust.regionaldashboardworker.config;
+package com.zerotrust.regionaldashboardworker.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
