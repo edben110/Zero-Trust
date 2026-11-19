@@ -18,7 +18,7 @@ import java.time.Clock;
 import java.util.Optional;
 import java.util.function.Function;
 
-// Está en config/ y no en service/ porque compone clases concretas de adapter (constitución §4).
+// Está en config/ y no en service/ porque compone clases concretas de varias capas (constitución §4).
 public class CargadorConfiguracion {
 
     private final FuenteVariables variables;
