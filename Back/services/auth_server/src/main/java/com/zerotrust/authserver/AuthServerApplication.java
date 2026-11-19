@@ -1,7 +1,7 @@
 package com.zerotrust.authserver;
 
-import com.zerotrust.authserver.adapter.config.FuenteVariablesEntorno;
-import com.zerotrust.authserver.adapter.config.LectorArchivosSistema;
+import com.zerotrust.authserver.config.FuenteVariablesEntorno;
+import com.zerotrust.authserver.config.LectorArchivosSistema;
 import com.zerotrust.authserver.config.CargadorConfiguracion;
 import com.zerotrust.authserver.config.ConfiguracionAuthServer;
 import com.zerotrust.authserver.exception.ConfiguracionInvalidaException;

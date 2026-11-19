@@ -2,13 +2,8 @@ package com.zerotrust.votingapi.domain;
 
 import com.zerotrust.votingapi.exception.VotoDuplicadoException;
 
-/**
- * Situación de un votante del padrón en la jornada activa: su región registrada,
- * si ya votó en esta elección y cuántas veces eligió una región distinta.
- */
 public final class VotanteEnJornada {
 
-    /** Al llegar a este número de regiones incorrectas el voto queda anulado. */
     public static final int MAX_FALLOS_REGION = 2;
 
     private final Region regionRegistrada;
@@ -27,10 +22,7 @@ public final class VotanteEnJornada {
         this.fallosRegion = fallosRegion;
     }
 
-    /**
-     * Aplica las reglas de voto único y región; el orden importa: primero el duplicado,
-     * después la anulación previa y por último la comparación de región.
-     */
+    // El orden importa: primero el duplicado, luego la anulación previa y al final la región.
     public EvaluacionRegion evaluarRegion(Region seleccionada) {
         if (seleccionada == null) {
             throw new IllegalArgumentException("la región seleccionada no puede ser nula");

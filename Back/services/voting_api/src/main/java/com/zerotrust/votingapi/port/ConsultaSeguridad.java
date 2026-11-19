@@ -7,10 +7,7 @@ import com.zerotrust.votingapi.domain.ResumenSeguridad;
 
 import java.util.List;
 
-/**
- * Lectura y purga de fraud_incidents e ip_risk_state.
- * Lanza CanalSeguridadNoDisponibleException si la base de datos no responde.
- */
+// Lanza CanalSeguridadNoDisponibleException si la base de datos no responde.
 public interface ConsultaSeguridad {
 
     ResumenSeguridad resumen();

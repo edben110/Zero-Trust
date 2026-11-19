@@ -1,11 +1,5 @@
 package com.zerotrust.voteprocessor.domain;
 
-import com.zerotrust.voteprocessor.domain.model.CandidateId;
-import com.zerotrust.voteprocessor.domain.model.CandidateResult;
-import com.zerotrust.voteprocessor.domain.model.RawVoteEvent;
-import com.zerotrust.voteprocessor.domain.model.VoteAggregate;
-import com.zerotrust.voteprocessor.domain.model.VoteId;
-import com.zerotrust.voteprocessor.domain.model.VoterId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

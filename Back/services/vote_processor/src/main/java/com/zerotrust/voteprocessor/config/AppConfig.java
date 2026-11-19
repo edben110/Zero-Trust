@@ -1,9 +1,9 @@
 package com.zerotrust.voteprocessor.config;
 
-import com.zerotrust.voteprocessor.adapter.memoria.ConteoEnMemoria;
-import com.zerotrust.voteprocessor.adapter.persistence.ConteoVotosJdbc;
-import com.zerotrust.voteprocessor.domain.model.VoteAggregate;
-import com.zerotrust.voteprocessor.domain.port.ConteoVotos;
+import com.zerotrust.voteprocessor.repository.memoria.ConteoEnMemoria;
+import com.zerotrust.voteprocessor.repository.ConteoVotosJdbc;
+import com.zerotrust.voteprocessor.domain.VoteAggregate;
+import com.zerotrust.voteprocessor.port.ConteoVotos;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

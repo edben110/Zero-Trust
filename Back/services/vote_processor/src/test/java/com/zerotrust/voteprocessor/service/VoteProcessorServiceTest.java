@@ -1,13 +1,13 @@
 package com.zerotrust.voteprocessor.service;
 
-import com.zerotrust.voteprocessor.domain.model.CandidateId;
-import com.zerotrust.voteprocessor.domain.model.CandidateResult;
-import com.zerotrust.voteprocessor.domain.model.GlobalResultSnapshot;
-import com.zerotrust.voteprocessor.domain.model.RawVoteEvent;
-import com.zerotrust.voteprocessor.domain.model.VoteId;
-import com.zerotrust.voteprocessor.domain.model.VoterId;
-import com.zerotrust.voteprocessor.domain.port.ConteoVotos;
-import com.zerotrust.voteprocessor.domain.port.GlobalResultPublisher;
+import com.zerotrust.voteprocessor.domain.CandidateId;
+import com.zerotrust.voteprocessor.domain.CandidateResult;
+import com.zerotrust.voteprocessor.domain.GlobalResultSnapshot;
+import com.zerotrust.voteprocessor.domain.RawVoteEvent;
+import com.zerotrust.voteprocessor.domain.VoteId;
+import com.zerotrust.voteprocessor.domain.VoterId;
+import com.zerotrust.voteprocessor.port.ConteoVotos;
+import com.zerotrust.voteprocessor.port.GlobalResultPublisher;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

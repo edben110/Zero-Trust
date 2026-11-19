@@ -1,8 +1,8 @@
 package com.zerotrust.votingapi.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.votingapi.adapter.kafka.PublicadorComandosSeguridadKafka;
-import com.zerotrust.votingapi.adapter.persistence.ConsultaSeguridadJdbc;
+import com.zerotrust.votingapi.messaging.kafka.PublicadorComandosSeguridadKafka;
+import com.zerotrust.votingapi.repository.ConsultaSeguridadJdbc;
 import com.zerotrust.votingapi.domain.UmbralesSeguridad;
 import com.zerotrust.votingapi.port.ConsultaSeguridad;
 import com.zerotrust.votingapi.port.PublicadorComandosSeguridad;
@@ -15,9 +15,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 
 import java.time.Duration;
 
-/**
- * Beans del panel de seguridad (pruebas controladas, reinicios y purga del detector).
- */
 @Configuration
 public class BeansSeguridad {
 

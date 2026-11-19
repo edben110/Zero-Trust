@@ -1,8 +1,5 @@
 package com.zerotrust.votingapi.domain;
 
-/**
- * Umbrales del patrón State de bot_detector_service, mostrados en el panel.
- */
 public record UmbralesSeguridad(int sospechosa, int bloqueada, int ventanaSegundos) {
 
     public UmbralesSeguridad {

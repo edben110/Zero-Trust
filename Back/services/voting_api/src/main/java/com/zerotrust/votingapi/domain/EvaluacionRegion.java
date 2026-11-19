@@ -1,8 +1,5 @@
 package com.zerotrust.votingapi.domain;
 
-/**
- * Resultado de evaluar la región y número de fallos de región que queda tras la evaluación.
- */
 public record EvaluacionRegion(ResultadoRegion resultado, int fallos) {
 
     public EvaluacionRegion {

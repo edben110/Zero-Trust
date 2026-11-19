@@ -1,9 +1,9 @@
 package com.zerotrust.regionalrollup.config;
 
-import com.zerotrust.regionalrollup.adapter.memoria.ConteoRegionalEnMemoria;
-import com.zerotrust.regionalrollup.adapter.persistence.ConteoVotosRegionalesJdbc;
-import com.zerotrust.regionalrollup.domain.model.RegionalVoteAccumulator;
-import com.zerotrust.regionalrollup.domain.port.ConteoVotosRegionales;
+import com.zerotrust.regionalrollup.repository.memoria.ConteoRegionalEnMemoria;
+import com.zerotrust.regionalrollup.repository.ConteoVotosRegionalesJdbc;
+import com.zerotrust.regionalrollup.domain.RegionalVoteAccumulator;
+import com.zerotrust.regionalrollup.port.ConteoVotosRegionales;
 import com.zerotrust.regionalrollup.domain.strategy.RegionalConsolidationStrategy;
 import com.zerotrust.regionalrollup.domain.strategy.SimpleCountStrategy;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -20,8 +20,6 @@ public class AppConfig {
 
     @Bean
     public RegionalConsolidationStrategy consolidationStrategy() {
-        // Estrategia activa. Para cambiar la lógica de consolidación, basta con
-        // inyectar una implementación distinta de RegionalConsolidationStrategy aquí.
         return new SimpleCountStrategy();
     }
 

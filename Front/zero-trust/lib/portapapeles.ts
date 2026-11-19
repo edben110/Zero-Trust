@@ -1,6 +1,4 @@
-// El panel se sirve por HTTP a través del túnel SSM, que no es un contexto seguro.
-// navigator.clipboard solo existe en HTTPS (o localhost), así que se intenta primero
-// la API moderna y, si no está disponible o falla, se usa la selección temporal.
+// El panel va por HTTP (túnel SSM) y navigator.clipboard exige contexto seguro: si falla, se usa la selección temporal.
 export async function copiarTexto(texto: string): Promise<boolean> {
   if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
     try {

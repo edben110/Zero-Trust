@@ -1,8 +1,5 @@
 package com.zerotrust.regionalrollup.domain;
 
-import com.zerotrust.regionalrollup.domain.model.RawVoteEvent;
-import com.zerotrust.regionalrollup.domain.model.RegionalCandidateResult;
-import com.zerotrust.regionalrollup.domain.model.RegionalVoteAccumulator;
 import com.zerotrust.regionalrollup.domain.strategy.SimpleCountStrategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

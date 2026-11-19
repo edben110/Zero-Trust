@@ -1,9 +1,9 @@
 package com.zerotrust.analyticsarchiver.config;
 
-import com.zerotrust.analyticsarchiver.adapter.kafka.ConsumidorRawVotes;
-import com.zerotrust.analyticsarchiver.adapter.kafka.LectorVotoCrudo;
-import com.zerotrust.analyticsarchiver.adapter.persistence.RepositorioAuditoriaJpa;
-import com.zerotrust.analyticsarchiver.adapter.persistence.VotoAuditadoJpaRepository;
+import com.zerotrust.analyticsarchiver.messaging.kafka.ConsumidorRawVotes;
+import com.zerotrust.analyticsarchiver.messaging.kafka.LectorVotoCrudo;
+import com.zerotrust.analyticsarchiver.repository.RepositorioAuditoriaJpa;
+import com.zerotrust.analyticsarchiver.repository.VotoAuditadoJpaRepository;
 import com.zerotrust.analyticsarchiver.port.RepositorioAuditoria;
 import com.zerotrust.analyticsarchiver.service.ServicioArchivoVotos;
 import org.springframework.context.annotation.Bean;

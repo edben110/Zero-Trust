@@ -5,10 +5,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.Clock;
 
-/**
- * Reloj inyectable: la ventana de detección debe poder probarse con tiempo fijo
- * sin dormir el hilo ni depender del reloj del sistema.
- */
+// Reloj inyectable para probar la ventana de detección con tiempo fijo.
 @Configuration
 public class RelojConfig {
 

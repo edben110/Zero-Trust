@@ -1,9 +1,9 @@
 package com.zerotrust.regionalrollup.service;
 
-import com.zerotrust.regionalrollup.domain.model.RawVoteEvent;
-import com.zerotrust.regionalrollup.domain.model.RegionalResultSnapshot;
-import com.zerotrust.regionalrollup.domain.port.ConteoVotosRegionales;
-import com.zerotrust.regionalrollup.domain.port.RegionalResultPublisher;
+import com.zerotrust.regionalrollup.domain.RawVoteEvent;
+import com.zerotrust.regionalrollup.domain.RegionalResultSnapshot;
+import com.zerotrust.regionalrollup.port.ConteoVotosRegionales;
+import com.zerotrust.regionalrollup.port.RegionalResultPublisher;
 import com.zerotrust.regionalrollup.domain.strategy.RegionalConsolidationStrategy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;

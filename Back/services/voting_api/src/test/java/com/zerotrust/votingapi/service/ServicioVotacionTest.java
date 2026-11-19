@@ -38,7 +38,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.zerotrust.votingapi.adapter.crypto.DerivadorVoterIdHmac;
+import com.zerotrust.votingapi.security.DerivadorVoterIdHmac;
 import com.zerotrust.votingapi.domain.CandidateId;
 import com.zerotrust.votingapi.domain.Candidato;
 import com.zerotrust.votingapi.domain.Catalogo;

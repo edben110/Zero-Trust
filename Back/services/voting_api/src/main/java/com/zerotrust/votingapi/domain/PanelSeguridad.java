@@ -2,9 +2,6 @@ package com.zerotrust.votingapi.domain;
 
 import java.util.List;
 
-/**
- * Vista completa del panel de seguridad.
- */
 public record PanelSeguridad(UmbralesSeguridad umbrales, ResumenSeguridad resumen,
                              List<EstadoIp> estados, List<IncidenteSeguridad> incidentes) {
 

@@ -1,7 +1,7 @@
 package com.zerotrust.authserver.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.authserver.adapter.web.RespuestaJson;
+import com.zerotrust.authserver.controller.RespuestaJson;
 import com.zerotrust.authserver.domain.ClientId;
 import com.zerotrust.authserver.domain.CodigoErrorOAuth;
 import com.zerotrust.authserver.domain.RegistroClientes;

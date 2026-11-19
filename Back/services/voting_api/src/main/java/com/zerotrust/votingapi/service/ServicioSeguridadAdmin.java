@@ -10,11 +10,7 @@ import com.zerotrust.votingapi.domain.UmbralesSeguridad;
 import com.zerotrust.votingapi.port.ConsultaSeguridad;
 import com.zerotrust.votingapi.port.PublicadorComandosSeguridad;
 
-/**
- * Casos de uso del panel de seguridad: simulacros, reinicios, purga y consulta.
- *
- * Los simulacros no escriben en raw_votes: el escrutinio y la auditoría electoral quedan intactos.
- */
+// Los simulacros no escriben en raw_votes: el escrutinio y la auditoría quedan intactos.
 public class ServicioSeguridadAdmin {
 
     public static final int MAX_ESTADOS = 100;
@@ -55,11 +51,7 @@ public class ServicioSeguridadAdmin {
         }
     }
 
-    /**
-     * Primero ordena al detector olvidar sus contextos en memoria; si Kafka no confirma no se borra nada,
-     * para no dejar el panel en ceros mientras el detector sigue contando.
-     * No toca el padrón, los votos aceptados ni los intentos de región.
-     */
+    // Si Kafka no confirma el reinicio del detector no se borra nada, para no dejar el panel en ceros mientras sigue contando.
     public ResultadoPurga purgar() {
         try {
             publicador.reiniciarTodo();
