@@ -1,6 +1,6 @@
 package com.zerotrust.regionalrollup.domain.strategy;
 
-import com.zerotrust.regionalrollup.domain.model.RegionalCandidateResult;
+import com.zerotrust.regionalrollup.domain.RegionalCandidateResult;
 
 import java.util.Comparator;
 import java.util.List;

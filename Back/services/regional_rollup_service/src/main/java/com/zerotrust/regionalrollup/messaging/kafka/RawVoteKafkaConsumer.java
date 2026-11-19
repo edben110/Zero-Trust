@@ -1,7 +1,7 @@
-package com.zerotrust.regionalrollup.adapter.kafka;
+package com.zerotrust.regionalrollup.messaging.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zerotrust.regionalrollup.domain.model.RawVoteEvent;
+import com.zerotrust.regionalrollup.domain.RawVoteEvent;
 import com.zerotrust.regionalrollup.service.RegionalRollupService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;

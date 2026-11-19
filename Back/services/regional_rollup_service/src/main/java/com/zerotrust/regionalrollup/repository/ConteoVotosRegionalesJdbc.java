@@ -1,7 +1,7 @@
-package com.zerotrust.regionalrollup.adapter.persistence;
+package com.zerotrust.regionalrollup.repository;
 
-import com.zerotrust.regionalrollup.domain.model.RawVoteEvent;
-import com.zerotrust.regionalrollup.domain.port.ConteoVotosRegionales;
+import com.zerotrust.regionalrollup.domain.RawVoteEvent;
+import com.zerotrust.regionalrollup.port.ConteoVotosRegionales;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 

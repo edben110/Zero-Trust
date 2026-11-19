@@ -1,9 +1,9 @@
-package com.zerotrust.regionalrollup.adapter.rabbit;
+package com.zerotrust.regionalrollup.messaging.rabbit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.regionalrollup.exception.PublicacionFallidaException;
-import com.zerotrust.regionalrollup.domain.model.RegionalCandidateResult;
-import com.zerotrust.regionalrollup.domain.model.RegionalResultSnapshot;
+import com.zerotrust.regionalrollup.domain.RegionalCandidateResult;
+import com.zerotrust.regionalrollup.domain.RegionalResultSnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

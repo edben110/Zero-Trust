@@ -1,6 +1,6 @@
-package com.zerotrust.regionalrollup.domain.port;
+package com.zerotrust.regionalrollup.port;
 
-import com.zerotrust.regionalrollup.domain.model.RegionalResultSnapshot;
+import com.zerotrust.regionalrollup.domain.RegionalResultSnapshot;
 
 /**
  * Puerto de salida: publica snapshots al Topic Exchange live_results_regional.

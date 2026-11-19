@@ -1,6 +1,6 @@
-package com.zerotrust.regionalrollup.domain.port;
+package com.zerotrust.regionalrollup.port;
 
-import com.zerotrust.regionalrollup.domain.model.RawVoteEvent;
+import com.zerotrust.regionalrollup.domain.RawVoteEvent;
 
 import java.util.Map;
 

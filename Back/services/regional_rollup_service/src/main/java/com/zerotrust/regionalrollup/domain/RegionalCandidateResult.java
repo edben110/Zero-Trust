@@ -1,4 +1,4 @@
-package com.zerotrust.regionalrollup.domain.model;
+package com.zerotrust.regionalrollup.domain;
 
 public record RegionalCandidateResult(String candidateId, String candidateName, long voteCount) {
 

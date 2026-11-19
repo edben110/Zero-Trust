@@ -1,4 +1,4 @@
-package com.zerotrust.regionalrollup.config;
+package com.zerotrust.regionalrollup.security;
 
 import com.rabbitmq.client.impl.CredentialsProvider;
 import com.rabbitmq.client.impl.CredentialsRefreshService;

@@ -1,4 +1,4 @@
-package com.zerotrust.regionalrollup.domain.model;
+package com.zerotrust.regionalrollup.domain;
 
 import java.time.Instant;
 import java.util.List;

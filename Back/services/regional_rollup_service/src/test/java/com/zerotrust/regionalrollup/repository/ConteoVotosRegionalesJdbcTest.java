@@ -1,6 +1,6 @@
-package com.zerotrust.regionalrollup.adapter.persistence;
+package com.zerotrust.regionalrollup.repository;
 
-import com.zerotrust.regionalrollup.domain.model.RawVoteEvent;
+import com.zerotrust.regionalrollup.domain.RawVoteEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -1,8 +1,8 @@
-package com.zerotrust.regionalrollup.adapter.memoria;
+package com.zerotrust.regionalrollup.repository.memoria;
 
-import com.zerotrust.regionalrollup.domain.model.RawVoteEvent;
-import com.zerotrust.regionalrollup.domain.model.RegionalVoteAccumulator;
-import com.zerotrust.regionalrollup.domain.port.ConteoVotosRegionales;
+import com.zerotrust.regionalrollup.domain.RawVoteEvent;
+import com.zerotrust.regionalrollup.domain.RegionalVoteAccumulator;
+import com.zerotrust.regionalrollup.port.ConteoVotosRegionales;
 
 import java.util.Map;
 

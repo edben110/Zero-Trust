@@ -1,10 +1,10 @@
-package com.zerotrust.regionalrollup.adapter.rabbit;
+package com.zerotrust.regionalrollup.messaging.rabbit;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zerotrust.regionalrollup.exception.PublicacionFallidaException;
-import com.zerotrust.regionalrollup.domain.model.RegionalResultSnapshot;
-import com.zerotrust.regionalrollup.domain.port.RegionalResultPublisher;
+import com.zerotrust.regionalrollup.domain.RegionalResultSnapshot;
+import com.zerotrust.regionalrollup.port.RegionalResultPublisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;

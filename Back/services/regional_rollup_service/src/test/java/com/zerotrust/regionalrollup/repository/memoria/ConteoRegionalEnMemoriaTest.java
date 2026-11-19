@@ -1,7 +1,7 @@
-package com.zerotrust.regionalrollup.adapter.memoria;
+package com.zerotrust.regionalrollup.repository.memoria;
 
-import com.zerotrust.regionalrollup.domain.model.RawVoteEvent;
-import com.zerotrust.regionalrollup.domain.model.RegionalVoteAccumulator;
+import com.zerotrust.regionalrollup.domain.RawVoteEvent;
+import com.zerotrust.regionalrollup.domain.RegionalVoteAccumulator;
 import com.zerotrust.regionalrollup.domain.strategy.SimpleCountStrategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
