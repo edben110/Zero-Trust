@@ -25,15 +25,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Destinos donde el servidor publica mensajes a clientes web
         registry.enableSimpleBroker("/topic");
-        // Prefijo para mensajes del cliente hacia el servidor (no utilizado aquí)
+        // Este worker no recibe mensajes del cliente; el prefijo queda reservado.
         registry.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Endpoint de conexión STOMP para el navegador
         registry.addEndpoint("/ws/results")
                 .setAllowedOrigins(allowedOrigins)
                 .withSockJS();

@@ -4,13 +4,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-/**
- * Escucha el Fanout Exchange live_results_global y reenvía cada mensaje
- * a todos los clientes WebSocket suscritos a /topic/global.
- *
- * El mensaje llega ya como JSON (producido por vote_processor) y se
- * reenvía directamente sin deserializar, para no duplicar el trabajo.
- */
+// Reenvía el JSON tal cual llega de vote_processor, sin deserializarlo.
 @Component
 public class GlobalResultsRabbitConsumer {
 
